@@ -13,6 +13,7 @@ export default function RootLayout({ children } : RootLayoutProps) {
             <Header />
             <Divider className="divider-color fixed" />
             {children}
+            <Divider className="divider-color" />
             <Footer />
         </>
     )

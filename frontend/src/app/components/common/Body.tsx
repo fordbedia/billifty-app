@@ -12,11 +12,11 @@ export default function Body() {
             <div className="w-full flex justify-center px-5">
                 <BeautifulInvoiceDesign />
             </div>
-            <div className="w-full flex justify-center px-5">
-                <StreamlineBanner />
-            </div>
             <div className="w-full banner-bg-version-one flex justify-center px-5">
                 <InfoBanner />
+            </div>
+            <div className="w-full flex justify-center px-5">
+                <StreamlineBanner />
             </div>
         </div>
     )

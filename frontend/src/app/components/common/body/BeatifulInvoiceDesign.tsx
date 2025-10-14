@@ -7,7 +7,7 @@ import MinimalInvoiceDesign from '@/images/minimal-invoice-design.png'
 export default function BeautifulInvoiceDesign() {
     return (
          <div className="text-center">
-            <div className="max-w-screen-lg my-28">
+            <div className="max-w-screen-lg my-20">
                 <h2>Beautiful Invoice Designs</h2>
                 <p>Choose from our collection of professionally crafted invoice templates.
                     Each design is carefully created to make your business look professional and trustworthy.

@@ -3,7 +3,7 @@ import {Button} from "@heroui/react";
 export default function StreamlineBanner() {
     return (
          <div className="text-center">
-            <div className="max-w-screen-lg my-28">
+            <div className="max-w-screen-lg my-20">
                 <h2>Ready to streamline your invoicing?</h2>
                 <p>Join thousands of professionals who trust Billifty for their billing needs.</p>
 
