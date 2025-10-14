@@ -1,0 +1,50 @@
+@import "tailwindcss";
+@import "../styles/fonts.scss";
+@import "../styles/svgs.scss";
+@import "../styles/headers.scss";
+@import "../styles/body.scss";
+@plugin './hero.ts';
+@source '../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  --button-bg-color-main: #111827;
+  --botton-font-color-main: #ffffff;
+  --inline-menu-font-color: #374151;
+  --text-font-family: 'Inter';
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+
+    --button-bg-color-main: #ffffff;
+    --botton-font-color-main: #111827;
+    --inline-menu-font-color: #ffffff;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+.main-button{
+  background-color: var(--button-bg-color-main);
+  color: var(--botton-font-color-main);
+  font-family: var(--text-font-family);
+}
+.inline-menu-color{
+  color: var(--inline-menu-font-color);
+}

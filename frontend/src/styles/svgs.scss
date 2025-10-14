@@ -1,0 +1,45 @@
+:root {
+  --icon-color-auto-light: #FFFFFF;
+  --icon-color-auto-dark: #374451
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --icon-color-auto-light: #111827;
+    --icon-color-auto-dark: #FFFFFF
+  }
+}
+
+.arrow-right-icon {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: var(--icon-color-auto-light);
+  -webkit-mask: url("../svgs/arrow-right.svg") no-repeat center / contain;
+          mask: url("../svgs/arrow-right.svg") no-repeat center / contain;
+}
+
+.paint-brush-icon {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: var(--icon-color-auto-dark);
+  -webkit-mask: url("../svgs/paint-brush.svg") no-repeat center / contain;
+          mask: url("../svgs/paint-brush.svg") no-repeat center / contain;
+}
+.lightning-icon {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: var(--icon-color-auto-dark);
+  -webkit-mask: url("../svgs/lightning.svg") no-repeat center / contain;
+          mask: url("../svgs/lightning.svg") no-repeat center / contain;
+}
+.mobile-icon {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: var(--icon-color-auto-dark);
+  -webkit-mask: url("../svgs/mobile.svg") no-repeat center / contain;
+          mask: url("../svgs/mobile.svg") no-repeat center / contain;
+}

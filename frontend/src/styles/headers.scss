@@ -1,0 +1,48 @@
+/* --------------- */
+/* DEFAULT (LIGHT) */
+/* --------------- */
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  --header-bg: #ffffff;
+  --header-text: #000000;
+
+  --header-divider-color: #F3F4F6;
+}
+
+/* --------------------- */
+/* AUTO DARK DETECTION   */
+/* --------------------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+
+    --header-bg: #121212;
+    --header-text: #ffffff;
+    --header-divider-color: #F3F4F6;
+  }
+}
+
+/* --------------- */
+/* MANUAL DARK MODE */
+/* (use .dark class) */
+/* --------------- */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --header-bg: #121212;
+  --header-text: #ffffff;
+}
+
+/* --------------------- */
+/* Global element styles */
+/* --------------------- */
+header {
+  background-color: var(--header-bg);
+  color: var(--header-text);
+}
+hr.divider-color {
+  background-color: var(--header-divider-color);
+}

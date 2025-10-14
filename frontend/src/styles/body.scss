@@ -1,0 +1,85 @@
+:root {
+  --font-family: 'Inter';
+  --banner-heading-one-size: 72px;
+  --banner-heading-one-font-weight: bold;
+
+  --banner-heading-color: #111827;
+  --glow-font-color: #4B5563;
+
+  --text-font-size: 18px;
+  --text-font-color: #4B5563;
+  --button-font-size: 18px;
+
+  --banner-heading-two-size: 48px;
+  --banner-heading-two-font-weight: bold;
+
+  --banner-bg-version-one: #EBEDEE;
+
+  --group-box-shadow-auto-dark: #acacac 0 0 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --banner-heading-color: #F3F4F6;
+    --glow-font-color: #4B5563;
+    --text-font-color: #F3F4F6;
+    --banner-bg-version-one: #4B5563;
+    --group-box-shadow-auto-dark: #fff 0 0 10px;
+  }
+}
+
+.home {
+    h1 {
+      font-family: var(--font-family);
+      font-weight: var(--banner-heading-one-font-weight);
+      font-style: normal;
+      font-size: var(--banner-heading-one-size);
+      color: var(--banner-heading-color);
+      .glow-color {
+        color: var(--glow-font-color)
+      }
+    }
+  p{
+    font-family: var(--font-family);
+    font-size: var(--text-font-size);
+    font-style: normal;
+    color: var(--text-font-color);
+  }
+  .button-size{
+    font-size: var(--button-font-size);
+  }
+  .banner-bg-version-one {
+    background-color: var(--banner-bg-version-one);
+  }
+  h2 {
+    font-family: var(--font-family);
+    font-size: var(--banner-heading-two-size);
+    font-weight: var(--banner-heading-two-font-weight);
+    color: var(--banner-heading-color);
+  }
+  .banner-group {
+    h2 {
+      font-family: var(--font-family);
+      font-weight: var(--banner-heading-two-font-weight);
+      font-size: 24px;
+    }
+    p {
+      font-family: var(--font-family);
+      font-size: 18px;
+      font-weight: normal;
+      color: var(--text-font-color);
+    }
+    .group-icon {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: var(--group-box-shadow-auto-dark);
+    }
+  }
+}
+footer {
+  p {
+    font-family: var(--font-family);
+    font-size: var(--text-font-size);
+    color: var(--text-font-color);
+  }
+}
