@@ -29,16 +29,21 @@
 }
 
 .home {
-    h1 {
-      font-family: var(--font-family);
-      font-weight: var(--banner-heading-one-font-weight);
-      font-style: normal;
-      font-size: var(--banner-heading-one-size);
-      color: var(--banner-heading-color);
-      .glow-color {
-        color: var(--glow-font-color)
-      }
+  .center-banner-bg {
+    background-image: url("../images/invoice-template-bg.png");
+    background-size: 150%;
+    background-position: center center;
+  }
+  h1 {
+    font-family: var(--font-family);
+    font-weight: var(--banner-heading-one-font-weight);
+    font-style: normal;
+    font-size: var(--banner-heading-one-size);
+    color: var(--banner-heading-color);
+    .glow-color {
+      color: var(--glow-font-color)
     }
+  }
   p{
     font-family: var(--font-family);
     font-size: var(--text-font-size);
@@ -75,6 +80,7 @@
       box-shadow: var(--group-box-shadow-auto-dark);
     }
   }
+
 }
 footer {
   p {

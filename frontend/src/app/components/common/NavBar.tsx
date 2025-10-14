@@ -13,8 +13,14 @@ import {
 } from "@heroui/react";
 import Image from 'next/image'
 import React, { useState } from "react";
+import { useApp } from '@/app/providers/AppContext';
 
+type UseAppTypes = {
+  isDarkMode: boolean
+}
 export const BilliftyLogo = () => {
+  const { isDarkMode }: UseAppTypes = useApp();
+  const logo = isDarkMode ? "/images/Billifty-logo.png" : '/images/Billifty-logo-light.png';
   return (
     <Image
         alt="Billifty Logo"
@@ -22,7 +28,7 @@ export const BilliftyLogo = () => {
         height={51}
         priority
         quality={100}
-        src="/images/Billifty-logo.png" />
+        src={logo} />
   );
 };
 

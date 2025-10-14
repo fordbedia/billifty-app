@@ -11,7 +11,7 @@ export default function RootLayout({ children } : RootLayoutProps) {
     return (
         <>
             <Header />
-            <Divider className="divider-color" />
+            <Divider className="divider-color fixed" />
             {children}
             <Footer />
         </>
