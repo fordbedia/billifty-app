@@ -1,0 +1,43 @@
+# docker/nginx/conf.d/prod-https.conf
+server {
+  listen 80;
+  server_name getinvoice.com www.getinvoice.com;
+
+  location ^~ /.well-known/acme-challenge/ {
+    root /var/www/certbot;
+    allow all;
+  }
+
+  location / { return 301 https://$host$request_uri; }
+}
+
+server {
+  listen 443 ssl http2;
+  server_name getinvoice.com www.getinvoice.com;
+
+  ssl_certificate     /etc/letsencrypt/live/getinvoice.com/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/getinvoice.com/privkey.pem;
+
+  # Laravel API
+  location ^~ /api/ {
+    include        /etc/nginx/fastcgi_params;
+    fastcgi_pass   backend:9000;
+    fastcgi_param  SCRIPT_FILENAME  /var/www/html/public/index.php;
+    fastcgi_param  PATH_INFO        $uri;
+    fastcgi_param  REQUEST_URI      $request_uri;
+    fastcgi_param  QUERY_STRING     $query_string;
+    fastcgi_param  DOCUMENT_ROOT    /var/www/html/public;
+    fastcgi_param  SCRIPT_NAME      /index.php;
+    fastcgi_index  index.php;
+  }
+
+  # Next.js
+  location / {
+    proxy_pass http://frontend:3000;
+    proxy_set_header Host              $host;
+    proxy_set_header X-Real-IP         $remote_addr;
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto https;
+    proxy_read_timeout 120s;
+  }
+}

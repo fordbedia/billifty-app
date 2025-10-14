@@ -1,0 +1,71 @@
+/shared-resources/vendor
+.DS_Store
+.idea/
+/shared-resources
+
+### Frontend
+/frontend/node_modules
+/frontend/.pnp
+/frontend.pnp.*
+/frontend.yarn/*
+/frontend!.yarn/patches
+/frontend!.yarn/plugins
+/frontend!.yarn/releases
+/frontend!.yarn/versions
+
+# testing
+/frontend/coverage
+
+# next.js
+/frontend/.next/
+/frontend/out/
+
+# production
+/frontend/build
+
+# misc
+/frontend/.DS_Store
+/frontend/*.pem
+
+# debug
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+/frontend/.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+/frontend/.env*
+
+# vercel
+/frontend/.vercel
+
+# typescript
+/frontend/*.tsbuildinfo
+/frontend/next-env.d.ts
+
+#### Backend
+
+/backend/*.log
+/backend/.DS_Store
+/backend/.env
+/backend/.env.backup
+/backend/.env.production
+/backend/.phpactor.json
+/backend/.phpunit.result.cache
+/backend/.fleet
+/backend/.idea
+/backend/.nova
+/backend/.phpunit.cache
+/backend/.vscode
+/backend/.zed
+/backend/auth.json
+/backend/node_modules
+/backend/public/build
+/backend/public/hot
+/backend/public/storage
+/backend/storage/*.key
+/backend/storage/pail
+/backend/vendor
+/backend/Homestead.json
+/backend/Homestead.yaml
+/backend/Thumbs.db

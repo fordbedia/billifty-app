@@ -1,0 +1,38 @@
+server {
+  listen 80;
+  server_name int.getinvoice.com;
+
+  # Quick diagnostic stays
+  location = /api/ping {
+    default_type text/plain;
+    return 200 "OK: /api location matched\n";
+  }
+
+  # === Force ALL /api/* into Laravel front controller ===
+  location ^~ /api/ {
+    # We don't need 'root' here; just forward to PHP-FPM's index.php
+    include        /etc/nginx/fastcgi_params;
+    fastcgi_pass   backend:9000;
+
+    # Always execute Laravel's front controller
+    fastcgi_param  SCRIPT_FILENAME  /var/www/html/public/index.php;
+
+    # Preserve original path & query for Laravel
+    fastcgi_param  PATH_INFO        $uri;
+    fastcgi_param  REQUEST_URI      $request_uri;
+    fastcgi_param  QUERY_STRING     $query_string;
+    fastcgi_param  DOCUMENT_ROOT    /var/www/html/public;
+    fastcgi_param  SCRIPT_NAME      /index.php;
+    fastcgi_index  index.php;
+  }
+
+  # Everything else -> Next.js dev server
+  location / {
+    proxy_pass http://frontend:3000;
+    proxy_set_header Host              $host;
+    proxy_set_header X-Real-IP         $remote_addr;
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto http;
+    proxy_read_timeout 120s;
+  }
+}

@@ -1,0 +1,40 @@
+services:
+  nginx:
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./docker/certs:/etc/nginx/certs:ro
+    environment:
+      NGINX_ENV: dev
+
+  backend:
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://int.getinvoice.com
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      CORS_ALLOWED_ORIGINS: http://int.getinvoice.com,http://localhost:3000
+    command: bash -c "php -v && php-fpm"
+
+  frontend:
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: /api
+      # help watch changes over bind mounts
+      WATCHPACK_POLLING: "true"
+      WATCHPACK_POLL_INTERVAL: "300"
+      CHOKIDAR_USEPOLLING: "true"   # harmless with Turbopack; helps some setups
+    command: ["sh", "-c", "npm install && npm run dev"]
+    volumes:
+      - ./frontend:/usr/src/app:delegated  # delegated improves perf o
+
+  postgres:
+    ports:
+      - "5433:5432"
