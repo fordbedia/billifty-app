@@ -14,6 +14,7 @@ import {
 import Image from 'next/image'
 import React, { useState } from "react";
 import { useApp } from '@/app/providers/AppContext';
+import {path} from "@/constants/routerPaths";
 
 type UseAppTypes = {
   isDarkMode: boolean
@@ -22,13 +23,13 @@ export const BilliftyLogo = () => {
   const { isDarkMode }: UseAppTypes = useApp();
   const logo = isDarkMode ? "/images/Billifty-logo.png" : '/images/Billifty-logo-light.png';
   return (
-    <Image
+    <Link href={path.lp}><Image
         alt="Billifty Logo"
         width={144}
         height={51}
         priority
         quality={100}
-        src={logo} />
+        src={logo} /></Link>
   );
 };
 
@@ -82,7 +83,7 @@ export default function App() {
           <Link href="#" className="inline-menu-color">Pricing</Link>
         </NavbarItem>
         <NavbarItem>
-          <Button disableRipple as={Link} color="primary" className="main-button" href="#" variant="flat">
+          <Button disableRipple as={Link} color="primary" className="main-button" href={path.auth} variant="flat">
             Get Started
           </Button>
         </NavbarItem>

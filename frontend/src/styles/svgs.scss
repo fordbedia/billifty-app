@@ -43,3 +43,11 @@
   -webkit-mask: url("../svgs/mobile.svg") no-repeat center / contain;
           mask: url("../svgs/mobile.svg") no-repeat center / contain;
 }
+
+.google-g-icon {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  -webkit-mask: url("../svgs/google-g-icon.svg") no-repeat center / contain;
+          mask: url("../svgs/google-g-icon.svg") no-repeat center / contain;
+}

@@ -16,6 +16,9 @@
   --banner-bg-version-one: #EBEDEE;
 
   --group-box-shadow-auto-dark: #acacac 0 0 10px;
+
+  --button-auto-color-dark: #111827;
+  --button-auto-font-color-dark: #fff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -25,6 +28,9 @@
     --text-font-color: #F3F4F6;
     --banner-bg-version-one: #4B5563;
     --group-box-shadow-auto-dark: #fff 0 0 10px;
+
+    --button-auto-color-dark: #111827;
+    --button-auto-font-color-dark: #fff;
   }
 }
 
@@ -80,7 +86,50 @@
       box-shadow: var(--group-box-shadow-auto-dark);
     }
   }
-
+}
+.auth-tab {
+  box-shadow: none;
+}
+.auth-wrapper {
+  h2 {
+    font-family: var(--font-family);
+    font-size: 24px;
+    color: var(--banner-heading-color);
+  }
+  p{
+    font-family: var(--font-family);
+    font-size: 14px;
+    color: var(--banner-heading-color);
+  }
+  .google-g-icon-color {
+    background-color: #EF4444;
+  }
+  button {
+    font-family: var(--font-family);
+    font-size: 16px;
+    font-weight: 100;
+    border: 1px solid #E5E7EB;
+    background-color: #fff;
+  }
+  .google-button-color:hover {
+    background-color: #EF4444!important;
+    color: #fff;
+  }
+  .google-button-color:hover > i {
+    background-color: #fff;
+  }
+  .divider-text {
+    position: relative;
+    top: -11px;
+    left: 47%;
+    background-color: #fff;
+    max-width: max-content;
+    padding: 0 12px 0 12px;
+  }
+  .submit-btn {
+    background-color: var(--button-auto-color-dark);
+    color: var(--button-auto-font-color-dark);
+  }
 }
 footer {
   p {

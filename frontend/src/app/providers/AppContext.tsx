@@ -1,5 +1,5 @@
 'use client';
-import {
+import React, {
   createContext,
   type ReactNode,
   useContext,
@@ -30,6 +30,8 @@ interface AppContextValue {
   user: User | null;
   setUser: Dispatch<SetStateAction<User | null>>;
   isDarkMode: boolean;
+  selectedTab: string;
+  setSelectedTab: Dispatch<SetStateAction<string>>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -38,6 +40,11 @@ export function AppProvider({ children } : AppProviderProps) {
   const [theme, setTheme] = useState<Theme>('light');
   const [user, setUser]   = useState<User | null>(null);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const [selectedTab, setSelectedTab] = useState<string>('signin')
+  // SignUp
+  const [password, setPassword] = useState("");
+  const [submitted, setSubmitted] = useState(null);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -70,8 +77,10 @@ export function AppProvider({ children } : AppProviderProps) {
     setTheme,
     user,
     setUser,
-    isDarkMode
-  }), [theme, user]);
+    isDarkMode,
+    selectedTab,
+    setSelectedTab
+  }), [theme, user, selectedTab]);
   return <AppContext.Provider value={value}>
     {children}
   </AppContext.Provider>;

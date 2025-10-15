@@ -1,4 +1,5 @@
-import {Button} from "@heroui/react";
+import {Button, Link} from "@heroui/react";
+import {path} from "@/constants/routerPaths";
 
 export default function StreamlineBanner() {
     return (
@@ -8,7 +9,7 @@ export default function StreamlineBanner() {
                 <p>Join thousands of professionals who trust Billifty for their billing needs.</p>
 
                 <div className="max-w-screen-md m-auto my-10">
-                    <Button className="main-button button-size" disableRipple color="default" size="lg">Start Creating Invoices <i className="arrow-right-icon"></i></Button>
+                    <Button as={Link} href={path.auth} className="main-button button-size" disableRipple color="default" size="lg">Start Creating Invoices <i className="arrow-right-icon"></i></Button>
                 </div>
             </div>
          </div>

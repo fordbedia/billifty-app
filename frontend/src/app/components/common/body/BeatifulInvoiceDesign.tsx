@@ -1,8 +1,9 @@
 import Image from 'next/image'
-import {Button} from "@heroui/react";
+import {Button, Link} from "@heroui/react";
 import ModernInvoiceDesign from '@/images/modern-invoice-design.png'
 import ClassicInvoiceDesign from '@/images/classic-invoice-design.png'
 import MinimalInvoiceDesign from '@/images/minimal-invoice-design.png'
+import {path} from "@/constants/routerPaths";
 
 export default function BeautifulInvoiceDesign() {
     return (
@@ -50,7 +51,7 @@ export default function BeautifulInvoiceDesign() {
                     Create invoices that reflect your professional image and help you get paid faster.</p>
 
                 <div className="max-w-screen-md m-auto my-5">
-                    <Button className="main-button button-size" disableRipple color="default" size="lg">Get Started Free <i className="arrow-right-icon"></i></Button>
+                    <Button as={Link} href={path.auth} className="main-button button-size" disableRipple color="default" size="lg">Get Started Free <i className="arrow-right-icon"></i></Button>
                 </div>
             </div>
          </div>
