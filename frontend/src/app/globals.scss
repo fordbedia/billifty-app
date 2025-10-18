@@ -3,6 +3,7 @@
 @import "../styles/svgs.scss";
 @import "../styles/headers.scss";
 @import "../styles/body.scss";
+@import "../styles/app.scss";
 @plugin './hero.ts';
 @source '../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
 @custom-variant dark (&:is(.dark *));
@@ -38,7 +39,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--text-font-family);
 }
 .main-button{
   background-color: var(--button-bg-color-main);

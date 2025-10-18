@@ -51,3 +51,27 @@
   -webkit-mask: url("../svgs/google-g-icon.svg") no-repeat center / contain;
           mask: url("../svgs/google-g-icon.svg") no-repeat center / contain;
 }
+.pen-icon {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  -webkit-mask: url("../svgs/pen.svg") no-repeat center / contain;
+          mask: url("../svgs/pen.svg") no-repeat center / contain;
+  background-color: var(--icon-color-auto-dark);
+}
+.trash-icon {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  -webkit-mask: url("../svgs/trash.svg") no-repeat center / contain;
+          mask: url("../svgs/trash.svg") no-repeat center / contain;
+  background-color: var(--icon-color-auto-dark);
+}
+.plus-icon {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  -webkit-mask: url("../svgs/plus.svg") no-repeat center / contain;
+          mask: url("../svgs/plus.svg") no-repeat center / contain;
+  background-color: var(--icon-color-auto-dark);
+}

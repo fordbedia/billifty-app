@@ -23,6 +23,7 @@ export default function Authentication() {
             <div className="max-w-screen-sm m-auto my-20">
                 <div className="flex w-full flex-col">
                     <Tabs aria-label="Options"
+                          size="lg"
                           fullWidth
                           selectedKey={selectedTab}
                           onSelectionChange={(key) => setSelectedTab(key as string)}
