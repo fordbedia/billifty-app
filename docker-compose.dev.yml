@@ -3,6 +3,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "8081:8081"
     volumes:
       - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
       - ./docker/certs:/etc/nginx/certs:ro
@@ -14,6 +15,7 @@ services:
       APP_ENV: local
       APP_DEBUG: "true"
       APP_URL: http://int.getinvoice.com
+      APP_KEY: base64:ULBox/MrellslNhipD691hvFlg+5C7gNWkUjI/Rm1V4=
       DB_CONNECTION: pgsql
       DB_HOST: postgres
       DB_PORT: 5432

@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
      ->withProviders([
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class, // <— register the Passport config here
+        BilliftySDK\SharedResources\SharedResourceServiceProvider::class,
     ])
     ->withExceptions(function (Exceptions $exceptions): void {
         //
