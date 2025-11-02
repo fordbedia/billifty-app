@@ -9,7 +9,7 @@ export default function BeautifulInvoiceDesign() {
     return (
          <div className="text-center">
             <div className="max-w-screen-lg my-20">
-                <h2>Beautiful Invoice Designs</h2>
+                <h2>Beautiful BusinessProfile Designs</h2>
                 <p>Choose from our collection of professionally crafted invoice templates.
                     Each design is carefully created to make your business look professional and trustworthy.
                 </p>
@@ -18,7 +18,7 @@ export default function BeautifulInvoiceDesign() {
                         <div className="w-sm h-sm content-center">
                             <Image
                                 priority quality={100}
-                                alt="Modern Invoice Design"
+                                alt="Modern BusinessProfile Design"
                                 src={ModernInvoiceDesign} width="373" height="384" />
                         </div>
                         <h2>Modern & Clean</h2>
@@ -29,7 +29,7 @@ export default function BeautifulInvoiceDesign() {
                         <div className="w-sm h-sm content-center">
                             <Image
                                 priority quality={100}
-                                alt="Classic Invoice Design"
+                                alt="Classic BusinessProfile Design"
                                 src={ClassicInvoiceDesign} width="373" height="384" />
                         </div>
                         <h2>Classic & Professional</h2>
@@ -40,7 +40,7 @@ export default function BeautifulInvoiceDesign() {
                         <div className="w-sm h-sm content-center">
                             <Image
                                 priority quality={100}
-                                alt="Minimal Invoice Design"
+                                alt="Minimal BusinessProfile Design"
                                 src={MinimalInvoiceDesign} width="373" height="384" />
                         </div>
                         <h2>Minimal & Elegant</h2>
