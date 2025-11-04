@@ -7,8 +7,16 @@ import InvoiceItem from "@/app/app/invoice/components/InvoiceItem";
 import AddMoreItems from "@/app/app/invoice/components/buttons/AddMoreItems";
 import InvoiceInfo from "@/app/app/invoice/components/InvoiceInfo";
 import InvoiceTemplate from "@/app/app/invoice/components/InvoiceTemplate";
+import {useInvoice} from "@/app/providers/InvoiceContext";
 
 export default function App() {
+    const {
+        data,
+        addItems,
+        onDataChange,
+        updateItems,
+    } = useInvoice()
+    {console.log('data', data)}
     return (
         <RootLayout>
             <div className="app app-wrapper outer-bg">
@@ -31,38 +39,46 @@ export default function App() {
                                 <CardHeader className="flex gap-3">
                                     <div className="flex w-full justify-between items-center">
                                         <h2>Invoice Items</h2>
-                                        <Button disableRipple radius="sm" className="add-invoice-item-btn"><i className="plus-icon"></i>Add Item</Button>
+                                        <Button onPress={() => addItems()} disableRipple radius="sm" className="add-invoice-item-btn"><i className="plus-icon"></i>Add Item</Button>
                                     </div>
                                 </CardHeader>
                                 <Divider />
                                 <CardBody>
                                     <div className="px-1 py-1">
-                                        <InvoiceItem />
-                                        <InvoiceItem />
+                                        {data.invoice_items && Object.keys(data.invoice_items).length > 0 && data.invoice_items.map((item, index) => (
+                                            <InvoiceItem item={item} key={index} index={index} onChange={updateItems} />
+                                        ))}
 
                                         <AddMoreItems />
                                     </div>
                                 </CardBody>
                                 <Divider />
                                 <CardFooter>
-                                    <section className="invoice-summary">
+                                  <section className="invoice-summary">
+                                    <div className="summary-row">
+                                      <span className="label">Subtotal (before tax):</span>
+                                      <span className="value">${(data.subtotal_cents / 100).toFixed(2)}</span>
+                                    </div>
+
+                                    {data.shipping_cents > 0 && (
                                       <div className="summary-row">
-                                        <span className="label">Subtotal:</span>
-                                        <span className="value">$4,100.00</span>
+                                        <span className="label">Shipping:</span>
+                                        <span className="value">${(data.shipping_cents / 100).toFixed(2)}</span>
                                       </div>
+                                    )}
 
-                                      <div className="summary-row">
-                                        <span className="label">Tax (10%):</span>
-                                        <span className="value">$410.00</span>
-                                      </div>
+                                    <div className="summary-row">
+                                      <span className="label">Tax (items):</span>
+                                      <span className="value">${(data.tax_cents / 100).toFixed(2)}</span>
+                                    </div>
 
-                                      <hr className="divider" />
+                                    <hr className="divider" />
 
-                                      <div className="summary-row total">
-                                        <span className="label">Total:</span>
-                                        <span className="value accent">$4,510.00</span>
-                                      </div>
-                                    </section>
+                                    <div className="summary-row total">
+                                      <span className="label">Total:</span>
+                                      <span className="value accent">${(data.total_cents / 100).toFixed(2)}</span>
+                                    </div>
+                                  </section>
                                 </CardFooter>
                             </Card>
                             {/*<ClientInformation />*/}
