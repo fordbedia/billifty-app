@@ -45,6 +45,7 @@ export function InvoiceProvider({ children }) {
         payment_information_id: null,
         invoice_number: '',
         reference: '',
+        shipping_address: '',
         currency: '',
         issued_on: issueDate,
         due_on: dueDate,
@@ -58,6 +59,8 @@ export function InvoiceProvider({ children }) {
         discount_rate: 0,
         tax_cents: 0,
         shipping_cents: 0,
+        shipping_tax_rate: 0,
+        shipping_tax_cents: 0,
         total_cents: 0,
         amount_due_cents: 0,
         notes: '',
@@ -67,6 +70,8 @@ export function InvoiceProvider({ children }) {
         meta: '',
         invoice_items: []
     })
+
+    const [hasShipping, setHasShipping] = useState(false)
 
     const shallowEqualNumbers = (a, b, keys) => {
       return keys.every(k => (a?.[k] ?? null) === (b?.[k] ?? null));
@@ -130,7 +135,7 @@ export function InvoiceProvider({ children }) {
 
         // Prevent unnecessary state updates (and feedback loops)
         const stableKeys = [
-          "subtotal_cents", "tax_cents", "total_cents", "amount_due_cents"
+          "subtotal_cents", "tax_cents", "total_cents", "amount_due_cents", "shipping_tax_cents"
         ];
         const sameTotals = shallowEqualNumbers(prev, next, stableKeys);
 
@@ -146,12 +151,14 @@ export function InvoiceProvider({ children }) {
       });
     }, [
       // When these change, recompute:
-      data.invoice_items,          // items array (reference changes on edits/adds)
-      data.discount_cents,
-      data.tax_cents,
-      data.tax_rate_bps,           // optional, if you support it
-      data.shipping_cents,
+        data.invoice_items,
+        data.discount_cents,
+        data.tax_rate_bps,     // if you support invoice-level tax
+        data.shipping_cents,
+        data.shipping_tax_rate
     ]);
+
+    const [isTaxable, setIsTaxable] = useState((data.shipping_tax_rate ?? 0) > 0);
 
     const value = {
         businessProfileData,
@@ -160,7 +167,11 @@ export function InvoiceProvider({ children }) {
         data,
         onDataChange,
         addItems,
-        updateItems
+        updateItems,
+        setHasShipping,
+        hasShipping,
+        isTaxable,
+        setIsTaxable,
     }
 
     return <InvoiceContext.Provider value={value}>

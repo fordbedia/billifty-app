@@ -1,12 +1,7 @@
 import { Input } from "@heroui/react";
+import {centsToDollarsStr, dollarsToCents} from "@/app/utils/computeInvoice";
 
 // Helpers
-const dollarsToCents = (v) => {
-  const n = parseFloat(v);
-  return Number.isFinite(n) ? Math.round(n * 100) : 0;
-};
-const centsToDollarsStr = (c) => ((c ?? 0) / 100).toFixed(2);
-
 export default function InvoiceItem({ item, index, onChange }) {
   const qty   = parseFloat(item.quantity ?? 0) || 0;
   const unit  = parseInt(item.unit_price_cents ?? 0, 10) || 0;

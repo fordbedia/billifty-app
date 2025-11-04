@@ -16,7 +16,7 @@ export default function App() {
         onDataChange,
         updateItems,
     } = useInvoice()
-    {console.log('data', data)}
+
     return (
         <RootLayout>
             <div className="app app-wrapper outer-bg">
@@ -65,6 +65,13 @@ export default function App() {
                                         <span className="label">Shipping:</span>
                                         <span className="value">${(data.shipping_cents / 100).toFixed(2)}</span>
                                       </div>
+                                    )}
+
+                                    {data.shipping_tax_cents > 0 && (
+                                        <div className="summary-row">
+                                            <span className="label">Shipping Tax:</span>
+                                            <span className="value">${(data.shipping_tax_cents / 100).toFixed(2)}</span>
+                                        </div>
                                     )}
 
                                     <div className="summary-row">

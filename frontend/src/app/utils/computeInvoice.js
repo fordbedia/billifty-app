@@ -41,17 +41,20 @@ export function computeInvoice(prev) {
 
   const discount  = toInt(prev.discount_cents ?? 0);
   const shipping  = toInt(prev.shipping_cents ?? 0);
+  const shippingTaxRate = toFloat(prev.shipping_tax_rate ?? 0);
+  const shippingTax = Math.round(shipping * (shippingTaxRate / 100));
 
   // If you ALSO support invoice-level tax overrides, you could swap taxSum here.
   // For now we trust per-item tax:
   const tax = Math.max(0, taxSum);
 
-  const total = Math.max(0, subtotalBase - discount + tax + shipping);
+  const total = Math.max(0, subtotalBase - discount + tax + shipping + shippingTax);
 
-  next.invoice_items   = items;
-  next.subtotal_cents  = subtotalBase;   // subtotal BEFORE tax
-  next.tax_cents       = tax;            // total tax (sum of items)
-  next.total_cents     = total;          // grand total
+  next.shipping_tax_cents = shippingTax;
+  next.invoice_items      = items;
+  next.subtotal_cents     = subtotalBase;   // subtotal BEFORE tax
+  next.tax_cents          = tax;            // total tax (sum of items)
+  next.total_cents        = total;          // grand total
 
   if (typeof next.amount_due_cents === "number") {
     next.amount_due_cents = total;
@@ -59,3 +62,11 @@ export function computeInvoice(prev) {
 
   return next;
 }
+
+
+export const centsToDollarsStr = (c) => ((c ?? 0) / 100).toFixed(2);
+
+export const dollarsToCents = (v) => {
+  const n = parseFloat(v);
+  return Number.isFinite(n) ? Math.round(n * 100) : 0;
+};
