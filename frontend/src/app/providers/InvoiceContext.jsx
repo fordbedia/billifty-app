@@ -13,6 +13,7 @@ import Clients from "@/app/models/Clients";
 import Invoices from "@/app/models/Invoices";
 import { today, getLocalTimeZone } from "@internationalized/date";
 import {computeInvoice} from "@/app/utils/computeInvoice";
+import Invoice from "@/app/models/Invoices";
 
 const InvoiceContext = createContext(null)
 
@@ -55,6 +56,7 @@ export function InvoiceProvider({ children }) {
         template_version: '',
         theme_json: '',
         subtotal_cents: 0,
+		discount_mode: 'none',
         discount_cents: 0,
         discount_rate: 0,
         tax_cents: 0,
@@ -129,6 +131,12 @@ export function InvoiceProvider({ children }) {
         return {...prev, invoice_items: updated}
     })
 
+	const removeItem = (index) => setData(prev => {
+		const items = [...prev.invoice_items]
+		items.splice(index, 1)
+		return {...prev, invoice_items: items}
+	})
+
     useEffect(() => {
       setData(prev => {
         const next = computeInvoice(prev);
@@ -155,10 +163,25 @@ export function InvoiceProvider({ children }) {
         data.discount_cents,
         data.tax_rate_bps,     // if you support invoice-level tax
         data.shipping_cents,
-        data.shipping_tax_rate
+        data.shipping_tax_rate,
+		data.discount_mode,
+		data.discount_cents,
+		data.discount_rate,
     ]);
 
     const [isTaxable, setIsTaxable] = useState((data.shipping_tax_rate ?? 0) > 0);
+
+	const {mutate: saveDraft} = useMutation({
+		mutationFn: () => Invoice.saveDraft(data)
+	})
+
+	const save = (type) => {
+		switch(type) {
+			case 'draft':
+				saveDraft()
+				break;
+		}
+	}
 
     const value = {
         businessProfileData,
@@ -172,6 +195,8 @@ export function InvoiceProvider({ children }) {
         hasShipping,
         isTaxable,
         setIsTaxable,
+		removeItem,
+		save,
     }
 
     return <InvoiceContext.Provider value={value}>

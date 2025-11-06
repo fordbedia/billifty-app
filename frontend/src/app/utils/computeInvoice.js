@@ -1,30 +1,42 @@
+// frontend/src/app/utils/computeInvoice.js
 const toInt = (v) => (Number.isFinite(+v) ? Math.trunc(+v) : 0);
 const toFloat = (v) => (Number.isFinite(+v) ? +v : 0);
 
 export function computeInvoice(prev) {
   const next = { ...prev };
+  const mode = prev.discount_mode ?? 'none';
+  const usePerLine = mode === 'per-line';
 
-  let subtotalBase = 0;   // sum of line bases (qty * unit)
+  let subtotalBase = 0;   // sum of line bases (qty*unit) AFTER (optional) per-line discounts
   let taxSum = 0;         // sum of per-item taxes
 
   const items = (prev.invoice_items || []).map((it, i) => {
-    const qty      = toFloat(it.quantity ?? 0);
-    const unit     = toInt(it.unit_price_cents ?? 0);
-    const taxRate  = toFloat(it.tax_rate ?? 0); // percent, e.g. 8.25
+    const qty     = toFloat(it.quantity ?? 0);
+    const unit    = toInt(it.unit_price_cents ?? 0);
+    const taxRate = toFloat(it.tax_rate ?? 0); // percent, e.g. 8.25
 
-    // base line before tax/discount
     let base = Math.round(qty * unit);
 
-    // optional per-line discount handling (keep if you use these fields)
-    if (it.line_discount_cents != null) {
-      base -= toInt(it.line_discount_cents);
-    } else if (it.line_discount_rate != null) {
-      const r = toFloat(it.line_discount_rate);
-      base -= Math.round(base * r);
+    // ✅ Only apply per-line discounts in 'per-line' mode
+    if (usePerLine) {
+      // if (it.line_discount_cents != null) {
+      //   base -= toInt(it.line_discount_cents);
+      // } else if (it.line_discount_rate != null) {
+      //   const rPct = toFloat(it.line_discount_rate); // user enters 10 for 10%
+		// base -= Math.round(base * (rPct / 100));
+      // }
+		 const rawCents = it.line_discount_cents;
+		 const rawRate  = it.line_discount_rate;
+		 const hasCents = rawCents != null && toInt(rawCents) > 0;
+		 const hasRate  = rawRate  != null && toFloat(rawRate) > 0;
+
+		 if (hasRate) {
+			 const pct = Math.min(100, Math.max(0, toFloat(rawRate)));
+			 base -= Math.round(base * (pct / 100));
+		 }
     }
     base = Math.max(0, base);
 
-    // per-item tax (Pattern A + item tax)
     const lineTax = Math.round(base * (taxRate / 100));
     const lineWithTax = base + lineTax;
 
@@ -34,27 +46,41 @@ export function computeInvoice(prev) {
     return {
       ...it,
       position: it.position ?? i + 1,
-      tax_cents: lineTax,          // keep for display/debug if you want
-      line_total_cents: lineWithTax, // amount shown in the row (incl. tax)
+      tax_cents: lineTax,
+      line_total_cents: lineWithTax,
     };
   });
 
-  const discount  = toInt(prev.discount_cents ?? 0);
+  // ✅ Invoice-level discount (mutually exclusive)
+  let invoiceLevelDiscount = 0;
+  if (mode === 'amount') {
+    invoiceLevelDiscount = toInt(prev.discount_cents ?? 0);
+  } else if (mode === 'percent') {
+    const rate = toFloat(prev.discount_rate ?? 0); // 10 => 10%
+    invoiceLevelDiscount = Math.round(subtotalBase * (rate / 100));
+  }
+  invoiceLevelDiscount = Math.max(0, invoiceLevelDiscount);
+
   const shipping  = toInt(prev.shipping_cents ?? 0);
   const shippingTaxRate = toFloat(prev.shipping_tax_rate ?? 0);
   const shippingTax = Math.round(shipping * (shippingTaxRate / 100));
 
-  // If you ALSO support invoice-level tax overrides, you could swap taxSum here.
-  // For now we trust per-item tax:
+  // For now, we trust per-item tax
   const tax = Math.max(0, taxSum);
 
-  const total = Math.max(0, subtotalBase - discount + tax + shipping + shippingTax);
+  const total = Math.max(0, subtotalBase - invoiceLevelDiscount + tax + shipping + shippingTax);
 
-  next.shipping_tax_cents = shippingTax;
-  next.invoice_items      = items;
-  next.subtotal_cents     = subtotalBase;   // subtotal BEFORE tax
-  next.tax_cents          = tax;            // total tax (sum of items)
-  next.total_cents        = total;          // grand total
+  next.invoice_items       = items;
+  next.subtotal_cents      = subtotalBase;
+  next.tax_cents           = tax;
+  next.discount_cents      = invoiceLevelDiscount; // normalized effective invoice-level discount
+  next.shipping_tax_cents  = shippingTax;
+  next.total_cents         = total;
+
+  // ✅ Expose a display-only row for the totals UI (negative value)
+  next.display_discount_row = (mode === 'amount' || mode === 'percent') && invoiceLevelDiscount > 0
+    ? { label: 'Discount', amount_cents: -invoiceLevelDiscount }
+    : null;
 
   if (typeof next.amount_due_cents === "number") {
     next.amount_due_cents = total;
@@ -63,9 +89,7 @@ export function computeInvoice(prev) {
   return next;
 }
 
-
 export const centsToDollarsStr = (c) => ((c ?? 0) / 100).toFixed(2);
-
 export const dollarsToCents = (v) => {
   const n = parseFloat(v);
   return Number.isFinite(n) ? Math.round(n * 100) : 0;

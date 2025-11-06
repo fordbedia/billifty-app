@@ -31,6 +31,10 @@ export default function InvoiceInfo() {
       onDataChange("shipping_cents", 0);
       onDataChange("shipping_tax_rate", 0);
     };
+
+	const isAmount = data.discount_mode === "amount";
+  	const isPercent = data.discount_mode === "percent";
+  	const isPerLine = data.discount_mode === "per-line";
     return (
         <Card className="mb-5" fullWidth radius="sm">
             <CardHeader className="flex gap-3">
@@ -44,7 +48,7 @@ export default function InvoiceInfo() {
                             className="max-w-xs"
                             label="Select a Business Profile"
                             selectionMode="single"
-                            onSelectionChange={(val) => onDataChange('business_profile_id', Array.from(keys)[0] ?? null)}
+                            onSelectionChange={(keys) => onDataChange('business_profile_id', Array.from(keys)[0] ?? null)}
                         >
                             {businessProfileData && Object.keys(businessProfileData).length > 0 && businessProfileData.map(b =>
                                 <SelectItem key={b.id}>{b.name}</SelectItem>
@@ -96,7 +100,7 @@ export default function InvoiceInfo() {
                             className="max-w-xs"
                             label="Select a Client"
                             selectionMode="single"
-                            onSelectionChange={(val) => onDataChange('client_id', Array.from(keys)[0] ?? null)}>
+                            onSelectionChange={( keys) => onDataChange('client_id', Array.from(keys)[0] ?? null)}>
                             {clientData && Object.keys(clientData).length > 0 && clientData.map(b =>
                                 <SelectItem key={b.id}>{b.name}</SelectItem>
                             )}
@@ -170,6 +174,37 @@ export default function InvoiceInfo() {
                             )}
                     </div>
                 </div>
+				{/* 🔹 NEW: Discount Mode + Inputs */}
+				<div className="flex flex-col md:flex-row gap-2 py-2">
+					<div className="md:w-1/2">Discount Mode<Select
+						className="max-w-xs"
+						label="Select discount mode"
+						selectionMode="single"
+						selectedKeys={new Set([data.discount_mode || 'none'])}
+						onSelectionChange={(keys) => {const mode = Array.from(keys)[0] ?? 'none';onDataChange('discount_mode', mode);// No automatic resets here; user can keep their typed value.// Calculator will ignore irrelevant fields per mode.
+						}}
+					>
+						<SelectItem key="none">None</SelectItem>
+						<SelectItem key="amount">Invoice-level (Amount)</SelectItem>
+						<SelectItem key="percent">Invoice-level (Percent)</SelectItem>
+						<SelectItem key="per-line">Per-line discounts</SelectItem>
+					</Select>
+					</div>
+					{/* Invoice-level fields (amount/percent) */}
+					{isAmount && (<div className="md:w-1/2">Discount Amount ($)<Input type="number" variant="bordered" radius="sm" value={centsToDollarsStr(data.discount_cents ?? 0)} onValueChange={(val) => onDataChange('discount_cents', dollarsToCents(val))}
+						/>
+					</div>
+					)}
+					{isPercent && (<div className="md:w-1/2">Discount Percent (%)<Input type="number" variant="bordered" radius="sm" value={String(data.discount_rate ?? 0)} onValueChange={(val) => onDataChange('discount_rate', parseFloat(val) || 0)}
+						/>
+					</div>
+					)}
+					{/* If per-line: nothing here; fields will show inside each item row */}
+					{isPerLine && (<div className="md:w-1/2"><small className="text-default-500">Per-line discounts are enabled. Each item can set a discount in dollars or percent.
+					</small>
+					</div>
+					)}
+				</div>
             </CardBody>
         </Card>
     )

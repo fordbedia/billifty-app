@@ -1,8 +1,12 @@
-import { Input } from "@heroui/react";
+import { Input, Link } from "@heroui/react";
 import {centsToDollarsStr, dollarsToCents} from "@/app/utils/computeInvoice";
+import {useInvoice} from "@/app/providers/InvoiceContext";
 
 // Helpers
-export default function InvoiceItem({ item, index, onChange }) {
+export default function InvoiceItem({ item, index, onChange, removeItem }) {
+	const { data } = useInvoice();
+  	const showPerLine = (data.discount_mode ?? 'none') === 'per-line';
+
   const qty   = parseFloat(item.quantity ?? 0) || 0;
   const unit  = parseInt(item.unit_price_cents ?? 0, 10) || 0;
   const taxRt = parseFloat(item.tax_rate ?? 0) || 0;
@@ -67,18 +71,36 @@ export default function InvoiceItem({ item, index, onChange }) {
           />
         </div>
 
+		{/* 🔹 Per-line discounts only shown when mode = per-line */}
+        {showPerLine && (
+          <>
+            <div className="md:w-1/6">
+              Line Discount (%)
+              <Input
+                type="number"
+                variant="bordered"
+                radius="sm"
+                value={String(item.line_discount_rate ?? 0)}
+                onValueChange={(v) =>
+                  onChange(index, "line_discount_rate", parseFloat(v) || 0)
+                }
+              />
+            </div>
+          </>
+        )}
+
         <div className="md:w-1/6">
           Amount ($)
           <Input
             isReadOnly
             variant="bordered"
             radius="sm"
-            value={centsToDollarsStr(lineWithTax)}
+            value={centsToDollarsStr(item.line_total_cents ?? 0)}
           />
         </div>
 
         <div className="self-center">
-          <i className="trash-icon"></i>
+          <Link onPress={() => removeItem(index)}><i className="trash-icon"></i></Link>
         </div>
       </div>
     </div>

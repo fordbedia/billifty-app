@@ -46,7 +46,7 @@ export default function InvoiceTemplate() {
                 </CardBody>
             </Card>
 
-            <Card fullWidth radius="sm" className="mt-4">
+            <Card fullWidth radius="sm" className="mt-4 mb-4">
                 <CardHeader className="flex gap-3">
                     Color Schemes
                 </CardHeader>

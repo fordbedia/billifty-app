@@ -8,6 +8,7 @@ import AddMoreItems from "@/app/app/invoice/components/buttons/AddMoreItems";
 import InvoiceInfo from "@/app/app/invoice/components/InvoiceInfo";
 import InvoiceTemplate from "@/app/app/invoice/components/InvoiceTemplate";
 import {useInvoice} from "@/app/providers/InvoiceContext";
+import Actions from "@/app/app/invoice/components/buttons/Actions";
 
 export default function App() {
     const {
@@ -15,6 +16,7 @@ export default function App() {
         addItems,
         onDataChange,
         updateItems,
+		removeItem,
     } = useInvoice()
 
     return (
@@ -46,10 +48,16 @@ export default function App() {
                                 <CardBody>
                                     <div className="px-1 py-1">
                                         {data.invoice_items && Object.keys(data.invoice_items).length > 0 && data.invoice_items.map((item, index) => (
-                                            <InvoiceItem item={item} key={index} index={index} onChange={updateItems} />
+                                            <InvoiceItem
+												item={item}
+												key={index}
+												index={index}
+												onChange={updateItems}
+												removeItem={removeItem}
+											/>
                                         ))}
 
-                                        <AddMoreItems />
+                                        <AddMoreItems link={addItems} />
                                     </div>
                                 </CardBody>
                                 <Divider />
@@ -74,6 +82,15 @@ export default function App() {
                                         </div>
                                     )}
 
+									{data.display_discount_row && (
+									  <div className="summary-row">
+										<span className="label">{data.display_discount_row.label}:</span>
+										<span className="value">
+										  ${(Math.abs(data.display_discount_row.amount_cents) / 100).toFixed(2)}{/* show as positive with minus implied by label */}
+										</span>
+									  </div>
+									)}
+
                                     <div className="summary-row">
                                       <span className="label">Tax (items):</span>
                                       <span className="value">${(data.tax_cents / 100).toFixed(2)}</span>
@@ -92,6 +109,8 @@ export default function App() {
                         </div>
                         <div className="w-1/3 ml-2">
                             <InvoiceTemplate />
+
+							<Actions />
                         </div>
                     </div>
                 </div>
