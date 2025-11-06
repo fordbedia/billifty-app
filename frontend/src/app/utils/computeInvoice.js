@@ -17,14 +17,8 @@ export function computeInvoice(prev) {
 
     let base = Math.round(qty * unit);
 
-    // ✅ Only apply per-line discounts in 'per-line' mode
+    // Only apply per-line discounts in 'per-line' mode
     if (usePerLine) {
-      // if (it.line_discount_cents != null) {
-      //   base -= toInt(it.line_discount_cents);
-      // } else if (it.line_discount_rate != null) {
-      //   const rPct = toFloat(it.line_discount_rate); // user enters 10 for 10%
-		// base -= Math.round(base * (rPct / 100));
-      // }
 		 const rawCents = it.line_discount_cents;
 		 const rawRate  = it.line_discount_rate;
 		 const hasCents = rawCents != null && toInt(rawCents) > 0;
@@ -51,7 +45,7 @@ export function computeInvoice(prev) {
     };
   });
 
-  // ✅ Invoice-level discount (mutually exclusive)
+  // Invoice-level discount (mutually exclusive)
   let invoiceLevelDiscount = 0;
   if (mode === 'amount') {
     invoiceLevelDiscount = toInt(prev.discount_cents ?? 0);
@@ -77,7 +71,7 @@ export function computeInvoice(prev) {
   next.shipping_tax_cents  = shippingTax;
   next.total_cents         = total;
 
-  // ✅ Expose a display-only row for the totals UI (negative value)
+  // Expose a display-only row for the totals UI (negative value)
   next.display_discount_row = (mode === 'amount' || mode === 'percent') && invoiceLevelDiscount > 0
     ? { label: 'Discount', amount_cents: -invoiceLevelDiscount }
     : null;
