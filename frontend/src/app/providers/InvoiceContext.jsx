@@ -15,21 +15,23 @@ import { today, getLocalTimeZone } from "@internationalized/date";
 import {computeInvoice} from "@/app/utils/computeInvoice";
 import Invoice from "@/app/models/Invoices";
 import Currency from "@/app/models/Currency";
+import {toISO} from "@/app/utils/date";
 
 const InvoiceContext = createContext(null)
 
 export function InvoiceProvider({ children }) {
 
     const tz = getLocalTimeZone();
-    const issueDate = today(tz);
-    const dueDate = issueDate.add({ months: 1 });
+
+    const issueDateISO = toISO(today(tz));
+	const dueDateISO = toISO(today(tz).add({ months: 1 }));
 
     const invoiceItemsInitialState = {
         position: 1,
         name: '',
         description: '',
         quantity: 1,
-        unit: 1,
+        unit: '',
         unit_price_cents: 0,
         line_discount_cents: 0,
         line_discount_rate: 0,
@@ -52,8 +54,8 @@ export function InvoiceProvider({ children }) {
         reference: '',
         shipping_address: '',
         currency_id: 1,
-        issued_on: issueDate,
-        due_on: dueDate,
+        issued_on: issueDateISO,
+        due_on: dueDateISO,
         paid_at: '',
         status: '',
         template_slug: '',

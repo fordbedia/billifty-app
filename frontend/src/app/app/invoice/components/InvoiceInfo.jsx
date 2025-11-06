@@ -5,6 +5,7 @@ import {Textarea, Input, Button, DatePicker} from "@heroui/react";
 import {Select, SelectItem, Checkbox} from "@heroui/react";
 import {useInvoice} from "@/app/providers/InvoiceContext";
 import {centsToDollarsStr, dollarsToCents} from "@/app/utils/computeInvoice";
+import {toDateValue, toISO} from "@/app/utils/date";
 
 export default function InvoiceInfo() {
     const {
@@ -77,22 +78,22 @@ export default function InvoiceInfo() {
                      <div className="md:w-1/2">
                         Issue Date
                         <DatePicker
-                            className="max-w-[284px]"
-                            label="Birth date"
-                            granularity="day"
-                            value={data.issued_on}
-                            onChange={(v) => onDataChange('issued_on', v)}
-                        />
+						  className="max-w-[284px]"
+						  label="Issue date"
+						  granularity="day"
+						  value={toDateValue(data.issued_on)}
+						  onChange={(v) => onDataChange('issued_on', toISO(v))}
+						/>
                     </div>
                     <div className="md:w-1/2">
                         Due Date
                         <DatePicker
-                            className="max-w-[284px]"
-                            label="Birth date"
-                            granularity="day"
-                            value={data.due_on}
-                            onChange={(v) => onDataChange('due_on', v)}
-                        />
+						  className="max-w-[284px]"
+						  label="Due date"
+						  granularity="day"
+						  value={toDateValue(data.due_on)}
+						  onChange={(v) => onDataChange('due_on', toISO(v))}
+						/>
                     </div>
                 </div>
                 <div className="flex flex-col md:flex-row gap-2 py-2">
