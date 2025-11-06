@@ -6,7 +6,8 @@ import {useInvoice} from "@/app/providers/InvoiceContext";
 
 export default function Actions() {
 	const {
-		save
+		save,
+		data,
 	} = useInvoice()
 	return (
 		 <>
@@ -16,9 +17,9 @@ export default function Actions() {
 					</CardHeader>
 					<Divider />
 					<CardBody>
-						<Button onPress={() => save('draft')} disableRipple className="my-2" color="primary" variant="flat">Save as Draft</Button>
-						<Button disableRipple className="my-2" color="success" variant="flat">Save</Button>
-						<Button disableRipple className="my-2" color="warning" variant="flat">Download</Button>
+						{!data?.id && (<Button onPress={() => save('draft')} disableRipple className="my-2" color="primary" variant="flat">Save as Draft</Button>)}
+						<Button isDisabled={!data.id} disableRipple className="my-2" color="success" variant="flat">Issue Invoice</Button>
+						<Button isDisabled={!data.id} disableRipple className="my-2" color="warning" variant="flat">Download</Button>
 					</CardBody>
 			 </Card>
 		</>

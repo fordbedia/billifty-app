@@ -16,6 +16,8 @@ export default function InvoiceInfo() {
         hasShipping,
         isTaxable,
         setIsTaxable,
+		currencies,
+		setSelectedCurrency,
     } = useInvoice()
 
 	const enableShipping = () => {
@@ -174,21 +176,52 @@ export default function InvoiceInfo() {
                             )}
                     </div>
                 </div>
+
+				<div className="flex flex-col md:flex-row gap-2 py-2">
+					<div className="md:w-1/2">
+						<Select
+							className="max-w-xs"
+							label="Select a currency"
+							selectionMode="single"
+							selectedKeys={new Set([String(data.currency_id ?? 1)])}
+							onSelectionChange={(val) => {
+								const id = Array.from(val)[0];
+    							onDataChange('currency_id', Number(id));
+								setSelectedCurrency((currencies.filter(f => parseInt(f.id) === parseInt(id))[0] || {}))
+							}}
+						>
+							{currencies && Object.keys(currencies).length > 0 && currencies.map(c => (
+								<SelectItem
+								  key={String(c.id)}
+								  textValue={`${c.code} — ${c.name}`}
+								>
+								  <div className="flex items-center gap-2">
+									<span className="font-medium">{c.code}</span>
+									<span className="text-default-500">— {c.name}</span>
+									<span className="ml-auto">{c.symbol}</span>
+								  </div>
+								</SelectItem>
+							))}
+						</Select>
+					</div>
+				</div>
+
 				{/* 🔹 NEW: Discount Mode + Inputs */}
 				<div className="flex flex-col md:flex-row gap-2 py-2">
-					<div className="md:w-1/2">Discount Mode<Select
-						className="max-w-xs"
-						label="Select discount mode"
-						selectionMode="single"
-						selectedKeys={new Set([data.discount_mode || 'none'])}
-						onSelectionChange={(keys) => {const mode = Array.from(keys)[0] ?? 'none';onDataChange('discount_mode', mode);// No automatic resets here; user can keep their typed value.// Calculator will ignore irrelevant fields per mode.
-						}}
-					>
-						<SelectItem key="none">None</SelectItem>
-						<SelectItem key="amount">Invoice-level (Amount)</SelectItem>
-						<SelectItem key="percent">Invoice-level (Percent)</SelectItem>
-						<SelectItem key="per-line">Per-line discounts</SelectItem>
-					</Select>
+					<div className="md:w-1/2">Discount Mode
+						<Select
+							className="max-w-xs"
+							label="Select discount mode"
+							selectionMode="single"
+							selectedKeys={new Set([data.discount_mode || 'none'])}
+							onSelectionChange={(keys) => {const mode = Array.from(keys)[0] ?? 'none';onDataChange('discount_mode', mode);// No automatic resets here; user can keep their typed value.// Calculator will ignore irrelevant fields per mode.
+							}}
+						>
+							<SelectItem key="none">None</SelectItem>
+							<SelectItem key="amount">Invoice-level (Amount)</SelectItem>
+							<SelectItem key="percent">Invoice-level (Percent)</SelectItem>
+							<SelectItem key="per-line">Per-line discounts</SelectItem>
+						</Select>
 					</div>
 					{/* Invoice-level fields (amount/percent) */}
 					{isAmount && (<div className="md:w-1/2">Discount Amount ($)<Input type="number" variant="bordered" radius="sm" value={centsToDollarsStr(data.discount_cents ?? 0)} onValueChange={(val) => onDataChange('discount_cents', dollarsToCents(val))}

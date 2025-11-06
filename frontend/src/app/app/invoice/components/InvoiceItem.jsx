@@ -4,7 +4,7 @@ import {useInvoice} from "@/app/providers/InvoiceContext";
 
 // Helpers
 export default function InvoiceItem({ item, index, onChange, removeItem }) {
-	const { data } = useInvoice();
+	const { data, selectedCurrency } = useInvoice();
   	const showPerLine = (data.discount_mode ?? 'none') === 'per-line';
 
   const qty   = parseFloat(item.quantity ?? 0) || 0;
@@ -19,7 +19,7 @@ export default function InvoiceItem({ item, index, onChange, removeItem }) {
     <div className="box-card px-4 py-4 my-3">
       <div className="flex flex-col md:flex-row gap-5">
 
-        <div className="md:w-1/4">
+        <div className="md:w-1/3">
           Description
           <Input
             variant="bordered"
@@ -44,7 +44,7 @@ export default function InvoiceItem({ item, index, onChange, removeItem }) {
         </div>
 
         <div className="md:w-1/6">
-          Unit Price ($)
+          Unit Price ({selectedCurrency.symbol})
           <Input
             type="number"
             variant="bordered"
@@ -75,7 +75,7 @@ export default function InvoiceItem({ item, index, onChange, removeItem }) {
         {showPerLine && (
           <>
             <div className="md:w-1/6">
-              Line Discount (%)
+			Discount (%)
               <Input
                 type="number"
                 variant="bordered"
@@ -90,7 +90,7 @@ export default function InvoiceItem({ item, index, onChange, removeItem }) {
         )}
 
         <div className="md:w-1/6">
-          Amount ($)
+          Amount ({selectedCurrency.symbol})
           <Input
             isReadOnly
             variant="bordered"
