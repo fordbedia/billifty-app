@@ -11,6 +11,7 @@ import {
   useDisclosure
 } from "@heroui/react";
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { useRouter, useSearchParams } from "next/navigation";
 import BusinessProfile from "@/app/models/BusinessProfile";
 import Clients from "@/app/models/Clients";
 import Invoices from "@/app/models/Invoices";
@@ -26,6 +27,9 @@ import ColorScheme from "@/app/models/ColorScheme";
 const InvoiceContext = createContext(null)
 
 export function InvoiceProvider({ children }) {
+	const router = useRouter();
+	const searchParams = useSearchParams();
+  	const clear = searchParams.get("clear");
 
     const tz = getLocalTimeZone();
 
@@ -328,8 +332,13 @@ export function InvoiceProvider({ children }) {
 		}
 	}, [template, colorSchemeData])
 
-	const clearSticky = () => window.localStorage.removeItem(STORAGE_KEY);
-
+	const clearSticky = () => router.replace('/app/invoice?clear=true');
+	const isStorageEmpty = () => {
+		const string = window.localStorage.getItem(STORAGE_KEY)
+		const storage = JSON.parse(string)
+		return !storage?.data;
+	}
+	isStorageEmpty()
     const [isTaxable, setIsTaxable] = useState((data.shipping_tax_rate ?? 0) > 0);
 
 	const {mutate: saveDraft} = useMutation({
@@ -343,6 +352,19 @@ export function InvoiceProvider({ children }) {
 				break;
 		}
 	}
+
+	// ----------------------------------------------------------------------------
+	// Finally, removed sticky forms, when clearSticky() is clicks
+	// ----------------------------------------------------------------------------
+	useEffect(() => {
+		if (clear === "true") {
+			window.localStorage.removeItem(STORAGE_KEY)
+
+			setTimeout(() => {
+				window.location.href = '/app/invoice';
+			}, 200)
+		}
+	}, [clear]);
 
     const value = {
         businessProfileData,
@@ -375,6 +397,8 @@ export function InvoiceProvider({ children }) {
 		setSelectedColorScheme,
 		selectedColorScheme,
 		onOpenChangeColorScheme,
+		clearSticky,
+		isStorageEmpty,
     }
 
     return <InvoiceContext.Provider value={value}>

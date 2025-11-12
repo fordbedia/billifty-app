@@ -8,6 +8,8 @@ export default function Actions() {
 	const {
 		save,
 		data,
+		clearSticky,
+		isStorageEmpty,
 	} = useInvoice()
 	return (
 		 <>
@@ -20,6 +22,7 @@ export default function Actions() {
 						{!data?.id && (<Button onPress={() => save('draft')} disableRipple className="my-2" color="primary" variant="flat">Save as Draft</Button>)}
 						<Button isDisabled={!data.id} disableRipple className="my-2" color="success" variant="flat">Issue Invoice</Button>
 						<Button isDisabled={!data.id} disableRipple className="my-2" color="warning" variant="flat">Download</Button>
+						{!data?.id && !isStorageEmpty() && (<Button disableRipple className="my-2" color="danger" onPress={clearSticky}>Reset All</Button>)}
 					</CardBody>
 			 </Card>
 		</>
