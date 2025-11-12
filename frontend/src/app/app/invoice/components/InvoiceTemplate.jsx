@@ -42,8 +42,8 @@ export default function InvoiceTemplate() {
 									<div className="flex" onClick={() => loadThemeSelector()}>
 										<Image src={selectedTemplate.preview_url} width="50" height="30" />
 										<div className="px-2">
-											<h2>Current Template: {selectedTemplate.display_name}</h2>
-											<h3>Current Color: {selectedColorScheme.color_scheme_name}</h3>
+											<h2>Current Template: {selectedTemplate?.display_name}</h2>
+											<h3>Current Color: {selectedColorScheme?.color_scheme_name}</h3>
 										</div>
 									</div>
 								</div>
