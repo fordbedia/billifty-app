@@ -51,6 +51,9 @@ export default function InvoiceInfo() {
                             className="max-w-xs"
                             label="Select a Business Profile"
                             selectionMode="single"
+							selectedKeys={
+								data.business_profile_id ? new Set([String(data.business_profile_id)]) : new Set()
+						  	}
                             onSelectionChange={(keys) => onDataChange('business_profile_id', Array.from(keys)[0] ?? null)}
                         >
                             {businessProfileData && Object.keys(businessProfileData).length > 0 && businessProfileData.map(b =>
@@ -103,6 +106,9 @@ export default function InvoiceInfo() {
                             className="max-w-xs"
                             label="Select a Client"
                             selectionMode="single"
+							selectedKeys={
+								data.client_id ? new Set([String(data.client_id)]) : new Set()
+						  	}
                             onSelectionChange={( keys) => onDataChange('client_id', Array.from(keys)[0] ?? null)}>
                             {clientData && Object.keys(clientData).length > 0 && clientData.map(b =>
                                 <SelectItem key={b.id}>{b.name}</SelectItem>
@@ -155,21 +161,24 @@ export default function InvoiceInfo() {
                                   </Checkbox>
 
                                   {isTaxable && (
-                                    <Input
-                                      isRequired={hasShipping && isTaxable}
-                                      errorMessage="Enter a tax rate like 8.25 for 8.25%"
-                                      labelPlacement="outside"
-                                      name="shipping_tax_rate"
-                                      placeholder="Enter Shipping Tax Rate (%)"
-                                      type="number"
-                                      variant="bordered"
-                                      radius="sm"
-                                      value={String(data.shipping_tax_rate ?? 0)}
-                                      onValueChange={(val) =>
-                                        onDataChange("shipping_tax_rate", parseFloat(val) || 0)
-                                      }
-                                      className="mb-3"
-                                    />
+									<>
+										<br />
+										Enter Shipping Tax Rate (%)
+										<Input
+										  isRequired={hasShipping && isTaxable}
+										  errorMessage="Enter a tax rate like 8.25 for 8.25%"
+										  labelPlacement="outside"
+										  name="shipping_tax_rate"
+										  type="number"
+										  variant="bordered"
+										  radius="sm"
+										  value={String(data.shipping_tax_rate ?? 0)}
+										  onValueChange={(val) =>
+											onDataChange("shipping_tax_rate", parseFloat(val) || 0)
+										  }
+										  className="mb-3"
+										/>
+									</>
                                   )}
 								   <br />
                                   <Link onPress={disableShipping}>Remove Shipping</Link>

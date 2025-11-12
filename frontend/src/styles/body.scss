@@ -131,6 +131,16 @@
     color: var(--button-auto-font-color-dark);
   }
 }
+
+.modal.modal__templates {
+  .box {
+    height: 350px;
+    transition: background 0.7s;
+  }
+  .box:hover {
+    background: #65adea33;
+  }
+}
 footer {
   p {
     font-family: var(--font-family);

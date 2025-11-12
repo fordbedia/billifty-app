@@ -17,6 +17,7 @@ export default function App() {
         onDataChange,
         updateItems,
 		removeItem,
+		selectedCurrency,
     } = useInvoice()
 
     return (
@@ -65,20 +66,20 @@ export default function App() {
                                   <section className="invoice-summary">
                                     <div className="summary-row">
                                       <span className="label">Subtotal (before tax):</span>
-                                      <span className="value">${(data.subtotal_cents / 100).toFixed(2)}</span>
+                                      <span className="value">{selectedCurrency?.symbol}{(data.subtotal_cents / 100).toFixed(2)}</span>
                                     </div>
 
                                     {data.shipping_cents > 0 && (
                                       <div className="summary-row">
                                         <span className="label">Shipping:</span>
-                                        <span className="value">${(data.shipping_cents / 100).toFixed(2)}</span>
+                                        <span className="value">{selectedCurrency?.symbol}{(data.shipping_cents / 100).toFixed(2)}</span>
                                       </div>
                                     )}
 
                                     {data.shipping_tax_cents > 0 && (
                                         <div className="summary-row">
                                             <span className="label">Shipping Tax:</span>
-                                            <span className="value">${(data.shipping_tax_cents / 100).toFixed(2)}</span>
+                                            <span className="value">{selectedCurrency?.symbol}{(data.shipping_tax_cents / 100).toFixed(2)}</span>
                                         </div>
                                     )}
 
@@ -86,21 +87,21 @@ export default function App() {
 									  <div className="summary-row">
 										<span className="label">{data.display_discount_row.label}:</span>
 										<span className="value">
-										  ${(Math.abs(data.display_discount_row.amount_cents) / 100).toFixed(2)}{/* show as positive with minus implied by label */}
+										  {selectedCurrency?.symbol}{(Math.abs(data.display_discount_row.amount_cents) / 100).toFixed(2)}{/* show as positive with minus implied by label */}
 										</span>
 									  </div>
 									)}
 
                                     <div className="summary-row">
                                       <span className="label">Tax (items):</span>
-                                      <span className="value">${(data.tax_cents / 100).toFixed(2)}</span>
+                                      <span className="value">{selectedCurrency?.symbol}{(data.tax_cents / 100).toFixed(2)}</span>
                                     </div>
 
                                     <hr className="divider" />
 
                                     <div className="summary-row total">
                                       <span className="label">Total:</span>
-                                      <span className="value accent">${(data.total_cents / 100).toFixed(2)}</span>
+                                      <span className="value accent">{selectedCurrency?.symbol}{(data.total_cents / 100).toFixed(2)}</span>
                                     </div>
                                   </section>
                                 </CardFooter>

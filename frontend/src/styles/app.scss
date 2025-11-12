@@ -130,7 +130,9 @@
       background-color: #fff;
     }
   }
-  .box-design-wrapper {
+}
+
+.box-design-wrapper {
     .design-box {
       .inner-box {
         border: var(--box-design-border);
@@ -145,7 +147,18 @@
           cursor: pointer;
         }
       }
+      .inner-box-preview{
+        border: dashed #D1D5DB;
+        padding: 9px 12px 9px 15px;
+        width: 100%;
+        background-image: url('/images/svg/undo-arrow-down.svg');
+        background-repeat: no-repeat;
+        background-position: 97% center;
+        background-size: 30px;
+        &:hover {
+          cursor: pointer;
+        }
+      }
     }
   }
-}
 

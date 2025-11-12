@@ -7,6 +7,9 @@ import React, {
     useState,
     useEffect
 } from 'react'
+import {
+  useDisclosure
+} from "@heroui/react";
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import BusinessProfile from "@/app/models/BusinessProfile";
 import Clients from "@/app/models/Clients";
@@ -16,6 +19,9 @@ import {computeInvoice} from "@/app/utils/computeInvoice";
 import Invoice from "@/app/models/Invoices";
 import Currency from "@/app/models/Currency";
 import {toISO} from "@/app/utils/date";
+import TemplateCategory from "@/app/models/TemplateCategory";
+import Template from "@/app/models/Templates";
+import ColorScheme from "@/app/models/ColorScheme";
 
 const InvoiceContext = createContext(null)
 
@@ -79,12 +85,29 @@ export function InvoiceProvider({ children }) {
         invoice_items: []
     })
 
+	const STORAGE_KEY = "billifty.invoice.form.v1";
+	const STORAGE_VERSION = 1;
+
+	const PERSIST_KEYS = new Set([
+	  "business_profile_id","client_id","invoice_template_id","color_scheme_id",
+	  "invoice_number","reference","shipping_address","currency_id",
+	  "issued_on","due_on","paid_at","status","template_slug","template_version",
+	  "theme_json","discount_mode","discount_cents","discount_rate",
+	  "shipping_cents","shipping_tax_rate","notes","terms","meta",
+	  "invoice_items"
+	]);
+	// totals like subtotal_cents, tax_cents, total_cents, amount_due_cents, shipping_tax_cents are recomputed
+	const pickPersistable = (src) =>
+	  Object.fromEntries(Object.entries(src).filter(([k]) => PERSIST_KEYS.has(k)));
+
+
     const [hasShipping, setHasShipping] = useState(false)
+	const {isOpen: isOpenTemplate, onOpen: onOpenTemplate, onOpenChange: onOpenChangeTemplate} = useDisclosure();
+	const {isOpen: isOpenColorScheme, onOpen: onOpenColorScheme, onOpenChange: onOpenChangeColorScheme} = useDisclosure();
 
     const shallowEqualNumbers = (a, b, keys) => {
       return keys.every(k => (a?.[k] ?? null) === (b?.[k] ?? null));
     }
-
 
     const {
         data: businessProfileData
@@ -121,7 +144,7 @@ export function InvoiceProvider({ children }) {
 	})
 
     useEffect(() => {
-        if (generatedInvoiceNum) {
+        if (generatedInvoiceNum && !data.invoice_number) {
 			setData((prevState) => ({
 				...prevState,
 				invoice_number: generatedInvoiceNum,
@@ -152,6 +175,57 @@ export function InvoiceProvider({ children }) {
 		return {...prev, invoice_items: items}
 	})
 
+	// Template Category
+	const {data: templateCategoryData} = useQuery({
+		queryKey: ['template-category'],
+		queryFn: async () => (await TemplateCategory.getAll())?.data
+	})
+
+	const {mutate: templateData, data: templates} = useMutation({
+		mutationFn: async (id) => (await Template.getAllByCategory(id))?.data,
+	})
+
+	const loadTemplates = (id) => {
+		onOpenTemplate()
+		templateData(id)
+	}
+
+	const [selectedTemplate, setSelectedTemplate] = useState({})
+	const [selectedColorScheme, setSelectedColorScheme] = useState({})
+
+	const {data: colorSchemeData} = useQuery({
+		queryKey: ['color-scheme'],
+		queryFn: async () => (await ColorScheme.getAll())?.data
+	})
+
+	// ----------------------------------------------------------------------------
+	// Only fired if data.invoice_template_id is mutated to get the selected template
+	// ----------------------------------------------------------------------------
+	const {data: template} = useQuery({
+		queryKey: ['template', data.invoice_template_id],
+		queryFn: async () => (await Template.get(data.invoice_template_id))?.data,
+		enabled: !!data.invoice_template_id, // only fetch when we have an id
+	})
+
+	const loadThemeSelector = (id = null) => {
+		const hasTemplate = selectedTemplate && Object.keys(selectedTemplate).length > 0;
+		const hasColorScheme = selectedColorScheme && Object.keys(selectedColorScheme).length > 0;
+
+		if (!hasTemplate && !hasColorScheme && id) {
+			onOpenTemplate()
+			templateData(id)
+		} else if (hasTemplate && !hasColorScheme) {
+			onOpenColorScheme()
+		} else {
+			setSelectedTemplate({})
+			setSelectedColorScheme({})
+		}
+	}
+	// ----------------------------------------------------------------------------
+	// Listen to all changes in the invoice item fields and any changes in the
+	// Business profile, Client, Shipping, currency and tax, this then updates
+	// the subtotal, total, shipping and tax accordingly in data state
+	// ----------------------------------------------------------------------------
     useEffect(() => {
       setData(prev => {
         const next = computeInvoice(prev);
@@ -184,6 +258,78 @@ export function InvoiceProvider({ children }) {
 		data.discount_rate,
     ]);
 
+	// ----------------------------------------------------------------------------
+	// Sync invoice data with selected template and color scheme
+	// Updates invoice_template_id and color_scheme_id when user makes a selection.
+	// ----------------------------------------------------------------------------
+	useEffect(() => {
+		if (!selectedTemplate && !selectedColorScheme) return;
+		setData(prev => {
+			const next = {...prev}
+
+			if (selectedTemplate?.id) {
+				next.invoice_template_id = selectedTemplate.id
+			}
+			if (selectedColorScheme?.id) {
+				next.color_scheme_id = selectedColorScheme.id
+			}
+
+			return next;
+		})
+	}, [selectedTemplate, selectedColorScheme]);
+
+	// ----------------------------------------------------------------------------
+	// STICKY FORMS
+	// ----------------------------------------------------------------------------
+	// Sync data on page load
+	useEffect(() => {
+	  try {
+		const raw = window.localStorage.getItem(STORAGE_KEY);
+		if (!raw) return;
+		const payload = JSON.parse(raw);
+		if (payload?.version !== STORAGE_VERSION) return;
+
+		// Merge only persisted fields; leave computed fields as-is (they’ll recompute)
+		setData((prev) => ({ ...prev, ...payload.data }));
+	  } catch (_) {
+		// ignore corrupted LS
+	  }
+	  // eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+	// Syncs data when fields are updated
+	useEffect(() => {
+	  let t = setTimeout(() => {
+		try {
+		  const payload = { version: STORAGE_VERSION, data: pickPersistable(data) };
+		  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+		} catch (_) { /* ignore quota / serialization issues */ }
+	  }, 400); // debounce so we don’t hammer LS while typing
+	  return () => clearTimeout(t);
+	}, [
+	  // Only track fields you actually persist:
+	  data.business_profile_id, data.client_id, data.invoice_template_id, data.color_scheme_id,
+	  data.invoice_number, data.reference, data.shipping_address, data.currency_id,
+	  data.issued_on, data.due_on, data.paid_at, data.status, data.template_slug, data.template_version,
+	  data.theme_json, data.discount_mode, data.discount_cents, data.discount_rate,
+	  data.shipping_cents, data.shipping_tax_rate, data.notes, data.terms, data.meta,
+	  data.invoice_items,
+	]);
+	// ----------------------------------------------------------------------------
+	// Updates the template and color scheme display
+	// Sync the template into the selectedTemplate and selectedColorScheme
+	// ----------------------------------------------------------------------------
+	useEffect(() => {
+		if (template) {
+			setSelectedTemplate(template)
+		}
+		if (colorSchemeData) {
+			const colorScheme = colorSchemeData.find(f => f.id === data.color_scheme_id)
+			setSelectedColorScheme(colorScheme)
+		}
+	}, [template, colorSchemeData])
+
+	const clearSticky = () => window.localStorage.removeItem(STORAGE_KEY);
+
     const [isTaxable, setIsTaxable] = useState((data.shipping_tax_rate ?? 0) > 0);
 
 	const {mutate: saveDraft} = useMutation({
@@ -214,7 +360,21 @@ export function InvoiceProvider({ children }) {
 		save,
 		currencies,
 		setSelectedCurrency,
-		selectedCurrency
+		selectedCurrency,
+		isOpenTemplate,
+		loadTemplates,
+		loadThemeSelector,
+		onOpenChangeTemplate,
+		templateCategoryData,
+		templates,
+		setSelectedTemplate,
+		selectedTemplate,
+		colorSchemeData,
+		isOpenColorScheme,
+		onOpenColorScheme,
+		setSelectedColorScheme,
+		selectedColorScheme,
+		onOpenChangeColorScheme,
     }
 
     return <InvoiceContext.Provider value={value}>
