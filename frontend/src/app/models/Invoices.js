@@ -8,6 +8,14 @@ export default class Invoice extends Model{
     }
 
 	static async saveDraft(data) {
-		return await this.axios().post('/save-draft', data)
+		return await this.axios().post('/', data)
+	}
+
+	static async update(data) {
+		return await this.axios().put('/', data)
+	}
+
+	static async find(id) {
+		return await this.axios().get(`/${id}`)
 	}
 }

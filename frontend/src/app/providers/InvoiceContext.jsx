@@ -5,13 +5,14 @@ import React, {
     ReactNode, SetStateAction,
     useContext,
     useState,
-    useEffect
+    useEffect,
+	Suspense
 } from 'react'
 import {
   useDisclosure
 } from "@heroui/react";
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 import BusinessProfile from "@/app/models/BusinessProfile";
 import Clients from "@/app/models/Clients";
 import Invoices from "@/app/models/Invoices";
@@ -26,10 +27,12 @@ import ColorScheme from "@/app/models/ColorScheme";
 
 const InvoiceContext = createContext(null)
 
-export function InvoiceProvider({ children }) {
+function InvoiceProviderInner({ children, mode, initialId = null }) {
+	const queryClient = useQueryClient()
 	const router = useRouter();
 	const searchParams = useSearchParams();
   	const clear = searchParams.get("clear");
+	const params = useParams()
 
     const tz = getLocalTimeZone();
 
@@ -86,7 +89,8 @@ export function InvoiceProvider({ children }) {
         pdf_url: '',
         render_snapshot_html: '',
         meta: '',
-        invoice_items: []
+        invoice_items: [],
+		action: '',
     })
 
 	const STORAGE_KEY = "billifty.invoice.form.v1";
@@ -104,6 +108,17 @@ export function InvoiceProvider({ children }) {
 	const pickPersistable = (src) =>
 	  Object.fromEntries(Object.entries(src).filter(([k]) => PERSIST_KEYS.has(k)));
 
+	const invoiceId = initialId ?? params.id ?? null;
+	const { isFetching} = useQuery({
+		queryKey: ['invoice', invoiceId],
+		enabled: !!invoiceId && mode !== 'new',
+		queryFn: async () => {
+			const inv = (await Invoices.find(invoiceId))?.data
+			if (inv && Object.keys(inv).length > 0) {
+				setData(prev => ({...prev, ...inv, invoice_items: [...inv.items]}))
+			}
+		}
+	})
 
     const [hasShipping, setHasShipping] = useState(false)
 	const {isOpen: isOpenTemplate, onOpen: onOpenTemplate, onOpenChange: onOpenChangeTemplate} = useDisclosure();
@@ -332,7 +347,7 @@ export function InvoiceProvider({ children }) {
 		}
 	}, [template, colorSchemeData])
 
-	const clearSticky = () => router.replace('/app/invoice?clear=true');
+	const clearSticky = () => router.replace('/app/invoice/new?clear=true');
 	const isStorageEmpty = () => {
 		const string = window.localStorage.getItem(STORAGE_KEY)
 		const storage = JSON.parse(string)
@@ -342,13 +357,27 @@ export function InvoiceProvider({ children }) {
     const [isTaxable, setIsTaxable] = useState((data.shipping_tax_rate ?? 0) > 0);
 
 	const {mutate: saveDraft} = useMutation({
-		mutationFn: () => Invoice.saveDraft(data)
+		mutationFn: () => {
+			setData((prev) => ({...prev, action}))
+			Invoice.saveDraft(data)
+		}
+	})
+
+	const {mutate: update} = useMutation({
+		mutationFn: (action) => {
+			setData((prev) => ({...prev, action}))
+			Invoice.update(data)
+		}
 	})
 
 	const save = (type) => {
 		switch(type) {
-			case 'draft':
-				saveDraft()
+			case 'save_draft':
+				saveDraft(type)
+				break;
+			case 'save_changes':
+			case 'issue':
+				update(type)
 				break;
 		}
 	}
@@ -361,7 +390,7 @@ export function InvoiceProvider({ children }) {
 			window.localStorage.removeItem(STORAGE_KEY)
 
 			setTimeout(() => {
-				window.location.href = '/app/invoice';
+				window.location.href = '/app/invoice/new';
 			}, 200)
 		}
 	}, [clear]);
@@ -404,6 +433,14 @@ export function InvoiceProvider({ children }) {
     return <InvoiceContext.Provider value={value}>
         {children}
     </InvoiceContext.Provider>
+}
+
+export function InvoiceProvider({children}) {
+	return (
+		<Suspense fallback={null}>
+			<InvoiceProviderInner>{children}</InvoiceProviderInner>
+		</Suspense>
+	)
 }
 
 export const useInvoice = () => {
