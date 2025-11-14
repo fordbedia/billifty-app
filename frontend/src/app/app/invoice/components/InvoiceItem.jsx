@@ -1,24 +1,26 @@
 import { Input, Link } from "@heroui/react";
-import {centsToDollarsStr, dollarsToCents} from "@/app/utils/computeInvoice";
-import {useInvoice} from "@/app/providers/InvoiceContext";
+import { centsToDollarsStr, dollarsToCents } from "@/app/utils/computeInvoice";
+import { useInvoice } from "@/app/providers/InvoiceContext";
 
 // Helpers
 export default function InvoiceItem({ item, index, onChange, removeItem }) {
-	const { data, selectedCurrency } = useInvoice();
-  	const showPerLine = (data.discount_mode ?? 'none') === 'per-line';
+  const { data, selectedCurrency, invoiceComputed } = useInvoice();
+  const showPerLine = (data.discount_mode ?? "none") === "per-line";
 
   const qty   = parseFloat(item.quantity ?? 0) || 0;
   const unit  = parseInt(item.unit_price_cents ?? 0, 10) || 0;
   const taxRt = parseFloat(item.tax_rate ?? 0) || 0;
 
-  const baseLine = Math.round(qty * unit);
-  const taxCents = Math.round(baseLine * (taxRt / 100));
-  const lineWithTax = baseLine + taxCents;
+  const currencySymbol = selectedCurrency?.symbol ?? "";
+
+  // Because computeInvoice (JS) mirrors backend, it returns `invoice_items`, not `items`
+  const computedItem =
+    invoiceComputed?.invoice_items?.[index] ?? item; // fallback to raw item if needed
+  const lineTotalCents = computedItem.line_total_cents ?? 0;
 
   return (
     <div className="box-card px-4 py-4 my-3">
       <div className="flex flex-col md:flex-row gap-5">
-
         <div className="md:w-1/3">
           Description
           <Input
@@ -44,7 +46,7 @@ export default function InvoiceItem({ item, index, onChange, removeItem }) {
         </div>
 
         <div className="md:w-1/6">
-          Unit Price ({selectedCurrency.symbol})
+          Unit Price ({currencySymbol})
           <Input
             type="number"
             variant="bordered"
@@ -71,36 +73,36 @@ export default function InvoiceItem({ item, index, onChange, removeItem }) {
           />
         </div>
 
-		{/* 🔹 Per-line discounts only shown when mode = per-line */}
+        {/* Per-line discounts only shown when mode = per-line */}
         {showPerLine && (
-          <>
-            <div className="md:w-1/6">
-			Discount (%)
-              <Input
-                type="number"
-                variant="bordered"
-                radius="sm"
-                value={String(item.line_discount_rate ?? 0)}
-                onValueChange={(v) =>
-                  onChange(index, "line_discount_rate", parseFloat(v) || 0)
-                }
-              />
-            </div>
-          </>
+          <div className="md:w-1/6">
+            Discount (%)
+            <Input
+              type="number"
+              variant="bordered"
+              radius="sm"
+              value={String(item.line_discount_rate ?? 0)}
+              onValueChange={(v) =>
+                onChange(index, "line_discount_rate", parseFloat(v) || 0)
+              }
+            />
+          </div>
         )}
 
         <div className="md:w-1/6">
-          Amount ({selectedCurrency.symbol})
+          Amount ({currencySymbol})
           <Input
             isReadOnly
             variant="bordered"
             radius="sm"
-            value={centsToDollarsStr(item.line_total_cents ?? 0)}
+            value={centsToDollarsStr(lineTotalCents)}
           />
         </div>
 
         <div className="self-center">
-          <Link onPress={() => removeItem(index)}><i className="trash-icon"></i></Link>
+          <Link onPress={() => removeItem(index)}>
+            <i className="trash-icon"></i>
+          </Link>
         </div>
       </div>
     </div>

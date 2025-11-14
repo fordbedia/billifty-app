@@ -6,7 +6,8 @@ import React, {
     useContext,
     useState,
     useEffect,
-	Suspense
+	Suspense,
+	useMemo
 } from 'react'
 import {
   useDisclosure
@@ -91,6 +92,9 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
         meta: '',
         invoice_items: [],
     })
+	 const [hasShipping, setHasShipping] = useState(false)
+	 const [isEmpty, setIsEmpty] = useState(false);
+	 const [isTaxable, setIsTaxable] = useState((data.shipping_tax_rate ?? 0) > 0);
 
 	const STORAGE_KEY = "billifty.invoice.form.v1";
 	const STORAGE_VERSION = 1;
@@ -119,9 +123,9 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		}
 	})
 
-    const [hasShipping, setHasShipping] = useState(false)
 	const {isOpen: isOpenTemplate, onOpen: onOpenTemplate, onOpenChange: onOpenChangeTemplate} = useDisclosure();
 	const {isOpen: isOpenColorScheme, onOpen: onOpenColorScheme, onOpenChange: onOpenChangeColorScheme} = useDisclosure();
+	const {isOpen: isOpenConfirmIssueInvoice, onOpen: onOpenConfirmIssueInvoice, onOpenChange: onOpenChangeConfirmIssueInvoice} = useDisclosure();
 
     const shallowEqualNumbers = (a, b, keys) => {
       return keys.every(k => (a?.[k] ?? null) === (b?.[k] ?? null));
@@ -239,42 +243,19 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			setSelectedColorScheme({})
 		}
 	}
-	// ----------------------------------------------------------------------------
-	// Listen to all changes in the invoice item fields and any changes in the
-	// Business profile, Client, Shipping, currency and tax, this then updates
-	// the subtotal, total, shipping and tax accordingly in data state
-	// ----------------------------------------------------------------------------
-    useEffect(() => {
-      setData(prev => {
-        const next = computeInvoice(prev);
 
-        // Prevent unnecessary state updates (and feedback loops)
-        const stableKeys = [
-          "subtotal_cents", "tax_cents", "total_cents", "amount_due_cents", "shipping_tax_cents"
-        ];
-        const sameTotals = shallowEqualNumbers(prev, next, stableKeys);
-
-        // Compare items' line totals too
-        const sameItems =
-          prev.invoice_items?.length === next.invoice_items?.length &&
-          prev.invoice_items.every((it, i) =>
-            (it.line_total_cents ?? 0) === (next.invoice_items[i].line_total_cents ?? 0)
-          );
-
-        if (sameTotals && sameItems) return prev;
-        return next;
-      });
-    }, [
-      // When these change, recompute:
-        data.invoice_items,
-        data.discount_cents,
-        data.tax_rate_bps,     // if you support invoice-level tax
-        data.shipping_cents,
-        data.shipping_tax_rate,
+	const invoiceComputed = useMemo(
+	  () => computeInvoice(data),
+	  [
+		data.invoice_items,
 		data.discount_mode,
 		data.discount_cents,
 		data.discount_rate,
-    ]);
+		data.tax_rate_bps,
+		data.shipping_cents,
+		data.shipping_tax_rate,
+	  ]
+	);
 
 	// ----------------------------------------------------------------------------
 	// Sync invoice data with selected template and color scheme
@@ -309,6 +290,9 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 
 		// Merge only persisted fields; leave computed fields as-is (they’ll recompute)
 		setData((prev) => ({ ...prev, ...payload.data }));
+
+		const storage = JSON.parse(raw);
+		setIsEmpty(!storage?.data);
 	  } catch (_) {
 		// ignore corrupted LS
 	  }
@@ -346,24 +330,35 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		}
 	}, [template, colorSchemeData])
 
+	useEffect(() => {
+	  const has =
+		// Non-empty shipping address
+		(data.shipping_address && data.shipping_address.trim() !== "") ||
+		// Any non-zero shipping cost
+		(data.shipping_cents ?? 0) > 0 ||
+		// Any non-zero shipping tax rate
+		(data.shipping_tax_rate ?? 0) > 0;
+
+	  setHasShipping(has);
+	  const isTaxable = (data.shipping_tax_rate ?? 0) > 0;
+	  setIsTaxable(isTaxable)
+	}, [data.shipping_address, data.shipping_cents, data.shipping_tax_rate]);
+
 	const clearSticky = () => router.replace('/app/invoice/new?clear=true');
-	const isStorageEmpty = () => {
-		const string = window.localStorage.getItem(STORAGE_KEY)
-		const storage = JSON.parse(string)
-		return !storage?.data;
-	}
-	isStorageEmpty()
-    const [isTaxable, setIsTaxable] = useState((data.shipping_tax_rate ?? 0) > 0);
 
 	const {mutate: saveDraft} = useMutation({
-		mutationFn: (action) => {
-			Invoice.saveDraft(data, action)
+		mutationFn: async (action) => {
+			const payload = computeInvoice(data);
+			const r = await Invoice.saveDraft(payload, action)
+			setData(prev => ({...prev, status: r?.data?.status}))
 		}
 	})
 
 	const {mutate: update} = useMutation({
-		mutationFn: (action) => {
-			Invoice.update(invoiceId, data, action)
+		mutationFn: async (action) => {
+			const payload = computeInvoice(data);
+			const response = await Invoice.update(invoiceId, payload, action)
+			setData(prev => ({...prev, status: response?.data?.status}))
 		}
 	})
 
@@ -424,7 +419,12 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		selectedColorScheme,
 		onOpenChangeColorScheme,
 		clearSticky,
-		isStorageEmpty,
+		isEmpty,
+		onOpenConfirmIssueInvoice,
+		onOpenChangeConfirmIssueInvoice,
+		isOpenConfirmIssueInvoice,
+		invoiceComputed,
+		invoiceId,
     }
 
     return <InvoiceContext.Provider value={value}>

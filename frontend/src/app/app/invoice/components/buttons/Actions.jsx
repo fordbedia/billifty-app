@@ -9,8 +9,15 @@ export default function Actions() {
 		save,
 		data,
 		clearSticky,
-		isStorageEmpty,
+		isEmpty,
+		onOpenConfirmIssueInvoice,
+		invoiceId
 	} = useInvoice()
+
+	const confirm = () => {
+		onOpenConfirmIssueInvoice()
+	}
+
 	return (
 		 <>
 			 <Card fullWidth radius="sm" className="mb-2">
@@ -19,12 +26,14 @@ export default function Actions() {
 					</CardHeader>
 					<Divider />
 					<CardBody>
-						{!data?.id
+						{!invoiceId
 							? (<Button onPress={() => save('save_draft')} disableRipple className="my-2" color="primary" variant="flat">Save as Draft</Button>)
 							: (<Button onPress={() => save('save_changes')} disableRipple className="my-2" color="primary" variant="flat">Save Update</Button>)}
-						<Button onPress={() => save('issue')} isDisabled={!data.id} disableRipple className="my-2" color="success" variant="flat">Issue Invoice</Button>
+						{data?.id && data.status !== 'issued' && (
+							<Button onPress={confirm} isDisabled={!data.id} disableRipple className="my-2" color="success" variant="flat">Issue Invoice</Button>
+						)}
 						<Button isDisabled={!data.id} disableRipple className="my-2" color="warning" variant="flat">Download</Button>
-						{!data?.id && !isStorageEmpty() && (<Button disableRipple className="my-2" color="danger" onPress={clearSticky}>Reset All</Button>)}
+						{!invoiceId && !isEmpty && (<Button disableRipple className="my-2" color="danger" onPress={clearSticky}>Reset All</Button>)}
 					</CardBody>
 			 </Card>
 		</>

@@ -64,6 +64,7 @@ export default function InvoiceInfo() {
                     <div className="md:w-1/2">
                         Invoice Number
                         <Input
+							disabled={data.status === 'issued'}
                             isRequired
                             errorMessage="Please enter a valid name"
                             labelPlacement="outside"
@@ -103,6 +104,7 @@ export default function InvoiceInfo() {
                     <div className="md:w-1/2">
                         Your Client/Bill To
                         <Select
+							disabled={data.status === 'issued'}
                             className="max-w-xs"
                             label="Select a Client"
                             selectionMode="single"
