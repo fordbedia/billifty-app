@@ -369,7 +369,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		}
 	})
 
-	const save = (type) => {
+	const save = (type, callback = null) => {
 		switch(type) {
 			case 'save_draft':
 				saveDraft(type)
@@ -378,6 +378,10 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			case 'issue':
 				update(type)
 				break;
+		}
+
+		if (callback) {
+			callback()
 		}
 	}
 

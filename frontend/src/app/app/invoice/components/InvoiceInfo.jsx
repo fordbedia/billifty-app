@@ -82,6 +82,7 @@ export default function InvoiceInfo() {
                      <div className="md:w-1/2">
                         Issue Date
                         <DatePicker
+						  isDisabled={data.status === 'issued'}
 						  className="max-w-[284px]"
 						  label="Issue date"
 						  granularity="day"
@@ -92,6 +93,7 @@ export default function InvoiceInfo() {
                     <div className="md:w-1/2">
                         Due Date
                         <DatePicker
+						  isDisabled={data.status === 'issued'}
 						  className="max-w-[284px]"
 						  label="Due date"
 						  granularity="day"
