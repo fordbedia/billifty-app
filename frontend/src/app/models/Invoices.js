@@ -7,12 +7,14 @@ export default class Invoice extends Model{
         return await this.axios().get('/generated-invoice-number')
     }
 
-	static async saveDraft(data) {
+	static async saveDraft(data, action = 'save_draft') {
+		data = {...data, action}
 		return await this.axios().post('/', data)
 	}
 
-	static async update(data) {
-		return await this.axios().put('/', data)
+	static async update(invoiceId, data, action) {
+		data = {...data, action}
+		return await this.axios().put(`/${invoiceId}`, data)
 	}
 
 	static async find(id) {

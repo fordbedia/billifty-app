@@ -90,7 +90,6 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
         render_snapshot_html: '',
         meta: '',
         invoice_items: [],
-		action: '',
     })
 
 	const STORAGE_KEY = "billifty.invoice.form.v1";
@@ -357,16 +356,14 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
     const [isTaxable, setIsTaxable] = useState((data.shipping_tax_rate ?? 0) > 0);
 
 	const {mutate: saveDraft} = useMutation({
-		mutationFn: () => {
-			setData((prev) => ({...prev, action}))
-			Invoice.saveDraft(data)
+		mutationFn: (action) => {
+			Invoice.saveDraft(data, action)
 		}
 	})
 
 	const {mutate: update} = useMutation({
 		mutationFn: (action) => {
-			setData((prev) => ({...prev, action}))
-			Invoice.update(data)
+			Invoice.update(invoiceId, data, action)
 		}
 	})
 
