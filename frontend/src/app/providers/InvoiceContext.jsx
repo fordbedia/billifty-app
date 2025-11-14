@@ -112,14 +112,12 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	  Object.fromEntries(Object.entries(src).filter(([k]) => PERSIST_KEYS.has(k)));
 
 	const invoiceId = initialId ?? params.id ?? null;
-	const { isFetching} = useQuery({
+	const { isFetchingdata, data: fetchedInvoice } = useQuery({
 		queryKey: ['invoice', invoiceId],
 		enabled: !!invoiceId && mode !== 'new',
 		queryFn: async () => {
-			const inv = (await Invoices.find(invoiceId))?.data
-			if (inv && Object.keys(inv).length > 0) {
-				setData(prev => ({...prev, ...inv, invoice_items: [...inv.items]}))
-			}
+			const inv = (await Invoices.find(invoiceId))?.data;
+			return inv ?? null;
 		}
 	})
 
@@ -300,13 +298,16 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	}, []);
 	// Syncs data when fields are updated
 	useEffect(() => {
-	  let t = setTimeout(() => {
-		try {
-		  const payload = { version: STORAGE_VERSION, data: pickPersistable(data) };
-		  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-		} catch (_) { /* ignore quota / serialization issues */ }
-	  }, 400); // debounce so we don’t hammer LS while typing
-	  return () => clearTimeout(t);
+		if (!invoiceId) {
+			let t = setTimeout(() => {
+				try {
+					const payload = {version: STORAGE_VERSION, data: pickPersistable(data)};
+					window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+				} catch (_) { /* ignore quota / serialization issues */
+				}
+			}, 400); // debounce so we don’t hammer LS while typing
+			return () => clearTimeout(t);
+		}
 	}, [
 	  // Only track fields you actually persist:
 	  data.business_profile_id, data.client_id, data.invoice_template_id, data.color_scheme_id,
@@ -316,6 +317,26 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	  data.shipping_cents, data.shipping_tax_rate, data.notes, data.terms, data.meta,
 	  data.invoice_items,
 	]);
+
+	useEffect(() => {
+	  if (!fetchedInvoice) return;
+
+	  // Merge server invoice into local form state
+	  setData((prev) => ({
+		...prev,
+		...fetchedInvoice,
+		invoice_items: [...(fetchedInvoice.items ?? [])],
+	  }));
+
+	  // Optional: derive flags from fetched invoice once
+	  if (fetchedInvoice.shipping_address || fetchedInvoice.shipping_cents) {
+		setHasShipping(true);
+	  }
+	  if (fetchedInvoice.shipping_tax_rate) {
+		setIsTaxable(true);
+	  }
+	}, [fetchedInvoice]);
+
 	// ----------------------------------------------------------------------------
 	// Updates the template and color scheme display
 	// Sync the template into the selectedTemplate and selectedColorScheme
@@ -329,20 +350,6 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			setSelectedColorScheme(colorScheme)
 		}
 	}, [template, colorSchemeData])
-
-	useEffect(() => {
-	  const has =
-		// Non-empty shipping address
-		(data.shipping_address && data.shipping_address.trim() !== "") ||
-		// Any non-zero shipping cost
-		(data.shipping_cents ?? 0) > 0 ||
-		// Any non-zero shipping tax rate
-		(data.shipping_tax_rate ?? 0) > 0;
-
-	  setHasShipping(has);
-	  const isTaxable = (data.shipping_tax_rate ?? 0) > 0;
-	  setIsTaxable(isTaxable)
-	}, [data.shipping_address, data.shipping_cents, data.shipping_tax_rate]);
 
 	const clearSticky = () => router.replace('/app/invoice/new?clear=true');
 

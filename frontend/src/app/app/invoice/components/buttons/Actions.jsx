@@ -29,7 +29,7 @@ export default function Actions() {
 						{!invoiceId
 							? (<Button onPress={() => save('save_draft')} disableRipple className="my-2" color="primary" variant="flat">Save as Draft</Button>)
 							: (<Button onPress={() => save('save_changes')} disableRipple className="my-2" color="primary" variant="flat">Save Update</Button>)}
-						{data?.id && data.status !== 'issued' && (
+						{invoiceId && data.status !== 'issued' && (
 							<Button onPress={confirm} isDisabled={!data.id} disableRipple className="my-2" color="success" variant="flat">Issue Invoice</Button>
 						)}
 						<Button isDisabled={!data.id} disableRipple className="my-2" color="warning" variant="flat">Download</Button>
