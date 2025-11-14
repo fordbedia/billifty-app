@@ -280,25 +280,27 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	// ----------------------------------------------------------------------------
 	// Sync data on page load
 	useEffect(() => {
-	  try {
-		const raw = window.localStorage.getItem(STORAGE_KEY);
-		if (!raw) return;
-		const payload = JSON.parse(raw);
-		if (payload?.version !== STORAGE_VERSION) return;
+		if (mode === 'new') {
+			try {
+				const raw = window.localStorage.getItem(STORAGE_KEY);
+				if (!raw) return;
+				const payload = JSON.parse(raw);
+				if (payload?.version !== STORAGE_VERSION) return;
 
-		// Merge only persisted fields; leave computed fields as-is (they’ll recompute)
-		setData((prev) => ({ ...prev, ...payload.data }));
+				// Merge only persisted fields; leave computed fields as-is (they’ll recompute)
+				setData((prev) => ({...prev, ...payload.data}));
 
-		const storage = JSON.parse(raw);
-		setIsEmpty(!storage?.data);
-	  } catch (_) {
-		// ignore corrupted LS
-	  }
+				const storage = JSON.parse(raw);
+				setIsEmpty(!storage?.data);
+			} catch (_) {
+				// ignore corrupted LS
+			}
+		}
 	  // eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 	// Syncs data when fields are updated
 	useEffect(() => {
-		if (!invoiceId) {
+		if (mode === 'new') {
 			let t = setTimeout(() => {
 				try {
 					const payload = {version: STORAGE_VERSION, data: pickPersistable(data)};
@@ -356,16 +358,25 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	const {mutate: saveDraft} = useMutation({
 		mutationFn: async (action) => {
 			const payload = computeInvoice(data);
-			const r = await Invoice.saveDraft(payload, action)
-			setData(prev => ({...prev, status: r?.data?.status}))
+			return await Invoice.saveDraft(payload, action)
+		},
+		onSuccess: (r) => {
+			if (r && r.data) {
+				setData(prev => ({...prev, status: r?.data?.status}))
+				router.replace(`/app/invoice/${r.data?.id}`)
+			}
 		}
 	})
 
 	const {mutate: update} = useMutation({
 		mutationFn: async (action) => {
 			const payload = computeInvoice(data);
-			const response = await Invoice.update(invoiceId, payload, action)
-			setData(prev => ({...prev, status: response?.data?.status}))
+			return await Invoice.update(invoiceId, payload, action)
+		},
+		onSuccess: (r) => {
+			if (r && r.data) {
+				setData(prev => ({...prev, status: r?.data?.status}))
+			}
 		}
 	})
 

@@ -64,7 +64,7 @@ export default function InvoiceInfo() {
                     <div className="md:w-1/2">
                         Invoice Number
                         <Input
-							disabled={data.status === 'issued'}
+							isDisabled={data.status === 'issued'}
                             isRequired
                             errorMessage="Please enter a valid name"
                             labelPlacement="outside"
@@ -106,7 +106,7 @@ export default function InvoiceInfo() {
                     <div className="md:w-1/2">
                         Your Client/Bill To
                         <Select
-							disabled={data.status === 'issued'}
+							isDisabled={data.status === 'issued'}
                             className="max-w-xs"
                             label="Select a Client"
                             selectionMode="single"
@@ -194,6 +194,7 @@ export default function InvoiceInfo() {
 				<div className="flex flex-col md:flex-row gap-2 py-2">
 					<div className="md:w-1/2">
 						<Select
+							isDisabled={data.status === 'issued'}
 							className="max-w-xs"
 							label="Select a currency"
 							selectionMode="single"
