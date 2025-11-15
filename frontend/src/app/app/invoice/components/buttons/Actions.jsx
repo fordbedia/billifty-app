@@ -3,6 +3,7 @@
 import {Card, CardHeader, CardBody, CardFooter, Divider, Link, Image} from "@heroui/react";
 import {Button} from "@heroui/react";
 import {useInvoice} from "@/app/providers/InvoiceContext";
+import {Alert} from "@heroui/react";
 
 export default function Actions() {
 	const {
@@ -11,11 +12,17 @@ export default function Actions() {
 		clearSticky,
 		isEmpty,
 		onOpenConfirmIssueInvoice,
-		invoiceId
+		invoiceId,
+		createInvoiceError,
 	} = useInvoice()
 
 	const confirm = () => {
 		onOpenConfirmIssueInvoice()
+	}
+
+	let errors = null;
+	if (typeof createInvoiceError !== 'undefined' && createInvoiceError && Object.keys(createInvoiceError).length > 0) {
+		errors = createInvoiceError.response?.data?.errors;
 	}
 
 	return (
@@ -26,6 +33,15 @@ export default function Actions() {
 					</CardHeader>
 					<Divider />
 					<CardBody>
+						{errors && Object.keys(errors).length > 0 && (
+							<Alert color="danger">
+								<ul>
+									{Object.entries(errors).map(([k, v]) => (
+										<li>{v}</li>
+									))}
+								</ul>
+							</Alert>
+						)}
 						{!invoiceId
 							? (<Button onPress={() => save('save_draft')} disableRipple className="my-2" color="primary" variant="flat">Save as Draft</Button>)
 							: (<Button onPress={() => save('save_changes')} disableRipple className="my-2" color="primary" variant="flat">Save Update</Button>)}

@@ -365,7 +365,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		router.replace('/app/invoice/new?clear=true');
 	}
 
-	const {mutate: saveDraft} = useMutation({
+	const {mutate: saveDraft, error: createInvoiceError} = useMutation({
 		mutationFn: async (action) => {
 			const payload = computeInvoice(data);
 			return await Invoice.saveDraft(payload, action)
@@ -459,7 +459,8 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		invoiceComputed,
 		invoiceId,
 		router,
-		isInvoiceError
+		isInvoiceError,
+		createInvoiceError,
     }
 
     return <InvoiceContext.Provider value={value}>
