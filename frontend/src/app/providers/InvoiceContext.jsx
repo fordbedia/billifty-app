@@ -13,7 +13,7 @@ import {
   useDisclosure
 } from "@heroui/react";
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { useRouter, useSearchParams, useParams } from "next/navigation";
+import { useRouter, useSearchParams, useParams, usePathname } from "next/navigation";
 import BusinessProfile from "@/app/models/BusinessProfile";
 import Clients from "@/app/models/Clients";
 import Invoices from "@/app/models/Invoices";
@@ -34,6 +34,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	const searchParams = useSearchParams();
   	const clear = searchParams.get("clear");
 	const params = useParams()
+	const pathname = usePathname()
 
     const tz = getLocalTimeZone();
 
@@ -55,9 +56,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
         meta: ''
     }
 
-	const [selectedCurrency, setSelectedCurrency] = useState({})
-
-    const [data, setData] = useState({
+	const initialState = {
 		id: null,
         business_profile_id: null,
         client_id: null,
@@ -91,7 +90,11 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
         render_snapshot_html: '',
         meta: '',
         invoice_items: [],
-    })
+    };
+
+	const [selectedCurrency, setSelectedCurrency] = useState({})
+
+     const [data, setData] = useState({...initialState})
 	 const [hasShipping, setHasShipping] = useState(false)
 	 const [isEmpty, setIsEmpty] = useState(false);
 	 const [isTaxable, setIsTaxable] = useState((data.shipping_tax_rate ?? 0) > 0);
@@ -112,13 +115,14 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	  Object.fromEntries(Object.entries(src).filter(([k]) => PERSIST_KEYS.has(k)));
 
 	const invoiceId = initialId ?? params.id ?? null;
-	const { isFetchingdata, data: fetchedInvoice } = useQuery({
+	const { isFetchingdata, data: fetchedInvoice, isError: isInvoiceError } = useQuery({
 		queryKey: ['invoice', invoiceId],
 		enabled: !!invoiceId && mode !== 'new',
 		queryFn: async () => {
 			const inv = (await Invoices.find(invoiceId))?.data;
 			return inv ?? null;
-		}
+		},
+		retry: false,
 	})
 
 	const {isOpen: isOpenTemplate, onOpen: onOpenTemplate, onOpenChange: onOpenChangeTemplate} = useDisclosure();
@@ -353,7 +357,13 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		}
 	}, [template, colorSchemeData])
 
-	const clearSticky = () => router.replace('/app/invoice/new?clear=true');
+	const clearSticky = () => {
+		setData({...initialState, invoice_number: generatedInvoiceNum})
+		setSelectedTemplate({})
+		setSelectedColorScheme({})
+		window.localStorage.removeItem(STORAGE_KEY)
+		router.replace('/app/invoice/new?clear=true');
+	}
 
 	const {mutate: saveDraft} = useMutation({
 		mutationFn: async (action) => {
@@ -362,6 +372,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		},
 		onSuccess: (r) => {
 			if (r && r.data) {
+				window.localStorage.removeItem(STORAGE_KEY)
 				setData(prev => ({...prev, status: r?.data?.status}))
 				router.replace(`/app/invoice/${r.data?.id}`)
 			}
@@ -405,7 +416,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 
 			setTimeout(() => {
 				window.location.href = '/app/invoice/new';
-			}, 200)
+			}, 500)
 		}
 	}, [clear]);
 
@@ -447,6 +458,8 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		isOpenConfirmIssueInvoice,
 		invoiceComputed,
 		invoiceId,
+		router,
+		isInvoiceError
     }
 
     return <InvoiceContext.Provider value={value}>
@@ -454,10 +467,10 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
     </InvoiceContext.Provider>
 }
 
-export function InvoiceProvider({children}) {
+export function InvoiceProvider({children, initialId, mode}) {
 	return (
 		<Suspense fallback={null}>
-			<InvoiceProviderInner>{children}</InvoiceProviderInner>
+			<InvoiceProviderInner initialId={initialId} mode={mode}>{children}</InvoiceProviderInner>
 		</Suspense>
 	)
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import RootLayout from "@/app/components/common/RootLayout";
-import { Button, Card, CardHeader, CardBody, CardFooter, Divider } from "@heroui/react";
+import { Button, Card, CardHeader, CardBody, CardFooter, Divider, Link } from "@heroui/react";
 import InvoiceItem from "@/app/app/invoice/components/InvoiceItem";
 import AddMoreItems from "@/app/app/invoice/components/buttons/AddMoreItems";
 import InvoiceInfo from "@/app/app/invoice/components/InvoiceInfo";
@@ -9,6 +9,8 @@ import InvoiceTemplate from "@/app/app/invoice/components/InvoiceTemplate";
 import { useInvoice } from "@/app/providers/InvoiceContext";
 import Actions from "@/app/app/invoice/components/buttons/Actions";
 import ConfirmIssueInvoiceModal from "@/app/app/invoice/components/modals/ConfirmIssueInvoiceModal";
+import ConfirmNewInvoice from "@/app/app/invoice/components/modals/ConfirmNewInvoice";
+import NotFound from "@/app/app/invoice/components/errorPages/NotFound";
 
 export default function Layout() {
   const {
@@ -18,6 +20,9 @@ export default function Layout() {
     removeItem,
     selectedCurrency,
     invoiceComputed,
+	clearSticky,
+	router,
+	isInvoiceError,
   } = useInvoice();
 
   const currencySymbol = selectedCurrency?.symbol ?? "";
@@ -34,10 +39,19 @@ export default function Layout() {
   const discountRow =
     invoiceComputed?.display_discount_row ?? data.display_discount_row ?? null;
 
+  if (typeof isInvoiceError !== 'undefined' && isInvoiceError) {
+	  return (
+		  <RootLayout>
+		  	<NotFound />
+		  </RootLayout>
+	  )
+  }
+
   return (
     <RootLayout>
       <div className="app app-wrapper outer-bg">
         <ConfirmIssueInvoiceModal />
+		<ConfirmNewInvoice />
         <div className="m-auto max-w-screen-xl py-5">
           <div className="w-full flex mb-5">
             <div className="w-2/3">
@@ -47,7 +61,15 @@ export default function Layout() {
               </h2>
             </div>
             <div className="w-1/3 flex justify-end items-center">
-              <Button>Generate Invoice</Button>
+              <Button variant="flat" color="success" onPress={() => {
+				  clearSticky()
+				  router.replace('/app/invoice/new')
+			  }}>
+				 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+				  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+				</svg>
+				  New Invoice
+			  </Button>
             </div>
           </div>
 

@@ -32,7 +32,7 @@ export default function Actions() {
 						{invoiceId && data.status !== 'issued' && (
 							<Button onPress={confirm} isDisabled={!data.id} disableRipple className="my-2" color="success" variant="flat">Issue Invoice</Button>
 						)}
-						<Button isDisabled={!data.id} disableRipple className="my-2" color="warning" variant="flat">Download</Button>
+						{invoiceId && data.status === 'issued' && (<Button isDisabled={!data.id} disableRipple className="my-2" color="warning" variant="flat">Download</Button>)}
 						{!invoiceId && !isEmpty && (<Button disableRipple className="my-2" color="danger" onPress={clearSticky}>Reset All</Button>)}
 					</CardBody>
 			 </Card>
