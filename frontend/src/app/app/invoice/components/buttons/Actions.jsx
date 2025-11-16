@@ -14,6 +14,7 @@ export default function Actions() {
 		onOpenConfirmIssueInvoice,
 		invoiceId,
 		createInvoiceError,
+		updateError,
 	} = useInvoice()
 
 	const confirm = () => {
@@ -21,8 +22,19 @@ export default function Actions() {
 	}
 
 	let errors = null;
-	if (typeof createInvoiceError !== 'undefined' && createInvoiceError && Object.keys(createInvoiceError).length > 0) {
-		errors = createInvoiceError.response?.data?.errors;
+	if (
+		(
+			typeof createInvoiceError !== 'undefined' &&
+			createInvoiceError &&
+			Object.keys(createInvoiceError).length > 0
+		) ||
+		(
+			typeof updateError !== 'undefined' &&
+			updateError &&
+			Object.keys(updateError).length > 0
+		)
+	) {
+		errors = createInvoiceError?.response?.data?.errors ?? updateError?.response?.data?.errors;
 	}
 
 	return (

@@ -58,49 +58,95 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 
 	const initialState = {
 		id: null,
-        business_profile_id: null,
-        client_id: null,
-        invoice_template_id: null,
-        color_scheme_id: null,
-        payment_information_id: null,
-        invoice_number: '',
-        reference: '',
-        shipping_address: '',
-        currency_id: 1,
-        issued_on: issueDateISO,
-        due_on: dueDateISO,
-        paid_at: '',
-        status: '',
-        template_slug: '',
-        template_version: '',
-        theme_json: '',
-        subtotal_cents: 0,
+		business_profile_id: null,
+		client_id: null,
+		invoice_template_id: null,
+		color_scheme_id: null,
+		payment_information_id: null,
+		invoice_number: '',
+		reference: '',
+		shipping_address: '',
+		currency_id: 1,
+		issued_on: issueDateISO,
+		due_on: dueDateISO,
+		paid_at: '',
+		status: '',
+		template_slug: '',
+		template_version: '',
+		theme_json: '',
+		subtotal_cents: 0,
 		discount_mode: 'none',
-        discount_cents: 0,
-        discount_rate: 0,
-        tax_cents: 0,
-        shipping_cents: 0,
-        shipping_tax_rate: 0,
-        shipping_tax_cents: 0,
-        total_cents: 0,
-        amount_due_cents: 0,
-        notes: '',
-        terms: '',
-        pdf_url: '',
-        render_snapshot_html: '',
-        meta: '',
-        invoice_items: [],
+		discount_cents: 0,
+		discount_rate: 0,
+		tax_cents: 0,
+		shipping_cents: 0,
+		shipping_tax_rate: 0,
+		shipping_tax_cents: 0,
+		total_cents: 0,
+		amount_due_cents: 0,
+		notes: '',
+		terms: '',
+		pdf_url: '',
+		render_snapshot_html: '',
+		meta: '',
+		invoice_items: [],
     };
 
 	const [selectedCurrency, setSelectedCurrency] = useState({})
 
-     const [data, setData] = useState({...initialState})
-	 const [hasShipping, setHasShipping] = useState(false)
-	 const [isEmpty, setIsEmpty] = useState(false);
-	 const [isTaxable, setIsTaxable] = useState((data.shipping_tax_rate ?? 0) > 0);
+	const [data, setData] = useState({...initialState})
+	const [hasShipping, setHasShipping] = useState(false)
+	const [isEmpty, setIsEmpty] = useState(false);
+	const [isTaxable, setIsTaxable] = useState((data.shipping_tax_rate ?? 0) > 0);
 
 	const STORAGE_KEY = "billifty.invoice.form.v1";
 	const STORAGE_VERSION = 1;
+
+	// ----------------------------------------------------------------------------
+	// Fetch all users invoice
+	// ----------------------------------------------------------------------------
+	const [dateRange, setDateRange] = useState(null)
+	const [search, setSearch] = useState(null)
+	const [appliedSearch, setAppliedSearch] = useState("");
+	const hasRange = !!dateRange?.start && !!dateRange?.end;
+	const hasSearch = appliedSearch.trim().length > 0
+	const handleDateRangeChange = (newRange) => setDateRange(newRange);
+	const handleSearchKeyDown = (e) => {
+		if (e.key === "Enter") {
+			setAppliedSearch(search);    // 👈 trigger query update
+			setInvoicePage(1);           // optional: reset pagination
+		}
+	}
+	const [invoicePage, setInvoicePage] = useState(1);
+	const {data: userInvoices } = useQuery({
+		queryKey: ['user-invoice', invoicePage,
+			hasRange
+        ? {
+            start: dateRange.start.toString(), // e.g. "2025-11-16"
+            end: dateRange.end.toString(),
+          }
+        : null,
+			hasSearch
+				? appliedSearch.trim()
+				: null,
+		],
+		enabled: pathname === '/app/invoices',
+		queryFn: async () => {
+			const params = {
+					page: invoicePage
+			}
+			if (hasRange) {
+				params.start_date = dateRange.start?.toString();
+				params.end_date = dateRange.end?.toString();
+			}
+			if (hasSearch) {
+				params.search = appliedSearch.trim()
+			}
+			return (await Invoice.invoices(params))?.data
+		},
+		retry: false,
+		keepPreviousData: true,
+	})
 
 	const PERSIST_KEYS = new Set([
 	  "business_profile_id","client_id","invoice_template_id","color_scheme_id",
@@ -129,22 +175,22 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	const {isOpen: isOpenColorScheme, onOpen: onOpenColorScheme, onOpenChange: onOpenChangeColorScheme} = useDisclosure();
 	const {isOpen: isOpenConfirmIssueInvoice, onOpen: onOpenConfirmIssueInvoice, onOpenChange: onOpenChangeConfirmIssueInvoice} = useDisclosure();
 
-    const shallowEqualNumbers = (a, b, keys) => {
-      return keys.every(k => (a?.[k] ?? null) === (b?.[k] ?? null));
-    }
+	const shallowEqualNumbers = (a, b, keys) => {
+		return keys.every(k => (a?.[k] ?? null) === (b?.[k] ?? null));
+	}
 
-    const {
-        data: businessProfileData
-    } = useQuery({
-        queryKey: ['business-profiles'],
-        queryFn: async () => {
-            const a = await BusinessProfile.all()
-            if (a.data) {
-                return a.data
-            }
-            return null
-        }
-    })
+	const {
+		data: businessProfileData
+	} = useQuery({
+		queryKey: ['business-profiles'],
+		queryFn: async () => {
+			const a = await BusinessProfile.all()
+			if (a.data) {
+				return a.data
+			}
+			return null
+		}
+	})
 
     const {data: clientData} = useQuery({
         queryKey: ['client'],
@@ -379,7 +425,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		}
 	})
 
-	const {mutate: update} = useMutation({
+	const {mutate: update, error: updateError} = useMutation({
 		mutationFn: async (action) => {
 			const payload = computeInvoice(data);
 			return await Invoice.update(invoiceId, payload, action)
@@ -421,46 +467,53 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	}, [clear]);
 
     const value = {
-        businessProfileData,
-        clientData,
-        generatedInvoiceNum,
-        data,
-        onDataChange,
-        addItems,
-        updateItems,
-        setHasShipping,
-        hasShipping,
-        isTaxable,
-        setIsTaxable,
-		removeItem,
-		save,
-		currencies,
-		setSelectedCurrency,
-		selectedCurrency,
-		isOpenTemplate,
-		loadTemplates,
-		loadThemeSelector,
-		onOpenChangeTemplate,
-		templateCategoryData,
-		templates,
-		setSelectedTemplate,
-		selectedTemplate,
-		colorSchemeData,
-		isOpenColorScheme,
-		onOpenColorScheme,
-		setSelectedColorScheme,
-		selectedColorScheme,
-		onOpenChangeColorScheme,
-		clearSticky,
-		isEmpty,
-		onOpenConfirmIssueInvoice,
-		onOpenChangeConfirmIssueInvoice,
-		isOpenConfirmIssueInvoice,
-		invoiceComputed,
-		invoiceId,
-		router,
-		isInvoiceError,
-		createInvoiceError,
+			businessProfileData,
+			clientData,
+			generatedInvoiceNum,
+			data,
+			onDataChange,
+			addItems,
+			updateItems,
+			setHasShipping,
+			hasShipping,
+			isTaxable,
+			setIsTaxable,
+			removeItem,
+			save,
+			currencies,
+			setSelectedCurrency,
+			selectedCurrency,
+			isOpenTemplate,
+			loadTemplates,
+			loadThemeSelector,
+			onOpenChangeTemplate,
+			templateCategoryData,
+			templates,
+			setSelectedTemplate,
+			selectedTemplate,
+			colorSchemeData,
+			isOpenColorScheme,
+			onOpenColorScheme,
+			setSelectedColorScheme,
+			selectedColorScheme,
+			onOpenChangeColorScheme,
+			clearSticky,
+			isEmpty,
+			onOpenConfirmIssueInvoice,
+			onOpenChangeConfirmIssueInvoice,
+			isOpenConfirmIssueInvoice,
+			invoiceComputed,
+			invoiceId,
+			router,
+			isInvoiceError,
+			createInvoiceError,
+			userInvoices,
+			updateError,
+			invoicePage,
+			setInvoicePage,
+			handleDateRangeChange,
+			handleSearchKeyDown,
+			setSearch,
     }
 
     return <InvoiceContext.Provider value={value}>
