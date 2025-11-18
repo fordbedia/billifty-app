@@ -7,8 +7,8 @@ export default class BusinessProfile extends Model {
 		return await this.axios().get('/')
 	}
 
-	static async paginate() {
-		return await this.axios().get('/get-all')
+	static async paginate(payload) {
+		return await this.axios().get(`/get-all?page=${payload.page}`, {params: payload})
 	}
 
 	static async create(data) {

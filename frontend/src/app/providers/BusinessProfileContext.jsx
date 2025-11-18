@@ -55,13 +55,18 @@ export function BusinessProfileProvider({ children }) {
 	const inputRef = useRef(null);
   const [preview, setPreview] = useState(null);
 
+	const [businessProfilePage, setBusinessProfilePage] = useState(1)
 	const {data: businessProfileData} = useQuery({
-		queryKey: ['business-profiles'],
-		queryFn: async () => (await BusinessProfile.paginate())?.data,
+		queryKey: ['business-profiles', businessProfilePage],
+		queryFn: async () => {
+			const params = {
+					page: businessProfilePage
+			}
+			return (await BusinessProfile.paginate(params))?.data
+		},
 		retry: false,
 		keepPreviousData: true,
 	})
-	const [businessProfilePage, setBusinessProfilePage] = useState(1)
 
 	const handleFormChange = (table, attr, value) => {
 		switch(table) {
