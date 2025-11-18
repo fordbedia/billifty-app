@@ -2,12 +2,14 @@
 
 import {createContext, useContext, useRef, useState} from "react";
 import {Exception} from "sass";
-import {useMutation} from "@tanstack/react-query";
+import {useMutation, useQuery} from "@tanstack/react-query";
 import BusinessProfile from "@/app/models/BusinessProfile";
+import { useRouter, useSearchParams, useParams, usePathname } from "next/navigation";
 
 export const BusinessProfileContext = createContext()
 
 export function BusinessProfileProvider({ children }) {
+	const router = useRouter()
 
 	const paymentInfoInitialState = {
 		user_id: '',
@@ -52,6 +54,14 @@ export function BusinessProfileProvider({ children }) {
 
 	const inputRef = useRef(null);
   const [preview, setPreview] = useState(null);
+
+	const {data: businessProfileData} = useQuery({
+		queryKey: ['business-profiles'],
+		queryFn: async () => (await BusinessProfile.paginate())?.data,
+		retry: false,
+		keepPreviousData: true,
+	})
+	const [businessProfilePage, setBusinessProfilePage] = useState(1)
 
 	const handleFormChange = (table, attr, value) => {
 		switch(table) {
@@ -105,6 +115,9 @@ export function BusinessProfileProvider({ children }) {
 			})
 
 			return await BusinessProfile.create(formData)
+		},
+		onSuccess: () => {
+			window.location.href = '/app/invoice/business-profile'
 		}
 	})
 
@@ -118,6 +131,9 @@ export function BusinessProfileProvider({ children }) {
 		businessProfileForm,
 		paymentInfoForm,
 		submitForm,
+		businessProfileData,
+		businessProfilePage,
+		setBusinessProfilePage,
 	}
 	return <BusinessProfileContext.Provider value={value}>
 		{children}

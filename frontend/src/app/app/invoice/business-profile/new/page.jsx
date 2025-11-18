@@ -1,7 +1,7 @@
 "use client"
 
 import RootLayout from "@/app/components/common/RootLayout";
-import {Card, CardBody, CardHeader, Form, Button, Input, Select, SelectItem} from "@heroui/react";
+import {Card, CardBody, CardHeader, Form, Button, Input, Select, SelectItem, Link} from "@heroui/react";
 import {useRef, useState} from "react";
 import {useBusinessProfile} from "@/app/providers/BusinessProfileContext";
 
@@ -425,7 +425,7 @@ export default function NewBusinessProfile () {
 											</div>
 
 											<div className="flex gap-4 py-4">
-												<Button>Cancel</Button>
+												<Button as={Link} href="/app/invoice/business-profile">Cancel</Button>
 												<Button onPress={submitForm} color="primary" variant="flat">Submit</Button>
 											</div>
 
