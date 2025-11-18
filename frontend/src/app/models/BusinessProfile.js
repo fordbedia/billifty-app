@@ -6,4 +6,8 @@ export default class BusinessProfile extends Model {
 	static async all(params, queryParams){
 		return await this.axios().get('/')
 	}
+
+	static async create(data) {
+		return await this.axios().post('/', data)
+	}
 }

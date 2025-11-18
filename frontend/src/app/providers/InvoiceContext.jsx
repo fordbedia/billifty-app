@@ -62,7 +62,6 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		client_id: null,
 		invoice_template_id: null,
 		color_scheme_id: null,
-		payment_information_id: null,
 		invoice_number: '',
 		reference: '',
 		shipping_address: '',

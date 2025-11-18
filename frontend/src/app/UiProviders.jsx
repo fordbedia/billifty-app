@@ -3,6 +3,7 @@
 import { AppProvider } from "./providers/AppContext";
 import {AuthProvider} from "@/app/providers/AuthContext";
 import {InvoiceProvider} from "@/app/providers/InvoiceContext";
+import {BusinessProfileProvider} from "@/app/providers/BusinessProfileContext";
 import ReduxProvider from "./providers/ReduxProvider";
 import {HeroUIProvider} from "@heroui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -10,7 +11,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 const providers = [
     AppProvider,
     AuthProvider,
-    InvoiceProvider
+    InvoiceProvider,
+		BusinessProfileProvider,
 ]
 
 function AppContextProvider({ children }) {
