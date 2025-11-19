@@ -9,7 +9,9 @@ export default function BusinessProfile () {
 	const {
 		businessProfileData,
 		businessProfilePage,
-		setBusinessProfilePage
+		setBusinessProfilePage,
+		setSearch,
+		handleSearchKeyDown,
 	} = useBusinessProfile()
 
 	const column = [
@@ -21,7 +23,9 @@ export default function BusinessProfile () {
 	const renderCell = (item, columnKey) => {
 		switch (columnKey) {
 		  case "name":
-				return item.name
+				return (
+					<Link href={`/app/invoice/business-profile/${item.id}`}>{item.name}</Link>
+				)
 
 			case 'payment_information.payment_method':
 				return item.payment_information.payment_method ?? "--"
@@ -57,7 +61,9 @@ export default function BusinessProfile () {
 													<Input
 														name="search"
 														label="Search"
-														placeholder="Search for client name or email"
+														placeholder="Search for business name or email"
+														onValueChange={(v) => setSearch(v)}
+														onKeyDown={handleSearchKeyDown}
 													/>
 												</div>
 										</div>

@@ -15,7 +15,7 @@ export default function BusinessProfileAppForm () {
 		handleFormChange,
 		businessProfileForm,
 		paymentInfoForm,
-		submitForm,
+		mode,
 		save,
 	} = useBusinessProfile()
 
@@ -418,8 +418,8 @@ export default function BusinessProfileAppForm () {
 											</div>
 
 											<div className="flex gap-4 py-4">
-												<Button as={Link} href="/app/invoice/business-profile">Cancel</Button>
-												<Button type="button" onPress={save} color="primary" variant="flat">Submit</Button>
+												<Button as={Link} href="/app/invoice/business-profile">{mode === 'new' ? 'Cancel' : 'Back'}</Button>
+												<Button type="button" onPress={save} color="primary" variant="flat">{mode === 'new' ? 'Submit' : 'Save Changes'}</Button>
 											</div>
 
 										</div>

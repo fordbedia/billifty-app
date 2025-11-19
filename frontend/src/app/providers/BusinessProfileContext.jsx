@@ -10,6 +10,7 @@ export const BusinessProfileContext = createContext()
 
 export function BusinessProfileProvider({ children, id, mode }) {
 	const router = useRouter()
+	const pathname = usePathname()
 
 	const paymentInfoInitialState = {
 		user_id: '',
@@ -51,22 +52,40 @@ export function BusinessProfileProvider({ children, id, mode }) {
 
 	const [businessProfileForm, setBusinessProfileForm] = useState({...businessProfileInitialState})
 	const [paymentInfoForm, setPaymentInfoForm] = useState({...paymentInfoInitialState})
+	const [search, setSearch] = useState(null)
+	const [appliedSearch, setAppliedSearch] = useState("");
 
 	const inputRef = useRef(null);
   const [preview, setPreview] = useState(null);
 
 	const [businessProfilePage, setBusinessProfilePage] = useState(1)
+	const hasSearch = search && Object.keys(search).length > 0;
 	const {data: businessProfileData} = useQuery({
-		queryKey: ['business-profiles', businessProfilePage],
+		queryKey: ['business-profiles', businessProfilePage,
+			hasSearch
+				? appliedSearch.trim()
+				: null,
+		],
 		queryFn: async () => {
 			const params = {
 					page: businessProfilePage
+			}
+			if (hasSearch) {
+				params.search = appliedSearch.trim()
 			}
 			return (await BusinessProfile.paginate(params))?.data
 		},
 		retry: false,
 		keepPreviousData: true,
+		enabled: pathname === '/app/invoice/business-profile'
 	})
+
+	const handleSearchKeyDown = (e) => {
+		if (e.key === "Enter") {
+			setAppliedSearch(search);    // 👈 trigger query update
+			setBusinessProfilePage(1);           // optional: reset pagination
+		}
+	}
 
 	// ----------------------------------------------------------------------------
 	// Pull data for edit
@@ -199,6 +218,9 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		businessProfilePage,
 		setBusinessProfilePage,
 		save,
+		mode,
+		setSearch,
+		handleSearchKeyDown,
 	}
 	return <BusinessProfileContext.Provider value={value}>
 		{children}
