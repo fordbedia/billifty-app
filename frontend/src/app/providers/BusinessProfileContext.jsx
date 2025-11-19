@@ -5,6 +5,7 @@ import {Exception} from "sass";
 import {useMutation, useQuery} from "@tanstack/react-query";
 import BusinessProfile from "@/app/models/BusinessProfile";
 import { useRouter, useSearchParams, useParams, usePathname } from "next/navigation";
+import {useDisclosure} from "@heroui/react";
 
 export const BusinessProfileContext = createContext()
 
@@ -55,6 +56,11 @@ export function BusinessProfileProvider({ children, id, mode }) {
 	const [search, setSearch] = useState(null)
 	const [appliedSearch, setAppliedSearch] = useState("");
 	const [errors, setErrors] = useState(null)
+	const {
+		isOpen: isOpenConfirmDeleteModal,
+		onOpen: onOpenConfirmDeleteModal,
+		onOpenChange: onOpenChangeConfirmDeleteModal
+	} = useDisclosure();
 
 	const inputRef = useRef(null);
   const [preview, setPreview] = useState(null);
@@ -205,16 +211,33 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		}
 	}
 
+	const {mutate: deleteBusinessProfile} = useMutation({
+		mutationFn: async () => (await BusinessProfile.archive(id)),
+		onSuccess: () => {
+			window.location.href = '/app/invoice/business-profile'
+		}
+	})
+
 	useEffect(() => {
 		let e = []
-		console.log('weerer', errorSubmit)
+		const handleError = (errorHandler) => {
+			e = Object.values(errorHandler).map(([v, k]) => (v))
+			setErrors(e)
+		}
 		if (
 			typeof errorSubmit !== undefined &&
 			errorSubmit?.response?.data?.errors &&
 			Object.keys(errorSubmit?.response?.data?.errors).length > 0
 		) {
-			e = Object.values(errorSubmit?.response?.data?.errors).map(([v, k]) => (v))
-			setErrors(e)
+			handleError(errorSubmit?.response?.data?.errors)
+		}
+
+		if (
+			typeof errorUpdate !== undefined &&
+			errorUpdate?.response?.data?.errors &&
+			Object.keys(errorUpdate?.response?.data?.errors).length > 0
+		) {
+			handleError(errorUpdate?.response?.data?.errors)
 		}
 	}, [errorSubmit, errorUpdate]);
 
@@ -236,6 +259,10 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		setSearch,
 		handleSearchKeyDown,
 		errors,
+		isOpenConfirmDeleteModal,
+		onOpenConfirmDeleteModal,
+		onOpenChangeConfirmDeleteModal,
+		deleteBusinessProfile,
 	}
 	return <BusinessProfileContext.Provider value={value}>
 		{children}

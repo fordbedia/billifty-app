@@ -26,4 +26,8 @@ export default class BusinessProfile extends Model {
 		}
 		return await this.axios().put(`/${id}`, data)
 	}
+
+	static async archive(id) {
+		return await this.axios().post(`/archive/${id}`)
+	}
 }
