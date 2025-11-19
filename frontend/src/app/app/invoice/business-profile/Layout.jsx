@@ -1,7 +1,7 @@
 "use client"
 
 import RootLayout from "@/app/components/common/RootLayout";
-import {Card, CardBody, CardHeader, Form, Button, Input, Select, SelectItem, Link} from "@heroui/react";
+import {Card, CardBody, CardHeader, Form, Button, Input, Select, SelectItem, Link, Alert} from "@heroui/react";
 import {useRef, useState} from "react";
 import {useBusinessProfile} from "@/app/providers/BusinessProfileContext";
 
@@ -17,6 +17,7 @@ export default function BusinessProfileAppForm () {
 		paymentInfoForm,
 		mode,
 		save,
+		errors,
 	} = useBusinessProfile()
 
 	return (
@@ -415,6 +416,26 @@ export default function BusinessProfileAppForm () {
 														value={paymentInfoForm.cash_app}
 													/>
 												</div>
+												<div className="w-1/2">
+													<Input
+														name="stripe_payment_link"
+														label="Stripe Payment Link"
+														description="Paste your Stripe Payment Link or Checkout URL."
+														placeholder="https://buy.stripe.com/..."
+														onValueChange={(value) => handleFormChange('pi', 'stripe_payment_link', value)}
+														value={paymentInfoForm.stripe_payment_link}
+													/>
+												</div>
+											</div>
+
+											<div className="errors">
+												{typeof errors !== undefined && errors && Object.keys(errors).length > 0 && (
+													<Alert color="danger">
+														<ul>
+															{errors?.map((v, k) => (<li key={k}>{v}</li>))}
+														</ul>
+													</Alert>
+												)}
 											</div>
 
 											<div className="flex gap-4 py-4">

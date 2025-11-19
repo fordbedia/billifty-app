@@ -54,6 +54,7 @@ export function BusinessProfileProvider({ children, id, mode }) {
 	const [paymentInfoForm, setPaymentInfoForm] = useState({...paymentInfoInitialState})
 	const [search, setSearch] = useState(null)
 	const [appliedSearch, setAppliedSearch] = useState("");
+	const [errors, setErrors] = useState(null)
 
 	const inputRef = useRef(null);
   const [preview, setPreview] = useState(null);
@@ -133,7 +134,7 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		{key: 'cash_app', label: 'Cash App'}
 	];
 
-	const {mutate: submitForm} = useMutation({
+	const {mutate: submitForm, error: errorSubmit} = useMutation({
 		mutationFn: async () => {
 			const formData = new FormData();
 			// Business Profile
@@ -174,7 +175,7 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		}
 	}, [data]);
 
-	const {mutate: edit} = useMutation({
+	const {mutate: edit, error: errorUpdate} = useMutation({
 		mutationFn: async () => {
 			const formData = new FormData()
 
@@ -204,6 +205,19 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		}
 	}
 
+	useEffect(() => {
+		let e = []
+		console.log('weerer', errorSubmit)
+		if (
+			typeof errorSubmit !== undefined &&
+			errorSubmit?.response?.data?.errors &&
+			Object.keys(errorSubmit?.response?.data?.errors).length > 0
+		) {
+			e = Object.values(errorSubmit?.response?.data?.errors).map(([v, k]) => (v))
+			setErrors(e)
+		}
+	}, [errorSubmit, errorUpdate]);
+
 	const value = {
 		handleClick,
 		handleFileChange,
@@ -221,6 +235,7 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		mode,
 		setSearch,
 		handleSearchKeyDown,
+		errors,
 	}
 	return <BusinessProfileContext.Provider value={value}>
 		{children}
