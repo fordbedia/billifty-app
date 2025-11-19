@@ -14,4 +14,16 @@ export default class BusinessProfile extends Model {
 	static async create(data) {
 		return await this.axios().post('/', data)
 	}
+
+	static async show(id) {
+		return await this.axios().get(`/${id}`)
+	}
+
+	static async update(id, data) {
+		if (data instanceof FormData) {
+			data.append('_method', 'PUT');
+			return await this.axios().post(`/${id}`, data)
+		}
+		return await this.axios().put(`/${id}`, data)
+	}
 }

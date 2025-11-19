@@ -1,6 +1,6 @@
 "use client";
 
-import {createContext, useContext, useRef, useState} from "react";
+import {createContext, useContext, useEffect, useRef, useState} from "react";
 import {Exception} from "sass";
 import {useMutation, useQuery} from "@tanstack/react-query";
 import BusinessProfile from "@/app/models/BusinessProfile";
@@ -8,7 +8,7 @@ import { useRouter, useSearchParams, useParams, usePathname } from "next/navigat
 
 export const BusinessProfileContext = createContext()
 
-export function BusinessProfileProvider({ children }) {
+export function BusinessProfileProvider({ children, id, mode }) {
 	const router = useRouter()
 
 	const paymentInfoInitialState = {
@@ -66,6 +66,17 @@ export function BusinessProfileProvider({ children }) {
 		},
 		retry: false,
 		keepPreviousData: true,
+	})
+
+	// ----------------------------------------------------------------------------
+	// Pull data for edit
+	// ----------------------------------------------------------------------------
+	const {data} = useQuery({
+		queryKey: ['business-profile', id],
+		queryFn: async () => (await BusinessProfile.show(id))?.data,
+		retry: false,
+		keepPreviousData: true,
+		enabled: !!id
 	})
 
 	const handleFormChange = (table, attr, value) => {
@@ -126,6 +137,54 @@ export function BusinessProfileProvider({ children }) {
 		}
 	})
 
+	useEffect(() => {
+		if (data && Object.keys(data).length > 0) {
+			const paymentInfo = {...data.payment_information}
+			const bp = { ...data };
+			delete bp.payment_information
+
+			setBusinessProfileForm(bp)
+			setPaymentInfoForm(paymentInfo)
+
+			if (bp.logo_path) {
+				console.log('sdfdf', `/storage/${bp.logo_path}`)
+				setPreview(`/storage/${bp.logo_path}`)
+			} else {
+				setPreview(null)
+			}
+		}
+	}, [data]);
+
+	const {mutate: edit} = useMutation({
+		mutationFn: async () => {
+			const formData = new FormData()
+
+			Object.entries(businessProfileForm).forEach(([k, v]) => {
+				if (v !== undefined && v !== null) {
+					formData.append(k, v)
+				}
+			})
+			Object.entries(paymentInfoForm).forEach(([key, val]) => {
+				if (val !== undefined && val !== null) {
+					formData.append(`paymentInfo[${key}]`, val);
+				}
+			})
+
+			return await BusinessProfile.update(id, formData)
+		}
+	})
+
+	const save = () => {
+		switch(mode) {
+			case 'new':
+				submitForm()
+				break;
+			case 'edit':
+				edit()
+				break;
+		}
+	}
+
 	const value = {
 		handleClick,
 		handleFileChange,
@@ -139,6 +198,7 @@ export function BusinessProfileProvider({ children }) {
 		businessProfileData,
 		businessProfilePage,
 		setBusinessProfilePage,
+		save,
 	}
 	return <BusinessProfileContext.Provider value={value}>
 		{children}
