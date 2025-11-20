@@ -1,11 +1,12 @@
 "use client"
 
+import {BusinessProfileProvider} from "@/app/providers/BusinessProfileContext";
 import RootLayout from "@/app/components/common/RootLayout";
 import {Button, Card, CardBody, CardHeader, DateRangePicker, Input, Link} from "@heroui/react";
 import TableData from "@/app/components/Table";
 import {useBusinessProfile} from "@/app/providers/BusinessProfileContext";
 
-export default function BusinessProfile () {
+function Component () {
 	const {
 		businessProfileData,
 		businessProfilePage,
@@ -89,4 +90,10 @@ export default function BusinessProfile () {
 			</div>
 		</RootLayout>
 	)
+}
+
+export default function BusinessProfile() {
+	return <BusinessProfileProvider>
+		<Component />
+	</BusinessProfileProvider>
 }

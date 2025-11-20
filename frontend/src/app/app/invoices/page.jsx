@@ -1,5 +1,6 @@
 "use client"
 
+import {InvoiceProvider} from "@/app/providers/InvoiceContext";
 import RootLayout from "@/app/components/common/RootLayout";
 import TableData from "@/app/components/Table";
 import {Button, Card, CardBody, CardHeader, Divider, Link, Input} from "@heroui/react";
@@ -9,7 +10,7 @@ import {Chip, Tooltip} from "@heroui/react";
 import {formattedDate} from "@/app/utils/date";
 import {DateRangePicker} from "@heroui/react";
 
-export default function Invoices() {
+function Component() {
 	const {
 		userInvoices,
 		invoicePage,
@@ -181,4 +182,12 @@ export default function Invoices() {
       </div>
     </RootLayout>
   );
+}
+
+export default function Invoices() {
+	return (
+		<InvoiceProvider mode="list">
+			<Component />
+		</InvoiceProvider>
+	);
 }

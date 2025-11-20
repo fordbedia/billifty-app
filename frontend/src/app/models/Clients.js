@@ -8,4 +8,8 @@ export default class Clients extends Model {
     static async all() {
         return await this.axios().get('/')
     }
+
+		static async allWithPaginate() {
+			return await this.axios().get('/paginate')
+		}
 }
