@@ -5,6 +5,8 @@ import {Card, CardBody, CardHeader, Form, Button, Input, Select, SelectItem, Lin
 import {useRef, useState} from "react";
 import {useBusinessProfile} from "@/app/providers/BusinessProfileContext";
 import ConfirmDelete from "@/app/app/invoice/business-profile/modals/ConfirmDelete";
+import NotFound from "@/app/app/invoice/components/errorPages/NotFound";
+import BSpinner from "@/app/components/Spinner";
 
 export default function BusinessProfileAppForm () {
 	const {
@@ -22,8 +24,23 @@ export default function BusinessProfileAppForm () {
 		isOpenConfirmDeleteModal,
 		onOpenConfirmDeleteModal,
 		onOpenChangeConfirmDeleteModal,
+		isError,
+		isLoading,
 	} = useBusinessProfile()
 
+	if (isLoading) {
+		 return (
+			 <BSpinner />
+		 );
+	}
+
+	if (isError) {
+		return (
+			<RootLayout>
+				<NotFound />
+			</RootLayout>
+		)
+	}
 	return (
 		<RootLayout>
 			<ConfirmDelete />

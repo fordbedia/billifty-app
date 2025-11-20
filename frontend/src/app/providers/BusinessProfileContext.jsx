@@ -97,7 +97,7 @@ export function BusinessProfileProvider({ children, id, mode }) {
 	// ----------------------------------------------------------------------------
 	// Pull data for edit
 	// ----------------------------------------------------------------------------
-	const {data} = useQuery({
+	const {data, isError, isLoading} = useQuery({
 		queryKey: ['business-profile', id],
 		queryFn: async () => (await BusinessProfile.show(id))?.data,
 		retry: false,
@@ -263,6 +263,8 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		onOpenConfirmDeleteModal,
 		onOpenChangeConfirmDeleteModal,
 		deleteBusinessProfile,
+		isError,
+		isLoading,
 	}
 	return <BusinessProfileContext.Provider value={value}>
 		{children}

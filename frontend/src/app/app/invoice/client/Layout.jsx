@@ -4,7 +4,6 @@ import RootLayout from "@/app/components/common/RootLayout";
 import {Card, CardBody, CardHeader, Form, Button, Input, Select, SelectItem, Link, Alert} from "@heroui/react";
 import {useRef, useState} from "react";
 import {useClient} from "@/app/providers/ClientProvider";
-import ConfirmDelete from "@/app/app/invoice/business-profile/modals/ConfirmDelete";
 
 export default function ClientApp () {
 	const {
@@ -13,7 +12,6 @@ export default function ClientApp () {
 
 	return (
 		<RootLayout>
-			<ConfirmDelete />
 			 <div className="m-auto max-w-screen-xl py-5">
           <div className="w-full mb-5">
 						<div className="text-center py-7">

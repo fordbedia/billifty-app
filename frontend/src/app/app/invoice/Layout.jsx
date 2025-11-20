@@ -11,6 +11,7 @@ import Actions from "@/app/app/invoice/components/buttons/Actions";
 import ConfirmIssueInvoiceModal from "@/app/app/invoice/components/modals/ConfirmIssueInvoiceModal";
 import ConfirmNewInvoice from "@/app/app/invoice/components/modals/ConfirmNewInvoice";
 import NotFound from "@/app/app/invoice/components/errorPages/NotFound";
+import BSpinner from "@/app/components/Spinner";
 
 export default function Layout() {
   const {
@@ -20,9 +21,10 @@ export default function Layout() {
     removeItem,
     selectedCurrency,
     invoiceComputed,
-	clearSticky,
-	router,
-	isInvoiceError,
+		clearSticky,
+		router,
+		isInvoiceError,
+		isLoadingInvoice,
   } = useInvoice();
 
   const currencySymbol = selectedCurrency?.symbol ?? "";
@@ -38,6 +40,12 @@ export default function Layout() {
     invoiceComputed?.total_cents ?? data.total_cents ?? 0;
   const discountRow =
     invoiceComputed?.display_discount_row ?? data.display_discount_row ?? null;
+
+	if (typeof isLoadingInvoice !== undefined && isLoadingInvoice) {
+		return (
+			<BSpinner />
+		)
+	}
 
   if (typeof isInvoiceError !== 'undefined' && isInvoiceError) {
 	  return (

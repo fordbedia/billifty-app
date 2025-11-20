@@ -160,7 +160,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	  Object.fromEntries(Object.entries(src).filter(([k]) => PERSIST_KEYS.has(k)));
 
 	const invoiceId = initialId ?? params.id ?? null;
-	const { isFetchingdata, data: fetchedInvoice, isError: isInvoiceError } = useQuery({
+	const { isFetchingdata, data: fetchedInvoice, isError: isInvoiceError, isLoading: isLoadingInvoice } = useQuery({
 		queryKey: ['invoice', invoiceId],
 		enabled: !!invoiceId && mode !== 'new',
 		queryFn: async () => {
@@ -513,6 +513,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			handleDateRangeChange,
 			handleSearchKeyDown,
 			setSearch,
+			isLoadingInvoice,
     }
 
     return <InvoiceContext.Provider value={value}>

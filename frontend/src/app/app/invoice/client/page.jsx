@@ -1,11 +1,12 @@
 "use client"
 
+import {ClientProvider} from "@/app/providers/ClientProvider";
 import {Button, Card, CardBody, CardHeader, Input, Link} from "@heroui/react";
 import RootLayout from "@/app/components/common/RootLayout";
 import TableData from "@/app/components/Table";
 import {useClient} from "@/app/providers/ClientProvider";
 
-export default function ClientsApp() {
+function Component() {
 	const {
 		clients,
 		clientPage,
@@ -82,5 +83,13 @@ export default function ClientsApp() {
 				</div>
 			</div>
 		</RootLayout>
+	)
+}
+
+export default function ClientsApp() {
+	return (
+		<ClientProvider>
+			<Component />
+		</ClientProvider>
 	)
 }
