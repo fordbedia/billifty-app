@@ -9,7 +9,7 @@ export default class Clients extends Model {
         return await this.axios().get('/')
     }
 
-		static async allWithPaginate() {
-			return await this.axios().get('/paginate')
+		static async allWithPaginate(payload) {
+			return await this.axios().get(`/paginate`, {params: payload})
 		}
 }

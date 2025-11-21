@@ -34,15 +34,31 @@ export function ClientProvider({ children, mode, id }) {
 	const {isOpen:confirmDeleteModalIsOpen, onOpen: confirmDeleteModalOnOpen, onOpenChange: confirmDeleteModalOnOpenChange} = useDisclosure();
 
 	const [data, setData] = useState({...initialState})
+	const [search, setSearch] = useState(null)
+	const [appliedSearch, setAppliedSearch] = useState("");
 	const pathname = usePathname()
 	const [clientPage, setClientPage] = useState(1)
 	const [errors, setErrors] = useState(null)
 	const [hasToast, setHasToast] = useState(initialToast)
 
+	const hasSearch = appliedSearch.trim()
+	const handleSearchKeyDown = (e) => {
+		if (e.key === "Enter") {
+			setAppliedSearch(search);
+			setClientPage(1);
+		}
+	}
+
 	const {data: clients} = useQuery({
-		queryKey: ['clients'],
+		queryKey: ['clients', clientPage, hasSearch ? appliedSearch.trim() : null],
 		queryFn: async () => {
-			return (await Clients.allWithPaginate())?.data
+			const params = {
+					page: clientPage
+			}
+			if (hasSearch) {
+				params.search = appliedSearch.trim()
+			}
+			return (await Clients.allWithPaginate(params))?.data
 		},
 		enabled: pathname === '/app/invoice/client',
 		retry: false
@@ -150,6 +166,8 @@ export function ClientProvider({ children, mode, id }) {
 		confirmDeleteModalOnOpenChange,
 		archiveClient,
 		setHasToast,
+		handleSearchKeyDown,
+		setSearch,
 	}
 
 	return <ClientContext.Provider value={value}>

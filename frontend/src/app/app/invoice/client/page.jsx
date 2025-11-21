@@ -11,7 +11,9 @@ function Component() {
 		clients,
 		clientPage,
 		setClientPage,
-		uri
+		uri,
+		handleSearchKeyDown,
+		setSearch
 	} = useClient()
 
 	const column = [
@@ -59,6 +61,8 @@ function Component() {
 														name="search"
 														label="Search"
 														placeholder="Search for business name or email"
+														onValueChange={setSearch}
+														onKeyDown={handleSearchKeyDown}
 													/>
 												</div>
 										</div>

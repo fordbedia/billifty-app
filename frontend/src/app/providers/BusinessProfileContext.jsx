@@ -74,7 +74,7 @@ export function BusinessProfileProvider({ children, id, mode }) {
   const [preview, setPreview] = useState(null);
 
 	const [businessProfilePage, setBusinessProfilePage] = useState(1)
-	const hasSearch = search && Object.keys(search).length > 0;
+	const hasSearch = appliedSearch.trim();
 	const {data: businessProfileData} = useQuery({
 		queryKey: ['business-profiles', businessProfilePage,
 			hasSearch
