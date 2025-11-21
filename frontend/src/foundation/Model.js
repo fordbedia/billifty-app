@@ -41,8 +41,7 @@ export default class Model {
   }
 
   static async find(id) {
-    const res = await this.axios().get(`/${id}`);
-    return res.data;
+		return await this.axios().get(`/${id}`);
   }
 
   static async get(endpoint = '', params = {})
@@ -63,12 +62,11 @@ export default class Model {
   }
 
   static async update(id, data) {
-    const res = await this.axios().put(`/${id}`, data);
-    return res.data;
+		return await this.axios().put(`/${id}`, data);
   }
 
   static async delete(id) {
     const res = await this.axios().delete(`/${id}`);
-    return res.data;
+    return res;
   }
 }

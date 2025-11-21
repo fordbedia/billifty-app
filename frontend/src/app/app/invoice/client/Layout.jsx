@@ -4,14 +4,41 @@ import RootLayout from "@/app/components/common/RootLayout";
 import {Card, CardBody, CardHeader, Form, Button, Input, Select, SelectItem, Link, Alert} from "@heroui/react";
 import {useRef, useState} from "react";
 import {useClient} from "@/app/providers/ClientProvider";
+import NotFound from "@/app/app/invoice/components/errorPages/NotFound";
+import BSpinner from "@/app/components/Spinner";
+import ConfirmDeleteModal from "@/app/app/invoice/client/modals/ConfirmDeleteModal";
 
 export default function ClientApp () {
 	const {
 		mode,
+		handleFieldChange,
+		data,
+		save,
+		errors,
+		isClientDataError,
+		clientDataIsLoading,
+		confirmDeleteModalOnOpen,
 	} = useClient()
+
+	if (typeof clientDataIsLoading !== 'undefined' && clientDataIsLoading) {
+		return (
+			<RootLayout>
+				<BSpinner />
+			</RootLayout>
+		)
+	}
+
+	if (typeof isClientDataError !== 'undefined' && isClientDataError) {
+		return (
+			<RootLayout>
+				<NotFound />
+			</RootLayout>
+		)
+	}
 
 	return (
 		<RootLayout>
+			<ConfirmDeleteModal />
 			 <div className="m-auto max-w-screen-xl py-5">
           <div className="w-full mb-5">
 						<div className="text-center py-7">
@@ -35,6 +62,8 @@ export default function ClientApp () {
 														labelPlacement="outside"
 														description="Who should appear as the main contact on this client's invoices."
 														placeholder="e.g., John Smith"
+														onValueChange={(value) => handleFieldChange('name', value)}
+														value={data.name}
 													/>
 												</div>
 												<div className="w-1/2">
@@ -45,6 +74,8 @@ export default function ClientApp () {
 														labelPlacement="outside"
 														description="Registered business name, if different from the client name."
 														placeholder="e.g., Acme Construction LLC"
+														onValueChange={(value) => handleFieldChange('company', value)}
+														value={data.company}
 													/>
 												</div>
 											</div>
@@ -59,6 +90,8 @@ export default function ClientApp () {
 														labelPlacement="outside"
 														description="We'll use this email to send invoices, quotes, and receipts."
 														placeholder="e.g., billing@acmeconstruction.com"
+														onValueChange={(value) => handleFieldChange('email', value)}
+														value={data.email}
 													/>
 												</div>
 												<div className="w-1/2">
@@ -69,6 +102,8 @@ export default function ClientApp () {
 														labelPlacement="outside"
 														description="Primary contact number for this client."
 														placeholder="e.g., +1 (555) 123-4567"
+														onValueChange={(value) => handleFieldChange('phone', value)}
+														value={data.phone}
 													/>
 												</div>
 											</div>
@@ -82,6 +117,8 @@ export default function ClientApp () {
 														labelPlacement="outside"
 														description="Client's tax identification number (EIN, VAT, or local tax ID), if applicable."
 														placeholder="e.g., 12-3456789"
+														onValueChange={(value) => handleFieldChange('tax_id', value)}
+														value={data.tax_id}
 													/>
 												</div>
 												<div className="w-1/2">
@@ -91,6 +128,8 @@ export default function ClientApp () {
 														labelPlacement="outside"
 														description="Any professional or business license number you'd like to appear on invoices."
 														placeholder="e.g., Contractor license #C-123456"
+														onValueChange={(value) => handleFieldChange('license_no', value)}
+														value={data.license_no}
 													/>
 												</div>
 											</div>
@@ -105,6 +144,8 @@ export default function ClientApp () {
 														labelPlacement="outside"
 														description="Street address, P.O. box, or building name."
 														placeholder="e.g., 123 Main St, Suite 400"
+														onValueChange={(value) => handleFieldChange('address_line1', value)}
+														value={data.address_line1}
 													/>
 												</div>
 												<div className="w-1/2">
@@ -114,6 +155,8 @@ export default function ClientApp () {
 														labelPlacement="outside"
 														description="Apartment, unit, floor, or additional address details (optional)."
 														placeholder="e.g., Building B, Unit 12"
+														onValueChange={(value) => handleFieldChange('address_line2', value)}
+														value={data.address_line2}
 													/>
 												</div>
 											</div>
@@ -127,6 +170,8 @@ export default function ClientApp () {
 														label="City"
 														labelPlacement="outside"
 														placeholder="e.g., Houston"
+														onValueChange={(value) => handleFieldChange('city', value)}
+														value={data.city}
 													/>
 												</div>
 												<div className="w-1/2">
@@ -136,6 +181,8 @@ export default function ClientApp () {
 														label="State / province / region"
 														labelPlacement="outside"
 														placeholder="e.g., TX"
+														onValueChange={(value) => handleFieldChange('state', value)}
+														value={data.state}
 													/>
 												</div>
 											</div>
@@ -149,6 +196,8 @@ export default function ClientApp () {
 														label="Postal / ZIP code"
 														labelPlacement="outside"
 														placeholder="e.g., 77001"
+														onValueChange={(value) => handleFieldChange('postal_code', value)}
+														value={data.postal_code}
 													/>
 												</div>
 												<div className="w-1/2">
@@ -158,28 +207,30 @@ export default function ClientApp () {
 														label="Country"
 														labelPlacement="outside"
 														placeholder="e.g., United States"
+														onValueChange={(value) => handleFieldChange('country', value)}
+														value={data.country}
 													/>
 												</div>
 											</div>
 
 
-											{/*<div className="errors">*/}
-											{/*	{typeof errors !== undefined && errors && Object.keys(errors).length > 0 && (*/}
-											{/*		<Alert color="danger">*/}
-											{/*			<ul>*/}
-											{/*				{errors?.map((v, k) => (<li key={k}>{v}</li>))}*/}
-											{/*			</ul>*/}
-											{/*		</Alert>*/}
-											{/*	)}*/}
-											{/*</div>*/}
+											<div className="errors">
+												{typeof errors !== undefined && errors && Object.keys(errors).length > 0 && (
+													<Alert color="danger" className="mt-7">
+														<ul>
+															{errors?.map((v, k) => (<li key={k}>{v}</li>))}
+														</ul>
+													</Alert>
+												)}
+											</div>
 
 											<div className="flex gap-4 py-4 justify-between">
 												<div>
 													<Button className="mr-2" as={Link} href="/app/invoice/business-profile">{mode === 'new' ? 'Cancel' : 'Back'}</Button>
-													<Button className="mr-2" type="button" color="primary" variant="flat">{mode === 'new' ? 'Submit' : 'Save Changes'}</Button>
+													<Button className="mr-2" type="button" onPress={save} color="primary" variant="flat">{mode === 'new' ? 'Submit' : 'Save Changes'}</Button>
 												</div>
 												<div>
-													{mode === 'edit' && (<Button color="danger">
+													{mode === 'edit' && (<Button color="danger" onPress={confirmDeleteModalOnOpen}>
 														<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
 															<path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
 														</svg>

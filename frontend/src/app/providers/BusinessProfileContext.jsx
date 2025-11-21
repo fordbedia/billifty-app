@@ -6,6 +6,8 @@ import {useMutation, useQuery} from "@tanstack/react-query";
 import BusinessProfile from "@/app/models/BusinessProfile";
 import { useRouter, useSearchParams, useParams, usePathname } from "next/navigation";
 import {useDisclosure} from "@heroui/react";
+import {addToast} from "@heroui/react";
+import {uri} from "@/app/app/constants/routePaths";
 
 export const BusinessProfileContext = createContext()
 
@@ -50,7 +52,13 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		branding_json: '',
 		is_test: '',
 	}
+	const initialToastState = {
+		title: '',
+		message: '',
+		color: 'primary',
+	}
 
+	const [hasToast, setHasToast] = useState(initialToastState)
 	const [businessProfileForm, setBusinessProfileForm] = useState({...businessProfileInitialState})
 	const [paymentInfoForm, setPaymentInfoForm] = useState({...paymentInfoInitialState})
 	const [search, setSearch] = useState(null)
@@ -83,7 +91,6 @@ export function BusinessProfileProvider({ children, id, mode }) {
 			return (await BusinessProfile.paginate(params))?.data
 		},
 		retry: false,
-		keepPreviousData: true,
 		enabled: pathname === '/app/invoice/business-profile'
 	})
 
@@ -101,7 +108,6 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		queryKey: ['business-profile', id],
 		queryFn: async () => (await BusinessProfile.show(id))?.data,
 		retry: false,
-		keepPreviousData: true,
 		enabled: !!id
 	})
 
@@ -159,7 +165,8 @@ export function BusinessProfileProvider({ children, id, mode }) {
 			return await BusinessProfile.create(formData)
 		},
 		onSuccess: () => {
-			window.location.href = '/app/invoice/business-profile'
+			setHasToast({title: 'New business profile has been successfully created!', color: 'success'})
+			router.replace(uri.business_profile.lists)
 		}
 	})
 
@@ -197,6 +204,10 @@ export function BusinessProfileProvider({ children, id, mode }) {
 			})
 
 			return await BusinessProfile.update(id, formData)
+		},
+		onSuccess: () => {
+			setHasToast({title: 'Business profile has been successfully modified!', color: 'success'})
+			router.replace(uri.business_profile.lists)
 		}
 	})
 
@@ -214,7 +225,8 @@ export function BusinessProfileProvider({ children, id, mode }) {
 	const {mutate: deleteBusinessProfile} = useMutation({
 		mutationFn: async () => (await BusinessProfile.archive(id)),
 		onSuccess: () => {
-			window.location.href = '/app/invoice/business-profile'
+			setHasToast({title: 'Business profile has been successfully deleted!', color: 'danger'})
+			router.replace(uri.business_profile.lists)
 		}
 	})
 
@@ -240,6 +252,16 @@ export function BusinessProfileProvider({ children, id, mode }) {
 			handleError(errorUpdate?.response?.data?.errors)
 		}
 	}, [errorSubmit, errorUpdate]);
+
+	useEffect(() => {
+		if (hasToast && hasToast.title !== '') {
+			addToast({
+				title: hasToast.title,
+				description: hasToast.message ?? null,
+				color: hasToast.color
+			});
+		}
+	}, [hasToast])
 
 	const value = {
 		handleClick,
