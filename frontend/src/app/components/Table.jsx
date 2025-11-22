@@ -21,11 +21,12 @@ const getNestedValue = (obj, path) => {
 export default function TableData({
   column = [],
   data = [],
-  page = 1,               // controlled page
-  totalPages = 1,         // from backend (last_page)
+  page = 1, // controlled page
+  totalPages = 1, // from backend (last_page)
   onPageChange,           // callback to change page
   renderCell,             // optional
   renderActions,          // optional
+	paginationColor = 'primary',
 }) {
 	// --- sorting state ---
   const [sortDescriptor, setSortDescriptor] = React.useState({
@@ -93,7 +94,7 @@ export default function TableData({
             isCompact
             showControls  // 👈 adds next/prev buttons
             showShadow
-            color="secondary"
+            color={paginationColor}
             page={page}
             total={totalPages}
             onChange={onPageChange}  // 👈 this will trigger React Query

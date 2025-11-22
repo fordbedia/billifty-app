@@ -12,6 +12,7 @@ import ConfirmIssueInvoiceModal from "@/app/app/invoice/components/modals/Confir
 import ConfirmNewInvoice from "@/app/app/invoice/components/modals/ConfirmNewInvoice";
 import NotFound from "@/app/app/invoice/components/errorPages/NotFound";
 import BSpinner from "@/app/components/Spinner";
+import ConfirmDeleteModal from "@/app/app/invoice/components/modals/ConfirmDeleteModal";
 
 export default function Layout() {
   const {
@@ -58,8 +59,9 @@ export default function Layout() {
   return (
     <RootLayout>
       <div className="app app-wrapper outer-bg">
+				<ConfirmDeleteModal />
         <ConfirmIssueInvoiceModal />
-		<ConfirmNewInvoice />
+				<ConfirmNewInvoice />
         <div className="m-auto max-w-screen-xl py-5">
           <div className="w-full flex mb-5">
             <div className="w-2/3">

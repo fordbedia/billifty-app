@@ -25,6 +25,8 @@ import {toISO} from "@/app/utils/date";
 import TemplateCategory from "@/app/models/TemplateCategory";
 import Template from "@/app/models/Templates";
 import ColorScheme from "@/app/models/ColorScheme";
+import {addToast} from "@heroui/react";
+import {uri} from "@/app/app/constants/routePaths";
 
 const InvoiceContext = createContext(null)
 
@@ -90,6 +92,11 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		meta: '',
 		invoice_items: [],
     };
+	const toastInitialState = {
+		title: '',
+		message: '',
+		color: 'primary'
+	}
 
 	const [selectedCurrency, setSelectedCurrency] = useState({})
 
@@ -97,6 +104,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	const [hasShipping, setHasShipping] = useState(false)
 	const [isEmpty, setIsEmpty] = useState(false);
 	const [isTaxable, setIsTaxable] = useState((data.shipping_tax_rate ?? 0) > 0);
+	const [hasToast, setHasToast] = useState(toastInitialState)
 
 	const STORAGE_KEY = "billifty.invoice.form.v1";
 	const STORAGE_VERSION = 1;
@@ -144,7 +152,6 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			return (await Invoice.invoices(params))?.data
 		},
 		retry: false,
-		keepPreviousData: true,
 	})
 
 	const PERSIST_KEYS = new Set([
@@ -173,6 +180,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	const {isOpen: isOpenTemplate, onOpen: onOpenTemplate, onOpenChange: onOpenChangeTemplate} = useDisclosure();
 	const {isOpen: isOpenColorScheme, onOpen: onOpenColorScheme, onOpenChange: onOpenChangeColorScheme} = useDisclosure();
 	const {isOpen: isOpenConfirmIssueInvoice, onOpen: onOpenConfirmIssueInvoice, onOpenChange: onOpenChangeConfirmIssueInvoice} = useDisclosure();
+	const {isOpen: isOpenConfirmDeleteModal, onOpen: onOpenConfirmDeleteModal, onOpenChange: onOpenChangeConfirmDeleteModal} = useDisclosure();
 
 	const shallowEqualNumbers = (a, b, keys) => {
 		return keys.every(k => (a?.[k] ?? null) === (b?.[k] ?? null));
@@ -419,6 +427,10 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			if (r && r.data) {
 				window.localStorage.removeItem(STORAGE_KEY)
 				setData(prev => ({...prev, status: r?.data?.status}))
+				setHasToast({
+					title: 'Invoice was successfully created!',
+					color: 'success'
+				})
 				router.replace(`/app/invoice/${r.data?.id}`)
 			}
 		}
@@ -432,7 +444,22 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		onSuccess: (r) => {
 			if (r && r.data) {
 				setData(prev => ({...prev, status: r?.data?.status}))
+				setHasToast({
+					title: `Invoice was successfully ${r?.data?.action}!`,
+					color: r?.data?.action === 'issued' ? 'secondary' :'success'
+				})
 			}
+		}
+	})
+
+	const {mutate: deleteInvoice} = useMutation({
+		mutationFn: async () => (await Invoices.delete(invoiceId)).data,
+		onSuccess: () => {
+			setHasToast({
+				title: 'Invoice was successfully deleted!',
+				color: 'danger'
+			})
+			router.replace(uri.invoices)
 		}
 	})
 
@@ -464,6 +491,18 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			}, 500)
 		}
 	}, [clear]);
+
+	useEffect(() => {
+		if (typeof hasToast !== 'undefined' && Object.keys(hasToast).length > 0 && hasToast.title !== '') {
+			addToast({
+				title: hasToast.title,
+				description: hasToast.message ?? null,
+				hideIcon: true,
+				color: hasToast.color,
+				timeout: 4000
+			});
+		}
+	}, [hasToast])
 
     const value = {
 			businessProfileData,
@@ -514,7 +553,9 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			handleSearchKeyDown,
 			setSearch,
 			isLoadingInvoice,
-    }
+			isOpenConfirmDeleteModal, onOpenConfirmDeleteModal, onOpenChangeConfirmDeleteModal,
+			deleteInvoice,
+		}
 
     return <InvoiceContext.Provider value={value}>
         {children}

@@ -32,7 +32,7 @@ export default function ConfirmIssueInvoiceModal() {
                 <Button color="danger" variant="light" onPress={onClose}>
                   Close
                 </Button>
-                <Button color="primary" onPress={() => save('issue', () => onClose())}>
+                <Button color="warning" onPress={() => save('issue', () => onClose())}>
                   Issue Invoice
                 </Button>
               </ModalFooter>

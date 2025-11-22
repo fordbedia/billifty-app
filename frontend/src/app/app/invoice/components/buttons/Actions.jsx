@@ -15,6 +15,7 @@ export default function Actions() {
 		invoiceId,
 		createInvoiceError,
 		updateError,
+		onOpenConfirmDeleteModal,
 	} = useInvoice()
 
 	const confirm = () => {
@@ -55,13 +56,14 @@ export default function Actions() {
 							</Alert>
 						)}
 						{!invoiceId
-							? (<Button onPress={() => save('save_draft')} disableRipple className="my-2" color="primary" variant="flat">Save as Draft</Button>)
-							: (<Button onPress={() => save('save_changes')} disableRipple className="my-2" color="primary" variant="flat">Save Update</Button>)}
+							? (<Button onPress={() => save('save_draft')} disableRipple className="my-2" color="success">Create Invoice</Button>)
+							: (<Button onPress={() => save('save_changes')} disableRipple className="my-2" color="primary" variant="flat">Save Changes</Button>)}
 						{invoiceId && data.status !== 'issued' && (
-							<Button onPress={confirm} isDisabled={!data.id} disableRipple className="my-2" color="success" variant="flat">Issue Invoice</Button>
+							<Button onPress={confirm} isDisabled={!data.id} disableRipple className="my-2" color="warning" variant="flat">Issue Invoice</Button>
 						)}
 						{invoiceId && data.status === 'issued' && (<Button isDisabled={!data.id} disableRipple className="my-2" color="warning" variant="flat">Download</Button>)}
 						{!invoiceId && !isEmpty && (<Button disableRipple className="my-2" color="danger" onPress={clearSticky}>Reset All</Button>)}
+						{invoiceId && (<Button onPress={onOpenConfirmDeleteModal} color="danger">Delete</Button>)}
 					</CardBody>
 			 </Card>
 		</>

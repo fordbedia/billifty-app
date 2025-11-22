@@ -29,8 +29,17 @@ function Component () {
 				)
 
 			case 'payment_information.payment_method':
-				return item.payment_information.payment_method ?? "--"
-
+				switch(item.payment_information.payment_method){
+					case 'bank_transfer':
+						return 'Bank Transfer'
+					case 'paypal':
+						return 'PayPal';
+					case 'stripe':
+						return 'Stripe'
+					case 'cash_app':
+						return 'Cash App'
+				}
+				break;
 		  default:
 				return item[columnKey] ?? "—";
 			}
