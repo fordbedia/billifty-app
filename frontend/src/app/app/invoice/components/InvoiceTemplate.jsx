@@ -25,7 +25,7 @@ export default function InvoiceTemplate() {
 							{(selectedTemplate && Object.keys(selectedTemplate).length === 0) ? (
 							<>
 							{templateCategoryData && Object.keys(templateCategoryData).length > 0 && templateCategoryData.map(t => (
-								<div onClick={() => loadThemeSelector(t.id)} className="inner-box rounded-md px-5 py-3 w-64 mx-3">
+								<div key={t.id} onClick={() => loadThemeSelector(t.id)} className="inner-box rounded-md px-5 py-3 w-64 mx-3">
 									<Image
 										radius="none"
 										priority="true"

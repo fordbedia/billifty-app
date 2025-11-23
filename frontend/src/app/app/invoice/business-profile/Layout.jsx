@@ -189,7 +189,7 @@ export default function BusinessProfileAppForm () {
 														labelPlacement="outside"
 														placeholder="Enter your Legal Name"
 														onValueChange={(value) => handleFormChange('bp', 'legal_name', value)}
-														value={businessProfileForm.legal_name}
+														value={businessProfileForm.legal_name ?? ''}
 													/>
 												</div>
 											</div>
@@ -203,7 +203,7 @@ export default function BusinessProfileAppForm () {
 														labelPlacement="outside"
 														description="Used for tax and business compliance. Leave blank if you don't have one."
 														onValueChange={(value) => handleFormChange('bp', 'tax_id', value)}
-														value={businessProfileForm.tax_id}
+														value={businessProfileForm.tax_id ?? ''}
 													/>
 												</div>
 												<div className="w-1/2">
@@ -214,7 +214,7 @@ export default function BusinessProfileAppForm () {
 														labelPlacement="outside"
 														label="Business or Professional License No. (Optional)"
 														onValueChange={(value) => handleFormChange('bp', 'license_no', value)}
-														value={businessProfileForm.license_no}
+														value={businessProfileForm.license_no ?? ''}
 													/>
 												</div>
 											</div>
@@ -239,7 +239,7 @@ export default function BusinessProfileAppForm () {
 														labelPlacement="outside"
 														placeholder="(555) 123-4567"
 														onValueChange={(value) => handleFormChange('bp', 'phone', value)}
-														value={businessProfileForm.phone}
+														value={businessProfileForm.phone ?? ''}
 													/>
 												</div>
 											</div>
@@ -252,7 +252,7 @@ export default function BusinessProfileAppForm () {
 														labelPlacement="outside"
 														placeholder="Enter your address 1"
 														onValueChange={(value) => handleFormChange('bp', 'address_line1', value)}
-														value={businessProfileForm.address_line1}
+														value={businessProfileForm.address_line1 ?? ''}
 													/>
 												</div>
 												<div className="w-1/2">
@@ -262,7 +262,7 @@ export default function BusinessProfileAppForm () {
 														labelPlacement="outside"
 														placeholder="Enter your address 2"
 														onValueChange={(value) => handleFormChange('bp', 'address_line2', value)}
-														value={businessProfileForm.address_line2}
+														value={businessProfileForm.address_line2 ?? ''}
 													/>
 												</div>
 											</div>
@@ -275,7 +275,7 @@ export default function BusinessProfileAppForm () {
 														labelPlacement="outside"
 														placeholder="Enter your city"
 														onValueChange={(value) => handleFormChange('bp', 'city', value)}
-														value={businessProfileForm.city}
+														value={businessProfileForm.city ?? ''}
 													/>
 												</div>
 												<div className="w-1/2">
@@ -285,7 +285,7 @@ export default function BusinessProfileAppForm () {
 														labelPlacement="outside"
 														placeholder="Enter your state"
 														onValueChange={(value) => handleFormChange('bp', 'state', value)}
-														value={businessProfileForm.state}
+														value={businessProfileForm.state ?? ''}
 													/>
 												</div>
 											</div>
@@ -298,7 +298,7 @@ export default function BusinessProfileAppForm () {
 														labelPlacement="outside"
 														placeholder="10001"
 														onValueChange={(value) => handleFormChange('bp', 'postal_code', value)}
-														value={businessProfileForm.postal_code}
+														value={businessProfileForm.postal_code ?? ''}
 													/>
 												</div>
 												<div className="w-1/2">
@@ -308,7 +308,7 @@ export default function BusinessProfileAppForm () {
 														labelPlacement="outside"
 														placeholder="Enter your country"
 														onValueChange={(value) => handleFormChange('bp', 'country', value)}
-														value={businessProfileForm.country}
+														value={businessProfileForm.country ?? ''}
 													/>
 												</div>
 											</div>
@@ -321,7 +321,7 @@ export default function BusinessProfileAppForm () {
 														labelPlacement="outside"
 														placeholder="Enter website"
 														onValueChange={(value) => handleFormChange('bp', 'website', value)}
-														value={businessProfileForm.website}
+														value={businessProfileForm.website ?? ''}
 													/>
 												</div>
 											</div>
@@ -350,7 +350,7 @@ export default function BusinessProfileAppForm () {
 														labelPlacement="outside"
 														placeholder="Enter your bank name"
 														onValueChange={(value) => handleFormChange('pi', 'bank_name', value)}
-														value={paymentInfoForm.bank_name}
+														value={paymentInfoForm.bank_name ?? ''}
 													/>
 												</div>
 											</div>
@@ -362,7 +362,7 @@ export default function BusinessProfileAppForm () {
 														placeholder="e.g. Ed Bedia or EHD Enterprise LLC"
 														description="Name registered with your bank."
 														onValueChange={(value) => handleFormChange('pi', 'account_name', value)}
-														value={paymentInfoForm.account_name}
+														value={paymentInfoForm.account_name ?? ''}
 													/>
 												</div>
 												<div className="w-1/2">
@@ -372,7 +372,7 @@ export default function BusinessProfileAppForm () {
 														labelPlacement="outside"
 														placeholder="Enter your account number"
 														onValueChange={(value) => handleFormChange('pi', 'account_number', value)}
-														value={paymentInfoForm.account_number}
+														value={paymentInfoForm.account_number ?? ''}
 													/>
 												</div>
 											</div>
@@ -384,7 +384,7 @@ export default function BusinessProfileAppForm () {
 														placeholder="e.g. 026009593"
 														description="9-digit routing number for U.S. bank transfers."
 														onValueChange={(value) => handleFormChange('pi', 'routing_number', value)}
-														value={paymentInfoForm.routing_number}
+														value={paymentInfoForm.routing_number ?? ''}
 													/>
 												</div>
 												<div className="w-1/2">
@@ -394,7 +394,7 @@ export default function BusinessProfileAppForm () {
 															placeholder="e.g. DE89 3704 0044 0532 0130 00"
 															description="Your international bank account number for global transfers."
 															onValueChange={(value) => handleFormChange('pi', 'iban', value)}
-															value={paymentInfoForm.iban}
+															value={paymentInfoForm.iban ?? ''}
 														/>
 												</div>
 											</div>
@@ -406,7 +406,7 @@ export default function BusinessProfileAppForm () {
 														placeholder="e.g. CHASUS33 or BOFAUS3NXXX"
 														description="Unique bank identifier required for international wire transfers."
 														onValueChange={(value) => handleFormChange('pi', 'swift_code', value)}
-														value={paymentInfoForm.swift_code}
+														value={paymentInfoForm.swift_code ?? ''}
 													/>
 												</div>
 
@@ -417,7 +417,7 @@ export default function BusinessProfileAppForm () {
 														placeholder="e.g. billing@mybusiness.com"
 														description="Your PayPal account email for receiving payments."
 														onValueChange={(value) => handleFormChange('pi', 'paypal_email', value)}
-														value={paymentInfoForm.paypal_email}
+														value={paymentInfoForm.paypal_email ?? ''}
 													/>
 
 													{/*<Input*/}
@@ -435,7 +435,7 @@ export default function BusinessProfileAppForm () {
 														placeholder="e.g. $edbedia or $mybusinessname"
 														description="Your Cash App payment identifier. Cashtag starts with $. Email is optional."
 														onValueChange={(value) => handleFormChange('pi', 'cash_app', value)}
-														value={paymentInfoForm.cash_app}
+														value={paymentInfoForm.cash_app ?? ''}
 													/>
 												</div>
 												<div className="w-1/2">
@@ -445,7 +445,7 @@ export default function BusinessProfileAppForm () {
 														description="Paste your Stripe Payment Link or Checkout URL."
 														placeholder="https://buy.stripe.com/..."
 														onValueChange={(value) => handleFormChange('pi', 'stripe_payment_link', value)}
-														value={paymentInfoForm.stripe_payment_link}
+														value={paymentInfoForm.stripe_payment_link ?? ''}
 													/>
 												</div>
 											</div>

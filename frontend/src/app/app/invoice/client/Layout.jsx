@@ -75,7 +75,7 @@ export default function ClientApp () {
 														description="Registered business name, if different from the client name."
 														placeholder="e.g., Acme Construction LLC"
 														onValueChange={(value) => handleFieldChange('company', value)}
-														value={data.company}
+														value={data.company ?? ''}
 													/>
 												</div>
 											</div>
@@ -103,7 +103,7 @@ export default function ClientApp () {
 														description="Primary contact number for this client."
 														placeholder="e.g., +1 (555) 123-4567"
 														onValueChange={(value) => handleFieldChange('phone', value)}
-														value={data.phone}
+														value={data.phone ?? ''}
 													/>
 												</div>
 											</div>
@@ -118,7 +118,7 @@ export default function ClientApp () {
 														description="Client's tax identification number (EIN, VAT, or local tax ID), if applicable."
 														placeholder="e.g., 12-3456789"
 														onValueChange={(value) => handleFieldChange('tax_id', value)}
-														value={data.tax_id}
+														value={data.tax_id ?? ''}
 													/>
 												</div>
 												<div className="w-1/2">
@@ -129,7 +129,7 @@ export default function ClientApp () {
 														description="Any professional or business license number you'd like to appear on invoices."
 														placeholder="e.g., Contractor license #C-123456"
 														onValueChange={(value) => handleFieldChange('license_no', value)}
-														value={data.license_no}
+														value={data.license_no ?? ''}
 													/>
 												</div>
 											</div>
@@ -145,7 +145,7 @@ export default function ClientApp () {
 														description="Street address, P.O. box, or building name."
 														placeholder="e.g., 123 Main St, Suite 400"
 														onValueChange={(value) => handleFieldChange('address_line1', value)}
-														value={data.address_line1}
+														value={data.address_line1 ?? ''}
 													/>
 												</div>
 												<div className="w-1/2">
@@ -156,7 +156,7 @@ export default function ClientApp () {
 														description="Apartment, unit, floor, or additional address details (optional)."
 														placeholder="e.g., Building B, Unit 12"
 														onValueChange={(value) => handleFieldChange('address_line2', value)}
-														value={data.address_line2}
+														value={data.address_line2 ?? ''}
 													/>
 												</div>
 											</div>
@@ -171,7 +171,7 @@ export default function ClientApp () {
 														labelPlacement="outside"
 														placeholder="e.g., Houston"
 														onValueChange={(value) => handleFieldChange('city', value)}
-														value={data.city}
+														value={data.city ?? ''}
 													/>
 												</div>
 												<div className="w-1/2">
@@ -182,7 +182,7 @@ export default function ClientApp () {
 														labelPlacement="outside"
 														placeholder="e.g., TX"
 														onValueChange={(value) => handleFieldChange('state', value)}
-														value={data.state}
+														value={data.state ?? ''}
 													/>
 												</div>
 											</div>
@@ -197,7 +197,7 @@ export default function ClientApp () {
 														labelPlacement="outside"
 														placeholder="e.g., 77001"
 														onValueChange={(value) => handleFieldChange('postal_code', value)}
-														value={data.postal_code}
+														value={data.postal_code ?? ''}
 													/>
 												</div>
 												<div className="w-1/2">
@@ -208,7 +208,7 @@ export default function ClientApp () {
 														labelPlacement="outside"
 														placeholder="e.g., United States"
 														onValueChange={(value) => handleFieldChange('country', value)}
-														value={data.country}
+														value={data.country ?? ''}
 													/>
 												</div>
 											</div>
