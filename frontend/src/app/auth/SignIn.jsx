@@ -1,11 +1,11 @@
 import {Divider} from "@heroui/divider";
-import {Button} from "@heroui/react";
+import {Alert, Button} from "@heroui/react";
 import {Form, Input} from "@heroui/react";
 import React, {useState} from "react";
 import {useApp} from "@/app/providers/AppContext";
 import OptionLinks from "@/app/auth/OptionLinks";
 
-export default function SignIn({ handleFormChange, onSubmit, user }) {
+export default function SignIn({ handleFormChange, onSubmit, user, formErrors }) {
     const [action, setAction] = useState(null);
     const {
 			setSelectedTab,
@@ -58,6 +58,14 @@ export default function SignIn({ handleFormChange, onSubmit, user }) {
 									onValueChange={(v) => handleFormChange('password', v)}
 									value={user.password}
                 />
+
+							<div className="errors">
+									{typeof formErrors !== undefined && formErrors && Object.keys(formErrors).length > 0 && (
+										<Alert color="danger" className="mt-7">
+											{formErrors}
+										</Alert>
+									)}
+								</div>
 
               <div className="flex gap-2 w-full">
                 <Button type="submit" fullWidth radius="sm" className="submit-btn">

@@ -1,7 +1,7 @@
 import React, {
     createContext, Dispatch,
     ReactNode, SetStateAction,
-    useContext,
+    useContext, useEffect,
     useState
 } from 'react'
 import {ValidationErrors} from "@react-types/shared";
@@ -58,7 +58,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
     })
 
-    const {mutate: login} = useMutation({
+    const {mutate: login, error: loginError} = useMutation({
 		mutationFn: async () => (await User.login(user))?.data,
         onSuccess: (d) => {
             storeAuth(d)
@@ -66,6 +66,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 			router.refresh()
         }
 	})
+
+    useEffect(() => {
+        if (loginError) {
+            const e = loginError?.response?.data?.message
+            setErrors(e)
+        }
+    }, [loginError]);
 
     const value = {
         login,

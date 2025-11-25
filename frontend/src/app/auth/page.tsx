@@ -24,6 +24,7 @@ export function Component() {
         handleChange: handleFormSignInChange,
         login,
         user: userValue,
+        errors: loginErrors
     } = useAuth()
 
     const {
@@ -50,6 +51,7 @@ export function Component() {
                                         onSubmit={login}
                                         handleFormChange={handleFormSignInChange}
                                         user={userValue}
+                                        formErrors={loginErrors}
                                     />
                                 </CardBody>
                             </Card>
