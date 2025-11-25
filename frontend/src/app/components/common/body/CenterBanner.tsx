@@ -1,5 +1,5 @@
 import {Button, Link} from "@heroui/react";
-import {path} from "@/constants/routerPaths";
+import {uri} from "@/app/constants/routePaths";
 
 export default function CenterBanner() {
     return (
@@ -13,7 +13,7 @@ export default function CenterBanner() {
                     </p>
                 </div>
                 <div className="max-w-screen-md m-auto my-10">
-                    <Button as={Link} href={path.auth} className="main-button button-size" disableRipple color="default" size="lg">Get Started Free <i className="arrow-right-icon"></i></Button>
+                    <Button as={Link} href={uri.intro} className="main-button button-size" disableRipple color="default" size="lg">Get Started Free <i className="arrow-right-icon"></i></Button>
                 </div>
             </div>
         </div>

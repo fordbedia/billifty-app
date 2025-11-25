@@ -1,5 +1,7 @@
 export const uri = Object.freeze({
 	h: '/',
+	auth: '/auth',
+	intro: '/intro',
 	invoices: '/app/invoices',
 	create_invoice: '/app/invoice/new',
 	// business profile

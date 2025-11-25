@@ -15,13 +15,12 @@ import Image from 'next/image'
 import React, { useState } from "react";
 import { useApp } from '@/app/providers/AppContext';
 import {path} from "@/constants/routerPaths";
+import {uri} from "@/app/constants/routePaths";
 import {auth, AuthResult} from "@/app/helpers/auth";
+import {useAuth} from "@/app/providers/AuthContext";
 
-type UseAppTypes = {
-  isDarkMode: boolean
-}
 export const BilliftyLogo = () => {
-  const { isDarkMode }: UseAppTypes = useApp();
+  const { isDarkMode } = useApp();
   const logo = isDarkMode ? "/images/Billifty-logo.png" : '/images/Billifty-logo-light.png';
   return (
     <Link href={path.lp}><Image
@@ -35,7 +34,11 @@ export const BilliftyLogo = () => {
 };
 
 export default function App() {
-  const [isMenuOpen, setIsMenuOpen] = useState<Boolean>(false);
+  const {
+    logout
+  } = useAuth()
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const { user = null } = auth() ?? {};
 
   const menuItems = [
     "Profile",
@@ -86,10 +89,9 @@ export default function App() {
         </NavbarItem>
         <NavbarItem>
           {!auth() ? (
-          <Button disableRipple as={Link} color="primary" className="main-button" href={path.auth} variant="flat">
+          <Button disableRipple as={Link} color="primary" className="main-button" href={uri.intro} variant="flat">
             Get Started
           </Button>) :
-
           (<Dropdown placement="bottom-end">
           <DropdownTrigger>
             <Avatar
@@ -105,7 +107,7 @@ export default function App() {
           <DropdownMenu aria-label="Profile Actions" variant="flat">
             <DropdownItem key="profile" className="h-14 gap-2">
               <p className="font-semibold">Signed in as</p>
-              <p className="font-semibold">zoey@example.com</p>
+              <p className="font-semibold">{user.email ?? ''}</p>
             </DropdownItem>
             <DropdownItem key="settings">My Settings</DropdownItem>
             <DropdownItem key="team_settings">Team Settings</DropdownItem>
@@ -113,7 +115,7 @@ export default function App() {
             <DropdownItem key="system">System</DropdownItem>
             <DropdownItem key="configurations">Configurations</DropdownItem>
             <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
-            <DropdownItem key="logout" color="danger">
+            <DropdownItem onPress={logout} key="logout" color="danger">
               Log Out
             </DropdownItem>
           </DropdownMenu>

@@ -5,7 +5,7 @@ import {Exception} from "sass";
 import {useMutation, useQuery} from "@tanstack/react-query";
 import Clients from "@/app/models/Clients";
 import {usePathname, useRouter} from "next/navigation";
-import {uri} from "@/app/app/constants/routePaths";
+import {uri} from "@/app/constants/routePaths";
 import {addToast, useDisclosure} from "@heroui/react";
 
 export const ClientContext = createContext(null)

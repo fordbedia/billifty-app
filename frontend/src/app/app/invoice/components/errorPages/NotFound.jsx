@@ -1,5 +1,5 @@
 import {Image, Button, Link} from "@heroui/react";
-import {uri} from "@/app/app/constants/routePaths";
+import {uri} from "@/app/constants/routePaths";
 
 export default function NotFound() {
 	return (

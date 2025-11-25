@@ -115,7 +115,7 @@ function Component() {
 		</div>
   	);
 		return (
-    <RootLayout>
+    <RootLayout isProtected>
       <div className="app app-wrapper outer-bg">
         <div className="m-auto max-w-screen-xl py-5">
           <div className="w-full flex mb-5 gap-4">

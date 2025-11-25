@@ -11,15 +11,30 @@ import React, {
     type SetStateAction,
 } from "react";
 import {useApp} from "@/app/providers/AppContext";
+import {UserProvider, useUser} from "@/app/providers/UserContext";
+import {useAuth} from "@/app/providers/AuthContext";
 
-export default function Authentication() {
+export function Component() {
     const {
         selectedTab,
-        setSelectedTab
+        setSelectedTab,
     } = useApp()
 
+    const {
+        handleChange: handleFormSignInChange,
+        login,
+        user: userValue,
+    } = useAuth()
+
+    const {
+        user,
+		handleChange,
+        saveUser,
+        errors,
+    } = useUser()
+
     return (
-        <RootLayout>
+        <RootLayout isProtected={false}>
             <div className="max-w-screen-sm m-auto my-20">
                 <div className="flex w-full flex-col">
                     <Tabs aria-label="Options"
@@ -31,14 +46,23 @@ export default function Authentication() {
                         <Tab key="signin" title="Sign In">
                             <Card className="auth-tab">
                                 <CardBody>
-                                    <SignIn />
+                                    <SignIn
+                                        onSubmit={login}
+                                        handleFormChange={handleFormSignInChange}
+                                        user={userValue}
+                                    />
                                 </CardBody>
                             </Card>
                         </Tab>
                         <Tab key="signup" title="Sign Up">
                             <Card className="auth-tab">
                                 <CardBody>
-                                     <Signup />
+                                     <Signup
+                                         formErrors={errors}
+                                         user={user}
+                                         handleChange={handleChange}
+                                         save={saveUser}
+                                     />
                                 </CardBody>
                             </Card>
                         </Tab>
@@ -46,5 +70,13 @@ export default function Authentication() {
                 </div>
             </div>
         </RootLayout>
+    )
+}
+
+export default function Authentication() {
+    return (
+        <UserProvider>
+            <Component />
+        </UserProvider>
     )
 }

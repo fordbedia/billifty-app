@@ -5,9 +5,11 @@ import React, {useState} from "react";
 import {useApp} from "@/app/providers/AppContext";
 import OptionLinks from "@/app/auth/OptionLinks";
 
-export default function SignIn() {
+export default function SignIn({ handleFormChange, onSubmit, user }) {
     const [action, setAction] = useState(null);
-    const {setSelectedTab} = useApp()
+    const {
+			setSelectedTab,
+		} = useApp()
     return (
         <div className="auth-wrapper">
             <h2>Welcome back</h2>
@@ -26,6 +28,7 @@ export default function SignIn() {
                 let data = Object.fromEntries(new FormData(e.currentTarget));
 
                 setAction(`submit ${JSON.stringify(data)}`);
+								onSubmit()
               }}
             >
                   <Input
@@ -39,6 +42,8 @@ export default function SignIn() {
                     radius="sm"
                     variant="bordered"
                     size="lg"
+										onValueChange={(v) => handleFormChange('email', v)}
+										value={user.email}
                   />
                 <Input
                   isRequired
@@ -50,6 +55,8 @@ export default function SignIn() {
                   radius="sm"
                   variant="bordered"
                   size="lg"
+									onValueChange={(v) => handleFormChange('password', v)}
+									value={user.password}
                 />
 
               <div className="flex gap-2 w-full">
@@ -57,11 +64,6 @@ export default function SignIn() {
                   Sign In
                 </Button>
               </div>
-              {action && (
-                <div className="text-small text-default-500">
-                  Action: <code>{action}</code>
-                </div>
-              )}
             </Form>
 
             <div className="mt-5 flex justify-center">

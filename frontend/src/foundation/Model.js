@@ -1,6 +1,7 @@
 "use client";
 
 import axios from 'axios';
+import {auth} from "@/app/helpers/auth";
 
 export default class Model {
   static baseURL = process.env.NEXT_PUBLIC_SECURE_URL + '/api/v1'
@@ -17,13 +18,18 @@ export default class Model {
 
   static axios() {
   	const resource = this.resource ?? this.getName()
-		// const token = Auth.getToken()
+		const token = auth()?.token?.replace(/"/g, '').trim() ?? null;
+		const headers = {
+			Accept: 'application/json',
+		};
+
+		if (token) {
+			headers['Authorization'] = 'Bearer ' + token;
+		}
+
     return axios.create({
       baseURL: `${this.baseURL}/${resource}`,
-      headers: {
-        Accept: 'application/json',
-        // Authorization: 'Bearer ' + token,
-      },
+     	headers
     });
   }
 

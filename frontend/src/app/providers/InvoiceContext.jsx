@@ -26,7 +26,7 @@ import TemplateCategory from "@/app/models/TemplateCategory";
 import Template from "@/app/models/Templates";
 import ColorScheme from "@/app/models/ColorScheme";
 import {addToast} from "@heroui/react";
-import {uri} from "@/app/app/constants/routePaths";
+import {uri} from "@/app/constants/routePaths";
 
 const InvoiceContext = createContext(null)
 
@@ -227,9 +227,10 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 				invoice_number: generatedInvoiceNum,
 			}));
 		}
-		if (currencies && Object.keys(currencies).length > 0) {
-			setSelectedCurrency((currencies.filter(f => f.code === 'USD')[0] || currencies[0]))
-		}
+			// Only set if the fetch invoice is not available
+			if (currencies && Object.keys(currencies).length > 0 && !fetchedInvoice?.currency) {
+				setSelectedCurrency((currencies.filter(f => f.code === 'USD')[0] || currencies[0]))
+			}
     }, [generatedInvoiceNum, currencies])
 
     const onDataChange = (attr, val) => setData(prev => ({...prev, [attr]: val}))
@@ -394,6 +395,10 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	  if (fetchedInvoice.shipping_tax_rate) {
 		setIsTaxable(true);
 	  }
+		if (fetchedInvoice?.currency) {
+			console.log('fetchedInvoice?.currency', fetchedInvoice?.currency)
+			setSelectedCurrency(fetchedInvoice?.currency)
+		}
 	}, [fetchedInvoice]);
 
 	// ----------------------------------------------------------------------------

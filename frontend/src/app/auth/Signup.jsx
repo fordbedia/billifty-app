@@ -3,9 +3,10 @@ import {Divider} from "@heroui/divider";
 import {useAuth} from "@/app/providers/AuthContext";
 
 import React from "react";
-import {Form, Input, Select, SelectItem, Checkbox, Button} from "@heroui/react";
+import {Form, Input, Select, SelectItem, Checkbox, Button, Alert} from "@heroui/react";
+import {valueOf} from "axios";
 
-export default function Signup() {
+export default function Signup({ handleChange, user, save, formErrors }) {
     const {
         password,
         setPassword,
@@ -31,44 +32,6 @@ export default function Signup() {
         return null;
     };
 
-      const onSubmit = (e) => {
-        e.preventDefault();
-        setShowValidation(true);
-        const data = Object.fromEntries(new FormData(e.currentTarget));
-
-        // Custom validation checks
-        const newErrors  = {};
-
-        // Password validation
-        const passwordError = getPasswordError(data.password);
-
-        if (passwordError) {
-          newErrors.password = passwordError;
-        }
-
-        // Username validation
-        if (data.name === "admin") {
-          newErrors.name = "Please choose a different name";
-        }
-
-        if (Object.keys(newErrors).length > 0) {
-          setErrors(newErrors);
-
-          return;
-        }
-
-        if (data.terms !== "true") {
-          setErrors({terms: "Please accept the terms"});
-
-          return;
-        }
-
-        // Clear errors and submit
-        setErrors({});
-        setSubmitted(data);
-      };
-
-
     return (
         <div className="auth-wrapper">
             <h2>Create an account</h2>
@@ -84,25 +47,50 @@ export default function Signup() {
               className="w-full justify-center items-center space-y-4"
               validationErrors={errors}
               onReset={() => setSubmitted(null)}
-              onSubmit={onSubmit}
+              onSubmit={(e) => {
+								e.preventDefault();
+								save()
+							}}
             >
               <div className="flex flex-col gap-4 w-full">
                 <Input
                   isRequired
                   errorMessage={({validationDetails}) => {
                     if (validationDetails.valueMissing) {
-                      return "Please enter your name";
+                      return "Please enter your First Name";
                     }
 
-                    return errors.name;
+                    return errors.fname;
                   }}
-                  label="Name"
+                  label="First Name"
                   labelPlacement="outside"
-                  name="name"
+                  name="fname"
                   placeholder="Enter your name"
                   radius="sm"
                   variant="bordered"
                   size="lg"
+									onValueChange={(v) => handleChange('fname', v)}
+									value={user.fname}
+                />
+
+								<Input
+                  isRequired
+                  errorMessage={({validationDetails}) => {
+                    if (validationDetails.valueMissing) {
+                      return "Please enter your Last Name";
+                    }
+
+                    return errors.lname;
+                  }}
+                  label="Last Name"
+                  labelPlacement="outside"
+                  name="lname"
+                  placeholder="Enter your name"
+                  radius="sm"
+                  variant="bordered"
+                  size="lg"
+									onValueChange={(v) => handleChange('lname', v)}
+									value={user.lname}
                 />
 
                 <Input
@@ -123,6 +111,8 @@ export default function Signup() {
                   radius="sm"
                   variant="bordered"
                   size="lg"
+									onValueChange={(v) => handleChange('email', v)}
+									value={user.email}
                 />
 
                 <Input
@@ -134,29 +124,29 @@ export default function Signup() {
                   name="password"
                   placeholder="Enter your password"
                   type="password"
-                  value={password}
-                  onValueChange={setPassword}
+                  value={user.password}
+                  onValueChange={(v) => handleChange('password', v)}
                   radius="sm"
                   variant="bordered"
                   size="lg"
                 />
 
-                <Select
-                  isRequired
-                  label="Country"
-                  labelPlacement="outside"
-                  name="country"
-                  placeholder="Select country"
-                  radius="sm"
-                  variant="bordered"
-                  size="lg"
-                >
-                  <SelectItem key="ar">Argentina</SelectItem>
-                  <SelectItem key="us">United States</SelectItem>
-                  <SelectItem key="ca">Canada</SelectItem>
-                  <SelectItem key="uk">United Kingdom</SelectItem>
-                  <SelectItem key="au">Australia</SelectItem>
-                </Select>
+                {/*<Select*/}
+                {/*  isRequired*/}
+                {/*  label="Country"*/}
+                {/*  labelPlacement="outside"*/}
+                {/*  name="country"*/}
+                {/*  placeholder="Select country"*/}
+                {/*  radius="sm"*/}
+                {/*  variant="bordered"*/}
+                {/*  size="lg"*/}
+                {/*>*/}
+                {/*  <SelectItem key="ar">Argentina</SelectItem>*/}
+                {/*  <SelectItem key="us">United States</SelectItem>*/}
+                {/*  <SelectItem key="ca">Canada</SelectItem>*/}
+                {/*  <SelectItem key="uk">United Kingdom</SelectItem>*/}
+                {/*  <SelectItem key="au">Australia</SelectItem>*/}
+                {/*</Select>*/}
 
                 <Checkbox
                   isRequired
@@ -172,7 +162,15 @@ export default function Signup() {
                   I agree to the terms and conditions
                 </Checkbox>
 
-                {errors.terms && <span className="text-danger text-small">{errors.terms}</span>}
+								<div className="errors">
+									{typeof formErrors !== undefined && formErrors && Object.keys(formErrors).length > 0 && (
+										<Alert color="danger" className="mt-7">
+											<ul>
+												{formErrors?.map((v, k) => (<li key={k}>{v}</li>))}
+											</ul>
+										</Alert>
+									)}
+								</div>
 
                 <div className="flex gap-4">
                   <Button className="w-full submit-btn" fullWidth radius="sm" type="submit">

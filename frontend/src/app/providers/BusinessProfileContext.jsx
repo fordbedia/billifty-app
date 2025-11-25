@@ -7,7 +7,7 @@ import BusinessProfile from "@/app/models/BusinessProfile";
 import { useRouter, useSearchParams, useParams, usePathname } from "next/navigation";
 import {useDisclosure} from "@heroui/react";
 import {addToast} from "@heroui/react";
-import {uri} from "@/app/app/constants/routePaths";
+import {uri} from "@/app/constants/routePaths";
 
 export const BusinessProfileContext = createContext()
 
