@@ -16,6 +16,8 @@ export default function Actions() {
 		createInvoiceError,
 		updateError,
 		onOpenConfirmDeleteModal,
+		isOpenPreviewInvoiceModal, onOpenPreviewInvoiceModal, onOpenChangePreviewInvoiceModal,
+		generatePdf
 	} = useInvoice()
 
 	const confirm = () => {
@@ -64,6 +66,9 @@ export default function Actions() {
 						{invoiceId && data.status === 'issued' && (<Button isDisabled={!data.id} disableRipple className="my-2" color="warning" variant="flat">Download</Button>)}
 						{!invoiceId && !isEmpty && (<Button disableRipple className="my-2" color="danger" onPress={clearSticky}>Reset All</Button>)}
 						{invoiceId && (<Button onPress={onOpenConfirmDeleteModal} color="danger">Delete</Button>)}
+
+						{invoiceId && (<Button className="my-2" color="secondary" onPress={onOpenPreviewInvoiceModal}>Preview Invoice</Button>)}
+						{invoiceId && (<Button onPress={generatePdf} className="my-2" color="primary">Download</Button>)}
 					</CardBody>
 			 </Card>
 		</>

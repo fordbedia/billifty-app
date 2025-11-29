@@ -60,7 +60,7 @@ export default function Signup({ handleChange, user, save, formErrors }) {
                       return "Please enter your First Name";
                     }
 
-                    return errors.fname;
+                    return errors?.fname;
                   }}
                   label="First Name"
                   labelPlacement="outside"
@@ -80,7 +80,7 @@ export default function Signup({ handleChange, user, save, formErrors }) {
                       return "Please enter your Last Name";
                     }
 
-                    return errors.lname;
+                    return errors?.lname;
                   }}
                   label="Last Name"
                   labelPlacement="outside"
@@ -153,7 +153,7 @@ export default function Signup({ handleChange, user, save, formErrors }) {
                   classNames={{
                     label: "text-small",
                   }}
-                  isInvalid={!!errors.terms}
+                  isInvalid={!!errors?.terms}
                   name="terms"
                   validationBehavior="aria"
                   value="true"

@@ -77,4 +77,7 @@ return [
         public_path('storage') => storage_path('app/public'),
     ],
 
+    // which disk to use for invoices
+    'invoice_disk' => env('INVOICE_FILESYSTEM_DISK', 'public'),
+
 ];

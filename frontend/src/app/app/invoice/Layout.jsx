@@ -13,6 +13,7 @@ import ConfirmNewInvoice from "@/app/app/invoice/components/modals/ConfirmNewInv
 import NotFound from "@/app/app/invoice/components/errorPages/NotFound";
 import BSpinner from "@/app/components/Spinner";
 import ConfirmDeleteModal from "@/app/app/invoice/components/modals/ConfirmDeleteModal";
+import InvoicePreviewPage from "@/app/app/invoice/components/InvoicePreviewPage";
 
 export default function Layout() {
   const {
@@ -26,6 +27,7 @@ export default function Layout() {
 		router,
 		isInvoiceError,
 		isLoadingInvoice,
+		invoiceId,
   } = useInvoice();
 
   const currencySymbol = selectedCurrency?.symbol ?? "";
@@ -62,6 +64,7 @@ export default function Layout() {
 				<ConfirmDeleteModal />
         <ConfirmIssueInvoiceModal />
 				<ConfirmNewInvoice />
+				<InvoicePreviewPage invoiceId={invoiceId} />
         <div className="m-auto max-w-screen-xl py-5">
           <div className="w-full flex mb-5">
             <div className="w-2/3">

@@ -64,7 +64,7 @@ export function removeAuth(): void {
   window.localStorage.removeItem("billifty_token");
 }
 
-export function storeAuth(d): void {
+export function storeAuth(d: any): void {
   if (typeof window === "undefined") return;
 
   if (!d && typeof d.user === 'undefined' && typeof d.token === 'undefined') return;

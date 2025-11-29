@@ -181,6 +181,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	const {isOpen: isOpenColorScheme, onOpen: onOpenColorScheme, onOpenChange: onOpenChangeColorScheme} = useDisclosure();
 	const {isOpen: isOpenConfirmIssueInvoice, onOpen: onOpenConfirmIssueInvoice, onOpenChange: onOpenChangeConfirmIssueInvoice} = useDisclosure();
 	const {isOpen: isOpenConfirmDeleteModal, onOpen: onOpenConfirmDeleteModal, onOpenChange: onOpenChangeConfirmDeleteModal} = useDisclosure();
+	const { isOpen: isOpenPreviewInvoiceModal, onOpen: onOpenPreviewInvoiceModal, onOpenChange: onOpenChangePreviewInvoiceModal } = useDisclosure();
 
 	const shallowEqualNumbers = (a, b, keys) => {
 		return keys.every(k => (a?.[k] ?? null) === (b?.[k] ?? null));
@@ -283,6 +284,10 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		queryKey: ['template', data.invoice_template_id],
 		queryFn: async () => (await Template.get(data.invoice_template_id))?.data,
 		enabled: !!data.invoice_template_id, // only fetch when we have an id
+	})
+
+	const {mutate: generatePdf} = useMutation({
+		mutationFn: async () => (await Invoices.generate(invoiceId))?.data
 	})
 
 	const loadThemeSelector = (id = null) => {
@@ -560,6 +565,8 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			isLoadingInvoice,
 			isOpenConfirmDeleteModal, onOpenConfirmDeleteModal, onOpenChangeConfirmDeleteModal,
 			deleteInvoice,
+			isOpenPreviewInvoiceModal, onOpenPreviewInvoiceModal, onOpenChangePreviewInvoiceModal,
+			generatePdf,
 		}
 
     return <InvoiceContext.Provider value={value}>

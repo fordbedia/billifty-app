@@ -157,3 +157,34 @@ footer {
     color: var(--text-font-color);
   }
 }
+
+.invoice-preview-frame {
+  width: 1250px;
+  height: 1100px;
+  border: none;
+  transform-origin: top center;
+}
+
+@media (max-width: 1000px) {
+  .invoice-preview-frame {
+    transform: scale(0.9);
+  }
+}
+
+@media (max-width: 800px) {
+  .invoice-preview-frame {
+    transform: scale(0.75);
+  }
+}
+
+@media (max-width: 600px) {
+  .invoice-preview-frame {
+    transform: scale(0.6);
+  }
+}
+
+@media (max-width: 500px) {
+  .invoice-preview-frame {
+    transform: scale(0.5);
+  }
+}

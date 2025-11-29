@@ -6,7 +6,7 @@ import Body from "@/app/components/common/Body";
 
 export default function Home() {
     return (
-        <RootLayout>
+        <RootLayout isProtected={false}>
             <Body />
         </RootLayout>
     )
