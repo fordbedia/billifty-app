@@ -159,6 +159,19 @@
     margin: 2px 0;
   }
 }
+.congrats-page .check-icon {
+  border-radius: 100%;
+  padding: 22px 22px;
+  background: #22C55E;
+  color: #FFF;
+  .size-6 {
+    width: 80px;
+    height: 80px;
+  }
+}
+.congrats-page .small-icon {
+
+}
 footer {
   p {
     font-family: var(--font-family);

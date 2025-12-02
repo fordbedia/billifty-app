@@ -100,6 +100,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 
 	const exportOptionInitialState = {
 		selectedOption: '',
+		status: null,
 		payload: {
 			message: `Hi {{client.name}},
 				<br /><br />
@@ -310,7 +311,10 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	// Start: Send Invoice Logic: PDF Export
 	// ----------------------------------------------------------------------------
 	const { mutate: generatePdf } = useMutation({
-		mutationFn: async () => (await Invoices.generate(invoiceId))?.data,
+		mutationFn: async () => {
+			setExportOption(prev => ({...prev, status: 'processing'}))
+			return (await Invoices.generate(invoiceId))?.data
+		},
 		onSuccess: (data) => {
 			// data is your API response -> { data: invoice }
 			const invoiceFromApi = data?.data ?? data;
@@ -326,6 +330,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			// 2) Start polling
 			setPollCount(0);
 			setIsExporting(true);
+			setExportOption(prev => ({...prev, status: 'done'}))
 		},
 	});
 
@@ -358,21 +363,18 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		if (!isExporting || !fetchedInvoice) return;
 
 		const status = fetchedInvoice.pdf_status;
-		console.log('current pdf_status:', status);
 
 		if (status === "ready") {
 			setIsExporting(false);
 			downloadInvoicePdf(invoiceId);
 		} else if (status === "failed") {
 			setIsExporting(false);
-			console.error("PDF failed:", fetchedInvoice.pdf_error);
 		} else {
 			// queued/processing
 			setPollCount((prev) => {
 				const next = prev + 1;
 				if (next >= 5) {
 					setIsExporting(false);
-					console.warn("Max polling attempts reached");
 				}
 				return next;
 			});

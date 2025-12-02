@@ -13,13 +13,15 @@ import InvoicePreviewPage from "@/app/app/invoice/components/InvoicePreviewPage"
 import {uri} from "@/app/constants/routePaths";
 import NotFound from "@/app/app/invoice/components/errorPages/NotFound";
 import BSpinner from "@/app/components/Spinner";
+import CongratsScreen from "@/app/app/invoice/[id]/send/CongratsScreen";
 
-function Component({initialId}) {
+function Main({initialId}) {
 	const {
 		isInvoiceError, isLoadingInvoice,
 		onOpenPreviewInvoiceModal,
 		exportOption, setExportOption,
 		generatePdf,
+		data,
 	} = useInvoice()
 
 	const Buttons = () => {
@@ -58,23 +60,9 @@ function Component({initialId}) {
 		)
 	}
 
-	if (typeof isLoadingInvoice !== undefined && isLoadingInvoice) {
-		return (
-			<BSpinner />
-		)
-	}
-
-	if (isInvoiceError) {
-		return (
-			<RootLayout isProtected={true}>
-				<NotFound />
-			</RootLayout>
-		)
-	}
-
-	return (
-			<RootLayout isProtected={true}>
-				<InvoicePreviewPage invoiceId={initialId} />
+	const Body = () => (
+		<>
+			<InvoicePreviewPage invoiceId={initialId} />
 				<div className="app app-wrapper outer-bg">
 					<div className="m-auto max-w-screen-xl py-5">
           	<div className="w-full mb-5">
@@ -153,6 +141,45 @@ function Component({initialId}) {
 						</div>
 					</div>
 				</div>
+		</>
+	)
+
+	const Component = () => {
+		if (typeof isLoadingInvoice !== undefined && isLoadingInvoice) {
+			return <BSpinner />
+		}
+
+		if (isInvoiceError) {
+			return <NotFound />
+		}
+
+		if (exportOption.status === 'done') {
+			return <CongratsScreen
+				invoice={data}
+				options={exportOption}
+				footer={
+					<div className="flex justify-between mt-12 gap-3">
+							<Button as={Link} href={uri.create_invoice} disableRipple className="px-7 py-6 text-white bg-black">
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+									<path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+								</svg>
+								Create New Invoice</Button>
+							<Button onPress={() => setExportOption(prev => ({...prev, selectedOption: '', status: null}))} disableRipple className="px-7 py-6 bg-white text-black border-gray-500 border-1">
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+									<path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15M9 12l3 3m0 0 3-3m-3 3V2.25" />
+								</svg>
+								Re-Export PDF</Button>
+						</div>
+				}
+			/>
+		}
+
+		return <Body/>
+	}
+
+	return (
+			<RootLayout isProtected={true}>
+				<Component />
 			</RootLayout>
 	)
 }
@@ -161,7 +188,7 @@ export default function App({ params }) {
 	const resolveParams = use(params)
 	return (
 		<InvoiceProvider initialId={resolveParams?.id} mode="send">
-			<Component initialId={resolveParams?.id} />
+			<Main initialId={resolveParams?.id} />
 		</InvoiceProvider>
 	)
 }
