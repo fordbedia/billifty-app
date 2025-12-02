@@ -15,6 +15,72 @@ import NotFound from "@/app/app/invoice/components/errorPages/NotFound";
 import BSpinner from "@/app/components/Spinner";
 import CongratsScreen from "@/app/app/invoice/[id]/send/CongratsScreen";
 
+const EXPORT_OPTIONS = [
+  {
+    value: "downloadPdf",
+    title: "Download PDF",
+    description: "Download the PDF directly to your device",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className="size-6"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
+        />
+      </svg>
+    ),
+  },
+  {
+    value: "sendCopyToMe",
+    title: "Send copy to my email",
+    description: "Receive a copy of the invoice in your email inbox",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className="size-6"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
+        />
+      </svg>
+    ),
+  },
+  {
+    value: "directSendToClient",
+    title: "Send directly to client",
+    description: "Send the invoice directly to your client's email address",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className="size-6"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="m15 15 6-6m0 0-6-6m6 6H9a6 6 0 0 0 0 12h3"
+        />
+      </svg>
+    ),
+  },
+];
+
 function Main({initialId}) {
 	const {
 		isInvoiceError, isLoadingInvoice,
@@ -23,6 +89,13 @@ function Main({initialId}) {
 		generatePdf,
 		data,
 	} = useInvoice()
+
+	 const handleSelect = (value) => {
+			setExportOption((prev) => ({
+				...prev,
+				selectedOption: value,
+			}));
+		};
 
 	const Buttons = () => {
 		let button = '';
@@ -75,34 +148,74 @@ function Main({initialId}) {
 							<Card className="export-pdf mt-7">
 								<CardBody className="mx-7 py-8">
 									<h3 className="text-2xl font-bold">Delivery Options</h3>
-									 <RadioGroup
-										 label="Select options for delivery of your invoice"
-										 onValueChange={(v) => setExportOption(prev => ({...prev, selectedOption: v}))}
-									 >
-										 <Radio className="box" value="downloadPdf">
-											 <h2 className="flex items-center gap-2 pb-2 font-semibold">
-												 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-														<path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-													</svg>
-												 Download PDF</h2>
-											 <p className="text-base font-thin">Download the PDF directly to your device</p>
-										 </Radio>
-										 <Radio className="box" value="sendCopyToMe">
-											 <h2 className="flex items-center gap-2 pb-2 font-semibold">
-												 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-														<path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-													</svg>
-												 Send copy to my email</h2>
-											 <p className="text-base font-thin">Receive a copy of the invoice in your email inbox</p>
-										 </Radio>
-										 <Radio className="box" value="directSendToClient">
-											 <h2 className="flex items-center gap-2 pb-2 font-semibold"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-													<path strokeLinecap="round" strokeLinejoin="round" d="m15 15 6-6m0 0-6-6m6 6H9a6 6 0 0 0 0 12h3" />
-												</svg>
-													Send directly to client</h2>
-											 <p className="text-base font-thin">Send the invoice directly to your client's email address</p>
-										 </Radio>
-									</RadioGroup>
+									<div className="w-full">
+										 <fieldset className="space-y-3">
+											<legend className="mb-2 text-sm font-medium text-foreground">
+												Select options for delivery of your invoice
+											</legend>
+
+											<div className="grid gap-3 max-w-screen-lg">
+												{EXPORT_OPTIONS.map((opt) => {
+													const selected = exportOption.selectedOption === opt.value;
+
+													return (
+														<label
+															key={opt.value}
+															className={[
+																"relative flex cursor-pointer flex-col rounded-xl border px-4 py-3",
+																"transition-all duration-150",
+																// base colors
+																"bg-content1/60 border-default-200",
+																// hover glow
+																"hover:border-foreground hover:shadow-md",
+																// focus-visible from the hidden input
+																"focus-within:ring-2 focus-within:ring-foreground focus-within:ring-offset-1",
+																// selected state
+																selected
+																	? "border-foreground bg-content2 shadow-md"
+																	: "border-default-200",
+															].join(" ")}
+														>
+															{/* Native radio input for accessibility */}
+															<input
+																type="radio"
+																name="exportOption"
+																value={opt.value}
+																className="sr-only"
+																checked={selected}
+																onChange={() => handleSelect(opt.value)}
+															/>
+
+															<div className="flex items-start gap-3">
+																<div className="mt-0.5 shrink-0 text-foreground">
+																	{opt.icon}
+																</div>
+																<div>
+																	<h2 className="flex items-center gap-2 pb-1 text-base font-semibold">
+																		{opt.title}
+																	</h2>
+																	<p className="text-sm font-light text-foreground/80">
+																		{opt.description}
+																	</p>
+																</div>
+															</div>
+
+															{/* Optional subtle selected indicator dot */}
+															<span
+																aria-hidden="true"
+																className={[
+																	"pointer-events-none absolute right-4 top-4 h-2.5 w-2.5 rounded-full border",
+																	selected
+																		? "border-foreground bg-foreground"
+																		: "border-default-300 bg-transparent",
+																].join(" ")}
+															/>
+														</label>
+													);
+												})}
+											</div>
+										</fieldset>
+									</div>
 									{exportOption && Object.keys(exportOption).length > 0 && exportOption?.selectedOption === 'directSendToClient' && (
 										<div className="box">
 											<Tiptap
