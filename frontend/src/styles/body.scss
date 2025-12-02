@@ -150,6 +150,15 @@
     }
   }
 }
+.export-pdf {
+  .box {
+    border: 1px solid #a0a0a066;
+    border-radius: 12px;
+    padding: 22px 18px;
+    max-width: 90%;
+    margin: 2px 0;
+  }
+}
 footer {
   p {
     font-family: var(--font-family);

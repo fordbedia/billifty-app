@@ -4,6 +4,8 @@ export const uri = Object.freeze({
 	intro: '/intro',
 	invoices: '/app/invoices',
 	create_invoice: '/app/invoice/new',
+	invoice: (param) => `/app/invoice/${param}`,
+	send_invoice: (param) => `/app/invoice/${param}/send`,
 	// business profile
 	business_profile: {
 		lists: '/app/invoice/business-profile'
@@ -12,5 +14,8 @@ export const uri = Object.freeze({
 	client: {
 		clients: '/app/invoice/client',
 		create_client: '/app/invoice/client/new'
+	},
+	api: {
+		downloadPdf: (invoiceId) => `/api/v1/invoice/${invoiceId}/pdf/download`
 	}
 })

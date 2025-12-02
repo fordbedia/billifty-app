@@ -17,6 +17,8 @@ export default function InvoicePreviewPage({ invoiceId }) {
 	const {data: invoiceUrl, isSuccess} = useQuery({
 		queryKey: ['preview-invoice', invoiceId],
 		queryFn: async () => (await Invoice.preview(invoiceId))?.data,
+		enabled: !!invoiceId,
+		retry: false
 	})
 
   useEffect(() => {
@@ -37,13 +39,13 @@ export default function InvoicePreviewPage({ invoiceId }) {
     );
   }
 
-  if (!previewUrl) {
-    return (
-      <div className="p-4">
-        Loading preview...
-      </div>
-    );
-  }
+  // if (!previewUrl) {
+  //   return (
+  //     <div className="p-4">
+  //       Loading preview...
+  //     </div>
+  //   );
+  // }
 
   return (
 		<Modal

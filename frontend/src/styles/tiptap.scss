@@ -1,0 +1,86 @@
+.tiptap {
+  min-height: 150px;
+  outline: none;
+
+  > * + * {
+    margin-top: 0.75em;
+  }
+
+  /* ✅ Make lists actually look like lists */
+  ul {
+    padding-left: 1.5rem;
+    list-style-type: disc;      /* bullets */
+  }
+
+  ol {
+    padding-left: 1.5rem;
+    list-style-type: decimal;   /* numbers */
+  }
+
+  ul ul,
+  ol ul {
+    list-style-type: circle;    /* nested bullets */
+  }
+
+  ol ol,
+  ul ol {
+    list-style-type: lower-alpha; /* nested numbers */
+  }
+
+  blockquote {
+    border-left: 3px solid #ddd;
+    padding-left: 1rem;
+    font-style: italic;
+  }
+
+  code {
+    background: #f4f4f4;
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+
+  pre {
+    background: #f4f4f4;
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+  h1 {
+    font-size: 34px;
+  }
+  h2 {font-size: 28px;}
+  h3 {font-size: 26px;}
+  h4 {font-size: 24px;}
+  h5 {font-size: 22px;}
+  h6 {font-size: 20px;}
+}
+
+/* Toolbar styles… (keep what you already have) */
+.control-group {
+  margin-bottom: 0.5rem;
+}
+
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.button-group button {
+  background: #f1f1f1;
+  border-radius: 4px;
+  padding: 5px 10px;
+  border: 1px solid #d0d0d0;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.button-group button.is-active {
+  background: #d0d0ff;
+  border-color: #9090ff;
+}
+
+.button-group button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}

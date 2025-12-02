@@ -98,7 +98,25 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		color: 'primary'
 	}
 
+	const exportOptionInitialState = {
+		selectedOption: '',
+		payload: {
+			message: `Hi {{client.name}},
+				<br /><br />
+				Please find attached invoice {{invoice.number}}.
+				Let me know if you have any questions.
+				<br /><br />
+				Thank you,<br />
+				{{businessProfile.contact_name}}`,
+			cc: ''
+		}
+	}
+
+	const [isExporting, setIsExporting] = useState(false);
+  const [pollCount, setPollCount] = useState(0);
+
 	const [selectedCurrency, setSelectedCurrency] = useState({})
+	const [exportOption, setExportOption] = useState(exportOptionInitialState)
 
 	const [data, setData] = useState({...initialState})
 	const [hasShipping, setHasShipping] = useState(false)
@@ -175,6 +193,8 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			return inv ?? null;
 		},
 		retry: false,
+		refetchInterval: isExporting ? 1500 : false,
+  	refetchIntervalInBackground: true,
 	})
 
 	const {isOpen: isOpenTemplate, onOpen: onOpenTemplate, onOpenChange: onOpenChangeTemplate} = useDisclosure();
@@ -286,9 +306,76 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		enabled: !!data.invoice_template_id, // only fetch when we have an id
 	})
 
-	const {mutate: generatePdf} = useMutation({
-		mutationFn: async () => (await Invoices.generate(invoiceId))?.data
-	})
+	const { mutate: generatePdf } = useMutation({
+		mutationFn: async () => (await Invoices.generate(invoiceId))?.data,
+		onSuccess: (data) => {
+			// data is your API response -> { data: invoice }
+			const invoiceFromApi = data?.data ?? data;
+
+			// 1) Optimistically sync the React Query cache
+			queryClient.setQueryData(['invoice', invoiceId], (old) => ({
+				...(old ?? {}),
+				...invoiceFromApi,
+				pdf_status: invoiceFromApi.pdf_status ?? 'queued',
+				pdf_error: null,
+			}));
+
+			// 2) Start polling
+			setPollCount(0);
+			setIsExporting(true);
+		},
+	});
+
+	async function downloadInvoicePdf(invoiceId) {
+		const res = await Invoices.download(invoiceId);
+		// Try to read filename from headers (optional)
+		const contentDisposition = res.headers["content-disposition"];
+		let filename = `invoice-${invoiceId}.pdf`;
+
+		if (contentDisposition) {
+			const match = contentDisposition.match(/filename="?([^"]+)"?/);
+			if (match && match[1]) {
+				filename = match[1];
+			}
+		}
+
+		const blob = new Blob([res.data], { type: "application/pdf" });
+		const url = window.URL.createObjectURL(blob);
+
+		const a = document.createElement("a");
+		a.href = url;
+		a.setAttribute("download", filename);
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+		window.URL.revokeObjectURL(url);
+	}
+
+	useEffect(() => {
+		if (!isExporting || !fetchedInvoice) return;
+
+		const status = fetchedInvoice.pdf_status;
+		console.log('current pdf_status:', status);
+
+		if (status === "ready") {
+			setIsExporting(false);
+			downloadInvoicePdf(invoiceId);
+		} else if (status === "failed") {
+			setIsExporting(false);
+			console.error("PDF failed:", fetchedInvoice.pdf_error);
+		} else {
+			// queued/processing
+			setPollCount((prev) => {
+				const next = prev + 1;
+				if (next >= 5) {
+					setIsExporting(false);
+					console.warn("Max polling attempts reached");
+				}
+				return next;
+			});
+		}
+	}, [fetchedInvoice, isExporting, invoiceId]);
+
 
 	const loadThemeSelector = (id = null) => {
 		const hasTemplate = selectedTemplate && Object.keys(selectedTemplate).length > 0;
@@ -567,6 +654,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			deleteInvoice,
 			isOpenPreviewInvoiceModal, onOpenPreviewInvoiceModal, onOpenChangePreviewInvoiceModal,
 			generatePdf,
+			exportOption, setExportOption,
 		}
 
     return <InvoiceContext.Provider value={value}>

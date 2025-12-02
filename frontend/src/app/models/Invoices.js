@@ -32,4 +32,10 @@ export default class Invoice extends Model{
 	static async generate(invoiceId) {
 		return await this.axios().post(`/${invoiceId}/pdf`)
 	}
+
+	static async download(invoiceId) {
+		return await this.axios().get(`/${invoiceId}/pdf/download`, {
+			responseType: "blob",
+		})
+	}
 }

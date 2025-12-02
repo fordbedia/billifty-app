@@ -4,6 +4,7 @@ import {Card, CardHeader, CardBody, CardFooter, Divider, Link, Image} from "@her
 import {Button} from "@heroui/react";
 import {useInvoice} from "@/app/providers/InvoiceContext";
 import {Alert} from "@heroui/react";
+import {uri} from "@/app/constants/routePaths";
 
 export default function Actions() {
 	const {
@@ -69,6 +70,8 @@ export default function Actions() {
 
 						{invoiceId && (<Button className="my-2" color="secondary" onPress={onOpenPreviewInvoiceModal}>Preview Invoice</Button>)}
 						{invoiceId && (<Button onPress={generatePdf} className="my-2" color="primary">Download</Button>)}
+
+						<Button as={Link} href={uri.send_invoice(invoiceId)} color="success">Send Invoice</Button>
 					</CardBody>
 			 </Card>
 		</>

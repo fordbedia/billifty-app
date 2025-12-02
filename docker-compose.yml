@@ -82,6 +82,13 @@ services:
     ports:
       - "5432:5432"
     networks: [ webnet ]
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    # optional: persist Redis data
+    volumes:
+      - redis-data:/data
+    networks: [ webnet ]
 
   certbot:
     image: certbot/certbot:latest
@@ -108,3 +115,4 @@ volumes:
   storage:
   certbot-www:
   certbot-certs:
+  redis-data:
