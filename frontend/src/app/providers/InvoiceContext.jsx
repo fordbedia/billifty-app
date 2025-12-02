@@ -306,6 +306,9 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		enabled: !!data.invoice_template_id, // only fetch when we have an id
 	})
 
+	// ----------------------------------------------------------------------------
+	// Start: Send Invoice Logic: PDF Export
+	// ----------------------------------------------------------------------------
 	const { mutate: generatePdf } = useMutation({
 		mutationFn: async () => (await Invoices.generate(invoiceId))?.data,
 		onSuccess: (data) => {
@@ -375,6 +378,9 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			});
 		}
 	}, [fetchedInvoice, isExporting, invoiceId]);
+	// ----------------------------------------------------------------------------
+	// End: Send Invoice Logic: PDF Export
+	// ----------------------------------------------------------------------------
 
 
 	const loadThemeSelector = (id = null) => {
