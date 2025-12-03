@@ -113,7 +113,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		}
 	}
 
-	const [isExporting, setIsExporting] = useState(false);
+	const [toGenerateANdDownload, setToGenerateANdDownload] = useState(false);
   const [pollCount, setPollCount] = useState(0);
 
 	const [selectedCurrency, setSelectedCurrency] = useState({})
@@ -194,7 +194,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			return inv ?? null;
 		},
 		retry: false,
-		refetchInterval: isExporting ? 1500 : false,
+		refetchInterval: toGenerateANdDownload ? 1500 : false,
   	refetchIntervalInBackground: true,
 	})
 
@@ -310,6 +310,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	// ----------------------------------------------------------------------------
 	// Start: Send Invoice Logic: PDF Export
 	// ----------------------------------------------------------------------------
+	// Download PDF
 	const { mutate: generatePdf } = useMutation({
 		mutationFn: async () => {
 			setExportOption(prev => ({...prev, status: 'processing'}))
@@ -329,7 +330,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 
 			// 2) Start polling
 			setPollCount(0);
-			setIsExporting(true);
+			setToGenerateANdDownload(true);
 			setExportOption(prev => ({...prev, status: 'done'}))
 		},
 	});
@@ -360,26 +361,37 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	}
 
 	useEffect(() => {
-		if (!isExporting || !fetchedInvoice) return;
+		if (!toGenerateANdDownload || !fetchedInvoice) return;
 
 		const status = fetchedInvoice.pdf_status;
 
 		if (status === "ready") {
-			setIsExporting(false);
+			setToGenerateANdDownload(false);
 			downloadInvoicePdf(invoiceId);
 		} else if (status === "failed") {
-			setIsExporting(false);
+			setToGenerateANdDownload(false);
 		} else {
 			// queued/processing
 			setPollCount((prev) => {
 				const next = prev + 1;
 				if (next >= 5) {
-					setIsExporting(false);
+					setToGenerateANdDownload(false);
 				}
 				return next;
 			});
 		}
-	}, [fetchedInvoice, isExporting, invoiceId]);
+	}, [fetchedInvoice, toGenerateANdDownload, invoiceId]);
+	// Send Copy to my email
+	const { mutate: sendCopyToMyEmail } = useMutation({
+		mutationFn: async () => {
+			console.log('invoiceId', invoiceId)
+			setExportOption(prev => ({...prev, status: 'processing'}))
+			return (await Invoice.sendCopyToBusinessProfile(invoiceId))?.data
+		},
+		onSuccess: () => {
+			setExportOption(prev => ({...prev, status: 'done'}))
+		}
+	})
 	// ----------------------------------------------------------------------------
 	// End: Send Invoice Logic: PDF Export
 	// ----------------------------------------------------------------------------
@@ -663,6 +675,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			isOpenPreviewInvoiceModal, onOpenPreviewInvoiceModal, onOpenChangePreviewInvoiceModal,
 			generatePdf,
 			exportOption, setExportOption,
+			sendCopyToMyEmail,
 		}
 
     return <InvoiceContext.Provider value={value}>

@@ -88,6 +88,7 @@ function Main({initialId}) {
 		exportOption, setExportOption,
 		generatePdf,
 		data,
+		sendCopyToMyEmail,
 	} = useInvoice()
 
 	 const handleSelect = (value) => {
@@ -110,7 +111,7 @@ function Main({initialId}) {
 			)
 		} else if (exportOption?.selectedOption === 'sendCopyToMe') {
 			button = (
-				<Button variant="flat" disableRipple className="py-6 px-5 text-lg font-medium ml-2 bg-black text-white">
+				<Button onPress={sendCopyToMyEmail} variant="flat" disableRipple className="py-6 px-5 text-lg font-medium ml-2 bg-black text-white">
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
 						<path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
 					</svg>
@@ -141,20 +142,20 @@ function Main({initialId}) {
           	<div className="w-full mb-5">
 							<div className="mt-5 flex justify-center items-center flex-wrap flex-col gap-4">
 								<Image width="64" height="64" quality={100} priority src="/images/pdf-icon-b.png" alt="PDF Icon" />
-								<h3 className="text-4xl font-bold">PDF Export Options</h3>
-								<p className="text-xl font-thin">Customize your PDF export settings and choose how you'd like to share your invoice.</p>
+								<h3 className="text-4xl font-bold subpixel-antialiased">PDF Export Options</h3>
+								<p className="text-xl font-thin subpixel-antialiased">Customize your PDF export settings and choose how you'd like to share your invoice.</p>
 							</div>
 
-							<Card className="export-pdf mt-7">
+							<Card fullWidth className="export-pdf mt-7">
 								<CardBody className="mx-7 py-8">
-									<h3 className="text-2xl font-bold">Delivery Options</h3>
+									<h3 className="text-2xl font-bold subpixel-antialiased">Delivery Options</h3>
 									<div className="w-full">
-										 <fieldset className="space-y-3">
-											<legend className="mb-2 text-sm font-medium text-foreground">
+										 <fieldset className="space-y-3 mr-12">
+											<legend className="mb-2 text-base subpixel-antialiased font-extralight text-foreground pb-4">
 												Select options for delivery of your invoice
 											</legend>
 
-											<div className="grid gap-3 max-w-screen-lg">
+											<div className="grid gap-3">
 												{EXPORT_OPTIONS.map((opt) => {
 													const selected = exportOption.selectedOption === opt.value;
 

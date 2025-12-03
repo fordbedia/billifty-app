@@ -26,7 +26,7 @@ export default class Invoice extends Model{
 	}
 
 	static async preview(invoiceId) {
-		return await this.axios().get(`/${invoiceId}/preview-url`)
+		return await this.axios().get(`/${invoiceId}/preview-pdf`)
 	}
 
 	static async generate(invoiceId) {
@@ -37,5 +37,9 @@ export default class Invoice extends Model{
 		return await this.axios().get(`/${invoiceId}/pdf/download`, {
 			responseType: "blob",
 		})
+	}
+
+	static async sendCopyToBusinessProfile(invoiceId) {
+		return await this.axios().post(`/${invoiceId}/pdf/send-copy-to-business-profile`)
 	}
 }

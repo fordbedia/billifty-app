@@ -39,19 +39,11 @@ export default function InvoicePreviewPage({ invoiceId }) {
     );
   }
 
-  // if (!previewUrl) {
-  //   return (
-  //     <div className="p-4">
-  //       Loading preview...
-  //     </div>
-  //   );
-  // }
-
   return (
 		<Modal
         isOpen={isOpenPreviewInvoiceModal}
         onOpenChange={onOpenChangePreviewInvoiceModal}
-        size="full" // big modal
+        size="5xl" // big modal
         scrollBehavior="inside"
       >
         <ModalContent>

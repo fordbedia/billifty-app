@@ -45,3 +45,9 @@ Full command inside Docker:
 ```shell
 docker compose exec backend php artisan queue:work redis --tries=3 --timeout=90
 ```
+
+## Creating an Observer
+```shell
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec backend \ 
+php artisan billifty:make observer InvoiceObserver --module=Invoicing
+```
