@@ -92,7 +92,7 @@ function Main({ initialId }) {
     data,
     sendCopyToMyEmail,
     exportMessage,
-    setExportMessage,
+    setExportMessage, sendToClient,
   } = useInvoice();
 
   const handleSelect = (value) => {
@@ -158,6 +158,7 @@ function Main({ initialId }) {
     } else if (exportOption?.selectedOption === "directSendToClient") {
       button = (
         <Button
+					onPress={sendToClient}
           variant="flat"
           disableRipple
           className="py-6 px-5 text-lg font-medium ml-2 bg-black text-white"
