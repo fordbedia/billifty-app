@@ -42,4 +42,10 @@ export default class Invoice extends Model{
 	static async sendCopyToBusinessProfile(invoiceId) {
 		return await this.axios().post(`/${invoiceId}/pdf/send-copy-to-business-profile`)
 	}
+
+	static async directlySendToClient(invoiceId, message) {
+		return await this.axios().post(`/${invoiceId}/pdf/send-to-client`, {
+			message
+		})
+	}
 }

@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import "@/styles/tiptap.scss"
-import React from "react"
-import { EditorContent, useEditor, useEditorState } from "@tiptap/react"
-import StarterKit from "@tiptap/starter-kit"
+import "@/styles/tiptap.scss";
+import React, { useRef, useState, useEffect } from "react";
+import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
 
-const extensions = [StarterKit]
+const extensions = [StarterKit];
 
 function MenuBar({ editor }) {
-  if (!editor) return null
+  if (!editor) return null;
 
   const editorState = useEditorState({
     editor,
@@ -37,7 +37,7 @@ function MenuBar({ editor }) {
           isBlockquote: false,
           canUndo: false,
           canRedo: false,
-        }
+        };
       }
 
       return {
@@ -63,11 +63,11 @@ function MenuBar({ editor }) {
         isBlockquote: editor.isActive("blockquote") ?? false,
         canUndo: editor.can().chain().undo().run() ?? false,
         canRedo: editor.can().chain().redo().run() ?? false,
-      }
+      };
     },
-  })
+  });
 
-  if (!editorState) return null
+  if (!editorState) return null;
 
   return (
     <div className="control-group">
@@ -113,37 +113,49 @@ function MenuBar({ editor }) {
           Paragraph
         </button>
         <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 1 }).run()
+          }
           className={editorState.isHeading1 ? "is-active" : ""}
         >
           H1
         </button>
         <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 2 }).run()
+          }
           className={editorState.isHeading2 ? "is-active" : ""}
         >
           H2
         </button>
         <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 3 }).run()
+          }
           className={editorState.isHeading3 ? "is-active" : ""}
         >
           H3
         </button>
         <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 4 }).run()
+          }
           className={editorState.isHeading4 ? "is-active" : ""}
         >
           H4
         </button>
         <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 5 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 5 }).run()
+          }
           className={editorState.isHeading5 ? "is-active" : ""}
         >
           H5
         </button>
         <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 6 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 6 }).run()
+          }
           className={editorState.isHeading6 ? "is-active" : ""}
         >
           H6
@@ -172,7 +184,9 @@ function MenuBar({ editor }) {
         >
           Blockquote
         </button>
-        <button onClick={() => editor.chain().focus().setHorizontalRule().run()}>
+        <button
+          onClick={() => editor.chain().focus().setHorizontalRule().run()}
+        >
           Horizontal rule
         </button>
         <button onClick={() => editor.chain().focus().setHardBreak().run()}>
@@ -192,33 +206,67 @@ function MenuBar({ editor }) {
         </button>
       </div>
     </div>
-  )
+  );
 }
 
-export default function TipTap({ value, onChange }) {
-  const editor = useEditor({
-    extensions,
-    content: value ?? `
-<h2>
-  Hi there,
-</h2>
-<p>
-  This is a <em>basic</em> example of <strong>Tiptap</strong>.
-</p>
-`,
-    immediatelyRender: false, // 👈 avoids SSR hydration mismatches
-    onUpdate({ editor }) {
-      onChange?.(editor.getHTML())
-    },
-  })
+/**
+ * TipTap
+ *
+ * - `initialValue`: HTML string used ONLY at mount time.
+ * - `onCommit(html)`: called when the editor loses focus (blur) so you can
+ *   sync the final value to context / API.
+ */
+export default function TipTap({ initialValue, onCommit }) {
+  // Keep a local copy of the content while typing
+  const [localValue, setLocalValue] = useState(initialValue || "");
 
-  // Don’t render until editor exists (Next.js SSR-safe)
-  if (!editor) return null
+  // Freeze initial content for TipTap so it doesn’t re-init on re-renders
+  const initialContentRef = useRef(
+    initialValue ||
+      `
+      <p>Hi {{client.name}},</p>
+      <p>Please find attached invoice {{invoice.number}}. Let me know if you have any questions.</p>
+      <p>Thank you,<br/>{{businessProfile.contact_name}}</p>
+    `
+  );
+
+  const lastHtmlRef = useRef(initialContentRef.current);
+
+  const editor = useEditor(
+    {
+      extensions,
+      content: initialContentRef.current,
+      immediatelyRender: false, // avoid SSR hydration mismatch
+      onUpdate({ editor }) {
+        const html = editor.getHTML();
+        lastHtmlRef.current = html;
+        // update local only, not context
+        setLocalValue(html);
+      },
+    },
+    [] // create the editor once
+  );
+
+  // When the prop initialValue changes (e.g. you reset the form), update editor once
+  useEffect(() => {
+    if (editor && initialValue && initialValue !== lastHtmlRef.current) {
+      editor.commands.setContent(initialValue);
+      lastHtmlRef.current = initialValue;
+      setLocalValue(initialValue);
+    }
+  }, [initialValue, editor]);
+
+  if (!editor) return null;
+
+  const handleBlur = () => {
+    // Commit to parent/context only when user leaves the editor
+    onCommit?.(lastHtmlRef.current);
+  };
 
   return (
-    <div>
+    <div className="tiptap-root">
       <MenuBar editor={editor} />
-      <EditorContent editor={editor} />
+      <EditorContent editor={editor} onBlur={handleBlur} />
     </div>
-  )
+  );
 }

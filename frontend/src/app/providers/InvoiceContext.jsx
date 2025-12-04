@@ -1,13 +1,13 @@
 "use client";
 
 import React, {
-    createContext, Dispatch,
-    ReactNode, SetStateAction,
-    useContext,
-    useState,
-    useEffect,
+	createContext, Dispatch,
+	ReactNode, SetStateAction,
+	useContext,
+	useState,
+	useEffect,
 	Suspense,
-	useMemo
+	useMemo, use
 } from 'react'
 import {
   useDisclosure
@@ -104,14 +104,15 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		payload: {
 			message: `Hi {{client.name}},
 				<br /><br />
-				Please find attached invoice {{invoice.number}}.
-				Let me know if you have any questions.
+				I'm sharing invoice {{invoice.number}} with you in the attached file. If anything needs adjustment or if you have any questions, just let me know—I’m here to assist.
 				<br /><br />
-				Thank you,<br />
-				{{businessProfile.contact_name}}`,
+				Warm regards,<br />
+				{{businessProfile.name}}`,
 			cc: ''
 		}
 	}
+
+	const [exportMessage, setExportMessage] = useState(exportOptionInitialState.payload.message);
 
 	const [toGenerateANdDownload, setToGenerateANdDownload] = useState(false);
   const [pollCount, setPollCount] = useState(0);
@@ -384,9 +385,18 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	// Send Copy to my email
 	const { mutate: sendCopyToMyEmail } = useMutation({
 		mutationFn: async () => {
-			console.log('invoiceId', invoiceId)
 			setExportOption(prev => ({...prev, status: 'processing'}))
 			return (await Invoice.sendCopyToBusinessProfile(invoiceId))?.data
+		},
+		onSuccess: () => {
+			setExportOption(prev => ({...prev, status: 'done'}))
+		}
+	})
+
+	const {mutate: sendToClient} = useMutation({
+		mutationFn: async () => {
+			setExportOption(prev => ({...prev, status: 'processing'}))
+			return (await Invoice.directlySendToClient(invoiceId, exportMessage))
 		},
 		onSuccess: () => {
 			setExportOption(prev => ({...prev, status: 'done'}))
@@ -675,7 +685,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			isOpenPreviewInvoiceModal, onOpenPreviewInvoiceModal, onOpenChangePreviewInvoiceModal,
 			generatePdf,
 			exportOption, setExportOption,
-			sendCopyToMyEmail,
+			sendCopyToMyEmail, exportMessage, setExportMessage, sendToClient,
 		}
 
     return <InvoiceContext.Provider value={value}>
