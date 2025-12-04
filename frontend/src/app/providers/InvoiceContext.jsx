@@ -104,14 +104,15 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		payload: {
 			message: `Hi {{client.name}},
 				<br /><br />
-				Please find attached invoice {{invoice.number}}.
-				Let me know if you have any questions.
+				I'm sharing invoice {{invoice.number}} with you in the attached file. If anything needs adjustment or if you have any questions, just let me know—I’m here to assist.
 				<br /><br />
-				Thank you,<br />
+				Warm regards,<br />
 				{{businessProfile.contact_name}}`,
 			cc: ''
 		}
 	}
+
+	const [exportMessage, setExportMessage] = useState(exportOptionInitialState.payload.message);
 
 	const [toGenerateANdDownload, setToGenerateANdDownload] = useState(false);
   const [pollCount, setPollCount] = useState(0);
@@ -675,7 +676,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			isOpenPreviewInvoiceModal, onOpenPreviewInvoiceModal, onOpenChangePreviewInvoiceModal,
 			generatePdf,
 			exportOption, setExportOption,
-			sendCopyToMyEmail,
+			sendCopyToMyEmail, exportMessage, setExportMessage,
 		}
 
     return <InvoiceContext.Provider value={value}>
