@@ -400,6 +400,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		},
 		onSuccess: () => {
 			setExportOption(prev => ({...prev, status: 'done'}))
+			setExportMessage(exportOptionInitialState.payload.message)
 		}
 	})
 	// ----------------------------------------------------------------------------
