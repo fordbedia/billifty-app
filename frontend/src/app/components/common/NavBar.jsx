@@ -85,7 +85,7 @@ export default function App() {
       {/*</NavbarContent>*/}
       <NavbarContent justify="end">
         <NavbarItem className="hidden lg:flex">
-          <Link href="#" className="inline-menu-color">Pricing</Link>
+          <Link href={uri.pricing} className="inline-menu-color">Pricing</Link>
         </NavbarItem>
         <NavbarItem>
           {!auth() ? (

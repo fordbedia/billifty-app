@@ -172,6 +172,10 @@
 .congrats-page .small-icon {
 
 }
+.bg-premium-color {
+  background-color: #1F2937;
+  color: #FFF;
+}
 footer {
   p {
     font-family: var(--font-family);
@@ -185,6 +189,10 @@ footer {
   height: 1100px;
   border: none;
   transform-origin: top center;
+}
+.btn-colored {
+  background-color: #4F46E5;
+  color: #fff;
 }
 
 @media (max-width: 1000px) {
