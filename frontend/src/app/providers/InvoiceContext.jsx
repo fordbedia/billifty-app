@@ -119,6 +119,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 
 	const [selectedCurrency, setSelectedCurrency] = useState({})
 	const [exportOption, setExportOption] = useState(exportOptionInitialState)
+	const [hasCsvReport, setHasCsvReport] = useState(false)
 
 	const [data, setData] = useState({...initialState})
 	const [hasShipping, setHasShipping] = useState(false)
@@ -386,7 +387,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	const { mutate: sendCopyToMyEmail } = useMutation({
 		mutationFn: async () => {
 			setExportOption(prev => ({...prev, status: 'processing'}))
-			return (await Invoice.sendCopyToBusinessProfile(invoiceId))?.data
+			return (await Invoice.sendCopyToBusinessProfile(invoiceId, hasCsvReport))?.data
 		},
 		onSuccess: () => {
 			setExportOption(prev => ({...prev, status: 'done'}))
@@ -686,7 +687,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			isOpenPreviewInvoiceModal, onOpenPreviewInvoiceModal, onOpenChangePreviewInvoiceModal,
 			generatePdf,
 			exportOption, setExportOption,
-			sendCopyToMyEmail, exportMessage, setExportMessage, sendToClient,
+			sendCopyToMyEmail, exportMessage, setExportMessage, sendToClient, hasCsvReport, setHasCsvReport
 		}
 
     return <InvoiceContext.Provider value={value}>

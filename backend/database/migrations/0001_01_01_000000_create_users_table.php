@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            // Need to set nullable for super admin, admin, moderator, etc.
+            $table->unsignedBigInteger('plan_id')->nullable();
             $table->string('fname')->nullable();
             $table->string('lname')->nullable();
             $table->string('name');
@@ -23,9 +25,13 @@ return new class extends Migration
             $table->string('provider')->nullable();
             $table->string('provider_id')->nullable()->index();
             $table->text('avatar')->nullable();
+            $table->tinyInteger('is_test')->default(0);
 
             $table->rememberToken();
             $table->timestamps();
+
+            $table->foreign('plan_id')->references('id')->on('plans')
+                ->onDelete('cascade');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

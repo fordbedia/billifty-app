@@ -5,7 +5,7 @@ import Layout from "@/app/app/invoice/Layout";
 import { InvoiceProvider } from "@/app/providers/InvoiceContext";
 import RootLayout from "@/app/components/common/RootLayout";
 import Image from "next/image";
-import { Button, Card, CardBody, CardFooter, Link } from "@heroui/react";
+import {Button, Card, CardBody, CardFooter, Checkbox, CheckboxGroup, Link} from "@heroui/react";
 import { Divider } from "@heroui/divider";
 import Tiptap from "@/app/components/wysiwyg/TipTap";
 import { useInvoice } from "@/app/providers/InvoiceContext";
@@ -92,7 +92,7 @@ function Main({ initialId }) {
     data,
     sendCopyToMyEmail,
     exportMessage,
-    setExportMessage, sendToClient,
+    setExportMessage, sendToClient, hasCsvReport, setHasCsvReport
   } = useInvoice();
 
   const handleSelect = (value) => {
@@ -278,15 +278,27 @@ function Main({ initialId }) {
                   </fieldset>
                 </div>
 
+								<div className="mt-6"></div>
+
                 {exportOption &&
                   Object.keys(exportOption).length > 0 &&
                   exportOption?.selectedOption === "directSendToClient" && (
-                    <div className="box mt-6">
+                    <div className="box">
                       <Tiptap
                         initialValue={exportMessage}
                         onCommit={setExportMessage}
                       />
                     </div>
+                  )}
+
+								{exportOption &&
+                  Object.keys(exportOption).length > 0 &&
+                  exportOption?.selectedOption === "sendCopyToMe" && (
+                    <div className="flex flex-col gap-3">
+											<Checkbox color="primary" isSelected={hasCsvReport} onValueChange={setHasCsvReport}>
+												Include a CSV report for this invoice
+											</Checkbox>
+										</div>
                   )}
               </CardBody>
 

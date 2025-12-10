@@ -68,7 +68,6 @@ export default function ClientApp () {
 												</div>
 												<div className="w-1/2">
 													<Input
-														isRequired
 														name="company"
 														label="Company / organization (legal name)"
 														labelPlacement="outside"
@@ -96,7 +95,6 @@ export default function ClientApp () {
 												</div>
 												<div className="w-1/2">
 													<Input
-														isRequired
 														name="phone"
 														label="Phone number"
 														labelPlacement="outside"
@@ -138,7 +136,6 @@ export default function ClientApp () {
 											<div className="flex gap-4 mt-4">
 												<div className="w-1/2">
 													<Input
-														isRequired
 														name="address_line1"
 														label="Address line 1"
 														labelPlacement="outside"
@@ -165,7 +162,6 @@ export default function ClientApp () {
 											<div className="flex gap-4 mt-4">
 												<div className="w-1/2">
 													<Input
-														isRequired
 														name="city"
 														label="City"
 														labelPlacement="outside"
@@ -176,7 +172,6 @@ export default function ClientApp () {
 												</div>
 												<div className="w-1/2">
 													<Input
-														isRequired
 														name="state"
 														label="State / province / region"
 														labelPlacement="outside"
@@ -191,7 +186,6 @@ export default function ClientApp () {
 											<div className="flex gap-4 mt-4">
 												<div className="w-1/2">
 													<Input
-														isRequired
 														name="postal_code"
 														label="Postal / ZIP code"
 														labelPlacement="outside"
@@ -202,7 +196,6 @@ export default function ClientApp () {
 												</div>
 												<div className="w-1/2">
 													<Input
-														isRequired
 														name="country"
 														label="Country"
 														labelPlacement="outside"
