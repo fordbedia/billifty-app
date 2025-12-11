@@ -16,4 +16,8 @@ export default class User extends Model {
 		static async login(data) {
 			return await this.axios().post('/login', data)
 		}
+
+		static async me() {
+			return await this.axios().get('/me')
+		}
 }

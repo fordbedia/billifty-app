@@ -2,10 +2,15 @@
 
 import React, {useState} from "react";
 import RootLayout from "@/app/components/common/RootLayout";
+import { useRouter, usePathname } from "next/navigation";
 import {Button, Card, CardBody, Divider, Image, Tab, Tabs} from "@heroui/react";
 import {useQuery} from "@tanstack/react-query";
 import Plans from "@/app/models/Plans";
 import CompareFeaturesTable from "@/app/app/invoice/pricing/CompareFeaturesTable";
+import {useApp} from "@/app/providers/AppContext";
+import { auth } from "@/app/helpers/auth";
+import {router} from "next/client";
+import {uri} from "@/app/constants/routePaths";
 
 export type BillingCycle = "monthly" | "yearly"
 
@@ -26,13 +31,19 @@ export type Plan = {
 };
 
 export default function Pricing() {
-
+    const {
+        userData,
+        isErrorUserData,
+    } = useApp()
+    const session = auth()
+    const router = useRouter()
     const [cycleType, setCycleType] = useState<BillingCycle>("monthly")
+    const planCapabilities = userData?.plan_capabilities ?? []
 
     const {data} = useQuery<Plan[]>({
         queryKey: ["plan"],
         queryFn: async () => (await Plans.allPlans())?.data,
-        retry: false
+        retry: false,
     })
 
     const moveToCompareSection = () => {
@@ -41,10 +52,23 @@ export default function Pricing() {
         window.scrollTo({top: scrollY, behavior: 'smooth'});
     }
 
-    const styles = '';
+    const proceedToPlan = (plan: string): void => {
+        if (Array.isArray(planCapabilities) && planCapabilities.length === 0) {
+            // Redirect to checkout
+            console.log('redirecting to checkout')
+            router.replace(`${uri.checkout}/?plan=${plan}`)
+            return;
+        }
+        if (! session) {
+            // Redirect to the login page
+            console.log('redirecting to auth')
+            router.replace(`${uri.auth}/?plan=${plan}`)
+            return;
+        }
+    }
 
     return (
-        <RootLayout isProtected={true}>
+        <RootLayout>
             <div className="flex justify-center items-center gap-4 flex-col">
                 <div className="max-w-xl text-center pt-10">
                     <h1 className="subpixel-antialiased font-semibold text-5xl py-3">Simple pricing for powerful invoices</h1>
@@ -102,7 +126,7 @@ export default function Pricing() {
                                 <div className="flex flex-row items-baseline"><h2 className="py-1 text-6xl font-semibold pr-2">${p.billing[cycleType]?.price}</h2> /{cycleType === 'monthly' ? 'month' : 'year'}</div>
                                 <h3 className="font-extralight subpixel-antialiased">{p.actions?.text1}</h3>
 
-                                <Button className={'my-8 py-6 font-semibold text-lg ' + (p.code === 'pro'
+                                <Button onPress={() => proceedToPlan(p.code)} className={'my-8 py-6 font-semibold text-lg ' + (p.code === 'pro'
                                     ? 'bg-blue-600 text-white' : p.code === 'premium'
                                     ? 'text-black bg-white' : '')} disableRipple>{p.actions?.btn}</Button>
 

@@ -7,7 +7,7 @@ import {uri} from "@/app/constants/routePaths";
 
 export default function App () {
 	return (
-		<RootLayout>
+		<RootLayout isProtected={false}>
 			<div className="max-w-screen-xl m-auto my-20">
 				<div className="flex w-full mx-12">
 					<div className="w-1/2">

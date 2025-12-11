@@ -444,7 +444,7 @@ function Main({ initialId }) {
   };
 
   return (
-    <RootLayout isProtected={true}>
+    <RootLayout>
       <Component />
     </RootLayout>
   );

@@ -3,6 +3,7 @@ export const uri = Object.freeze({
 	auth: '/auth',
 	intro: '/intro',
 	pricing: '/app/invoice/pricing',
+	checkout: '/app/checkout',
 	invoices: '/app/invoices',
 	create_invoice: '/app/invoice/new',
 	invoice: (param) => `/app/invoice/${param}`,

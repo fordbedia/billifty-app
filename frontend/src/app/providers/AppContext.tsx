@@ -11,6 +11,9 @@ import React, {
 } from 'react';
 import {types} from "sass";
 import Boolean = types.Boolean;
+import {useQuery} from "@tanstack/react-query";
+import User from "@/app/models/User";
+import { auth } from "@/app/helpers/auth";
 
 type AppProviderProps = {
   children: ReactNode
@@ -18,7 +21,7 @@ type AppProviderProps = {
 
 type Theme = "light" | "dark" | "system";
 
-export interface User {
+export interface UserInterface {
   id: string;
   name: string;
   email?: string;
@@ -27,24 +30,35 @@ export interface User {
 interface AppContextValue {
   theme: Theme;
   setTheme: Dispatch<SetStateAction<Theme>>;
-  user: User | null;
-  setUser: Dispatch<SetStateAction<User | null>>;
+  user: UserInterface | null;
+  setUser: Dispatch<SetStateAction<UserInterface | null>>;
   isDarkMode: boolean;
   selectedTab: string;
   setSelectedTab: Dispatch<SetStateAction<string>>;
+  userData: Record<string, any>;
+  isUserDataLoading: boolean
+  isErrorUserData: boolean
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children } : AppProviderProps) {
   const [theme, setTheme] = useState<Theme>('light');
-  const [user, setUser]   = useState<User | null>(null);
+  const [user, setUser]   = useState<UserInterface | null>(null);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<string>('signin')
+  const session = auth()
   // SignUp
   const [password, setPassword] = useState("");
   const [submitted, setSubmitted] = useState(null);
   const [errors, setErrors] = useState({});
+
+  const {data: userData, isLoading: isUserDataLoading, isError: isErrorUserData} = useQuery({
+    queryKey: ['me'],
+    queryFn: async () => (await User.me())?.data,
+    retry: false,
+    enabled: !!session
+  })
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -79,8 +93,9 @@ export function AppProvider({ children } : AppProviderProps) {
     setUser,
     isDarkMode,
     selectedTab,
-    setSelectedTab
-  }), [theme, user, selectedTab]);
+    setSelectedTab,
+    userData, isUserDataLoading, isErrorUserData
+  }), [theme, user, selectedTab, userData, isUserDataLoading, isErrorUserData]);
   return <AppContext.Provider value={value}>
     {children}
   </AppContext.Provider>;

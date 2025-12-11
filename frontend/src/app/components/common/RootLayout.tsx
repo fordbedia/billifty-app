@@ -6,13 +6,12 @@ import ProtectedLayout from "@/app/services/components/ProtectedLayout";
 
 type RootLayoutProps = {
     children?: ReactNode,
-    isProtected: boolean
 }
 
-export default function RootLayout({ children, isProtected = false } : RootLayoutProps) {
+export default function RootLayout({ children } : RootLayoutProps) {
     return (
         <>
-            <ProtectedLayout isProtected={isProtected}>
+            <ProtectedLayout>
                 <Header />
                 <Divider className="divider-color fixed" />
                 {children}

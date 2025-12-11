@@ -22,7 +22,7 @@ export default function ClientApp () {
 
 	if (typeof clientDataIsLoading !== 'undefined' && clientDataIsLoading) {
 		return (
-			<RootLayout isProtectedt>
+			<RootLayout>
 				<BSpinner />
 			</RootLayout>
 		)
@@ -30,14 +30,14 @@ export default function ClientApp () {
 
 	if (typeof isClientDataError !== 'undefined' && isClientDataError) {
 		return (
-			<RootLayout isProtected>
+			<RootLayout>
 				<NotFound />
 			</RootLayout>
 		)
 	}
 
 	return (
-		<RootLayout isProtected>
+		<RootLayout>
 			<ConfirmDeleteModal />
 			 <div className="m-auto max-w-screen-xl py-5">
           <div className="w-full mb-5">

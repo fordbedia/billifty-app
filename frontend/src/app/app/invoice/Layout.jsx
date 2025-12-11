@@ -52,14 +52,14 @@ export default function Layout() {
 
   if (typeof isInvoiceError !== 'undefined' && isInvoiceError) {
 	  return (
-		  <RootLayout isProtected>
+		  <RootLayout>
 		  	<NotFound />
 		  </RootLayout>
 	  )
   }
 
   return (
-    <RootLayout isProtected>
+    <RootLayout>
       <div className="app app-wrapper outer-bg">
 				<ConfirmDeleteModal />
         <ConfirmIssueInvoiceModal />

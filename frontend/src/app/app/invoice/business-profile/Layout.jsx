@@ -36,13 +36,13 @@ export default function BusinessProfileAppForm () {
 
 	if (isError) {
 		return (
-			<RootLayout isProtected>
+			<RootLayout>
 				<NotFound />
 			</RootLayout>
 		)
 	}
 	return (
-		<RootLayout isProtected>
+		<RootLayout>
 			<ConfirmDelete />
 			 <div className="m-auto max-w-screen-xl py-5">
           <div className="w-full mb-5">

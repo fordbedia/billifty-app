@@ -13,7 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
         apiPrefix: 'api',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+       $middleware->alias([
+           'plan.capability' => \BilliftySDK\SharedResources\Modules\User\Http\Middleware\EnsurePlanCapability::class,
+           'plan.limit' => \BilliftySDK\SharedResources\Modules\User\Http\Middleware\EnsurePlanLimit::class,
+       ]);
     })
      ->withProviders([
         App\Providers\AppServiceProvider::class,
