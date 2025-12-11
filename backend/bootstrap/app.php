@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
        $middleware->alias([
            'plan.capability' => \BilliftySDK\SharedResources\Modules\User\Http\Middleware\EnsurePlanCapability::class,
            'plan.limit' => \BilliftySDK\SharedResources\Modules\User\Http\Middleware\EnsurePlanLimit::class,
+           'auth' => \App\Http\Middleware\Authenticate::class,
        ]);
     })
      ->withProviders([

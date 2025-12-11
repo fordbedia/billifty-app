@@ -24,6 +24,7 @@ return new class extends Migration
 
             $table->string('provider')->nullable();
             $table->string('provider_id')->nullable()->index();
+            $table->string('stripe_customer_id')->nullable()->index();
             $table->text('avatar')->nullable();
             $table->tinyInteger('is_test')->default(0);
 
