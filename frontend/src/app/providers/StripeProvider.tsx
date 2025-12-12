@@ -26,6 +26,7 @@ type StripeContextValue = {
   billingCycle: BillingCycle;
   setBillingCycle: (cycle: BillingCycle) => void;
   clientSecret: string | null;
+  subscriptionId: string | null;
   isLoading: boolean;
   isError: boolean;
   errorMessage: string | null;
@@ -56,6 +57,7 @@ export function StripeProvider({
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] =
     useState<BillingCycle>(initialBillingCycle);
+  const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
 
   const createIntentMutation = useMutation({
     mutationFn: async (cycle: BillingCycle) =>
@@ -65,6 +67,7 @@ export function StripeProvider({
       }),
     onSuccess: (data) => {
       setClientSecret(data.client_secret);
+      setSubscriptionId(data.subscription_id ?? null);  // 👈 save it
     },
   });
 
@@ -90,19 +93,13 @@ export function StripeProvider({
     }
   };
 
-  // useEffect(() => {
-  //   const plan = searchParams.get('plan');
-  //   if (plan === 'pro' || plan === 'premium') {
-  //     setPlan(plan)
-  //   }
-  // }, [searchParams])
-
   const value = useMemo<StripeContextValue>(
     () => ({
       planCode,
       billingCycle,
       setBillingCycle,
       clientSecret,
+      subscriptionId,
       isLoading: createIntentMutation.isPending,
       isError: Boolean(createIntentMutation.error),
       errorMessage:
@@ -115,6 +112,7 @@ export function StripeProvider({
       planCode,
       billingCycle,
       clientSecret,
+      subscriptionId,
       createIntentMutation.isPending,
       createIntentMutation.error,
       openBillingPortal,

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             // Need to set nullable for super admin, admin, moderator, etc.
-            $table->unsignedBigInteger('plan_id')->nullable();
+            $table->unsignedBigInteger('plan_id')->default(1)->nullable();
             $table->string('fname')->nullable();
             $table->string('lname')->nullable();
             $table->string('name');

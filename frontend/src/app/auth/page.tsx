@@ -35,7 +35,7 @@ export function Component() {
     } = useUser()
 
     return (
-        <RootLayout isProtected={false}>
+        <RootLayout>
             <div className="max-w-screen-sm m-auto my-20">
                 <div className="flex w-full flex-col">
                     <Tabs aria-label="Options"

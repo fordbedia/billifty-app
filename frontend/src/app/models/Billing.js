@@ -40,4 +40,10 @@ export default class Billing extends Model {
     const res = await this.axios().post("/portal-session");
     return res.data;
   }
+
+	static async confirmSubscription(payload) {
+		const res = await this.axios().post("/confirm-subscription", payload);
+		return res.data;
+	}
+
 }

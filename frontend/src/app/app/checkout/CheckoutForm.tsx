@@ -8,7 +8,8 @@ import {
 } from "@stripe/react-stripe-js";
 import { useStripeBilling } from "@/app/providers/StripeProvider";
 import BSpinner from "@/app/components/Spinner";
-import {uri} from "@/app/constants/routePaths";
+import { uri } from "@/app/constants/routePaths";
+import Billing from "@/app/models/Billing";
 
 export default function CheckoutForm() {
   const stripe = useStripe();
@@ -20,37 +21,84 @@ export default function CheckoutForm() {
     setBillingCycle,
     isLoading,
     openBillingPortal,
+    subscriptionId,
   } = useStripeBilling();
 
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
     setError(null);
 
-    if (!stripe || !elements) {
+    if (!stripe || !elements) return;
+    if (!subscriptionId) {
+      setErrorMessage("No subscription prepared. Please reload the page.");
       return;
     }
 
+    setIsSubmitting(true);
     setSubmitting(true);
 
-    const { error: stripeError } = await stripe.confirmPayment({
+    // 1) Confirm the payment with Stripe (no redirect)
+    const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${process.env.NEXT_PUBLIC_SECURE_URL}${uri.checkout_success}`,
+        // optional: return_url if you want redirect fallback
       },
+      redirect: "if_required",
     });
 
-    if (stripeError) {
-      setError(stripeError.message ?? "Payment failed. Please try again.");
+    if (error) {
+      setErrorMessage(error.message ?? "Payment failed.");
+      setIsSubmitting(false);
       setSubmitting(false);
       return;
     }
 
-    setSuccess(true);
-    setSubmitting(false);
+    if (!paymentIntent || paymentIntent.status !== "succeeded") {
+      setErrorMessage(
+        `Payment is not completed yet (status: ${
+          paymentIntent?.status ?? "unknown"
+        }).`
+      );
+      setIsSubmitting(false);
+      setSubmitting(false);
+      return;
+    }
+
+    // 2) Notify backend that subscription is now truly active
+    try {
+      await Billing.confirmSubscription({
+        subscription_id: subscriptionId,
+        plan_code: planCode,
+        billing_cycle: billingCycle,
+        // 👇 NEW: send the PaymentIntent ID so backend can verify with Stripe
+        payment_intent_id: paymentIntent.id,
+      });
+
+      setSuccess(true);
+
+      // 3) Optional: refetch /me so plan_capabilities updates
+      // e.g. queryClient.invalidateQueries(['me'])
+
+      // 4) Redirect to success / dashboard
+      window.location.href = uri.checkout_success; // adjust path as needed
+    } catch (err: any) {
+      console.error(err);
+      const msg =
+        err?.response?.data?.message ??
+        err?.message ??
+        "Failed to finalize your subscription.";
+      setErrorMessage(msg);
+    } finally {
+      setIsSubmitting(false);
+      setSubmitting(false);
+    }
   };
 
   const displayPrice = () => {
@@ -80,6 +128,9 @@ export default function CheckoutForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <PaymentElement />
 
+          {errorMessage && (
+            <p className="text-xs text-red-500 mt-2">{errorMessage}</p>
+          )}
           {error && (
             <p className="text-xs text-red-500 mt-2">
               {error}
@@ -159,9 +210,7 @@ export default function CheckoutForm() {
           </div>
 
           <div className="flex items-baseline gap-2 mb-2">
-            <span className="text-2xl font-bold">
-              {displayPrice()}
-            </span>
+            <span className="text-2xl font-bold">{displayPrice()}</span>
             <span className="text-xs text-slate-300">
               / {billingCycle === "monthly" ? "month" : "year"}
             </span>
