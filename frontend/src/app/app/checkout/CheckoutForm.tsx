@@ -73,7 +73,7 @@ export default function CheckoutForm() {
 
     // 2) Notify backend that subscription is now truly active
     try {
-      await Billing.confirmSubscription({
+      const c = await Billing.confirmSubscription({
         subscription_id: subscriptionId,
         plan_code: planCode,
         billing_cycle: billingCycle,
@@ -82,6 +82,7 @@ export default function CheckoutForm() {
       });
 
       setSuccess(true);
+      sessionStorage.setItem("success_checkout", JSON.stringify(c));
 
       // 3) Optional: refetch /me so plan_capabilities updates
       // e.g. queryClient.invalidateQueries(['me'])

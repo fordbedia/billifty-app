@@ -3,15 +3,36 @@
 import RootLayout from "@/app/components/common/RootLayout";
 import Image from "next/image";
 import {Button, Card, CardBody} from "@heroui/react";
+import {useEffect} from "react";
+import {uri} from "@/app/constants/routePaths";
+
+const rawSession = sessionStorage.getItem('success_checkout');
+const session = rawSession ? JSON.parse(rawSession) : null;
 
 export default function CheckoutSuccessPage() {
+    if (!session || typeof session.subscription === 'undefined') {
+        window.location.href = uri.h;
+        return;
+    }
+
+    const planLabel =
+          session.subscription?.plan_code
+            ? session.subscription.plan_code.charAt(0).toUpperCase() +
+              session.subscription.plan_code.slice(1).toLowerCase()
+            : '';
+    const cycle = session.subscription?.billing_cycle
+            ? session.subscription?.billing_cycle.charAt(0).toUpperCase() + session.subscription?.billing_cycle.slice(1).toLowerCase()
+            : ''
+    const cents = session.subscription?.unit_amount
+    const dollars = cents / 100;
+
     return (
         <RootLayout>
             <div className="flex justify-center flex-col items-center gap-4 mx-8 md:mx-0">
                 <div className="md:max-w-4xl text-center justify-items-center">
                     <Image src="/images/check-icon-success.png" alt="Check Success Icon" width="216" height="216" />
                     <h2 className="text-6xl font-bold subpixel-antialiased">Congratulations! 🎉</h2>
-                    <h3 className="pt-4 text-2xl font-extralight subpixel-antialiased">You've successfully subscribed to the <strong className="font-semibold text-indigo-600">Pro Plan</strong></h3>
+                    <h3 className="pt-4 text-2xl font-extralight subpixel-antialiased">You've successfully subscribed to the <strong className="font-semibold text-indigo-600">{planLabel} Plan</strong></h3>
 
                     <p className="pt-4 text-lg subpixel-antialiased font-extralight">Welcome to Billifty Pro! Your account has been upgraded and you now have access to all premium features. Start creating professional invoices right away.</p>
 
@@ -21,17 +42,17 @@ export default function CheckoutSuccessPage() {
                                 <div className="text-center justify-items-center">
                                     <Image src="/images/checkout/premium-plan-icon.png" alt="Pro Plan Icon" width="64" height="64" />
                                     <h2 className="text-base font-bold subpixel-antialiased pt-2">Plan Type</h2>
-                                    <h3 className="text-base font-extralight subpixel-antialiased">Pro Plan</h3>
+                                    <h3 className="text-base font-extralight subpixel-antialiased">{planLabel} Plan</h3>
                                 </div>
                                 <div className="text-center justify-items-center">
                                     <Image src="/images/checkout/billing-monthly-icon.png" alt="Pro Plan Icon" width="64" height="64" />
                                     <h2 className="text-base font-bold subpixel-antialiased pt-2">Billing Cycle</h2>
-                                    <h3 className="text-base font-extralight subpixel-antialiased">Monthly</h3>
+                                    <h3 className="text-base font-extralight subpixel-antialiased">{cycle}</h3>
                                 </div>
                                 <div className="text-center justify-items-center">
                                     <Image src="/images/checkout/dollar-icon.png" alt="Pro Plan Icon" width="64" height="64" />
                                     <h2 className="text-base font-bold subpixel-antialiased pt-2">Amount Paid</h2>
-                                    <h3 className="text-base font-extralight subpixel-antialiased">$4.99/month</h3>
+                                    <h3 className="text-base font-extralight subpixel-antialiased">${dollars}/{cycle}</h3>
                                 </div>
                             </div>
                         </CardBody>
