@@ -10,6 +10,7 @@ export const PUBLIC_ROUTES: string[] = [
   uri.intro,          // your intro page
   uri.auth,          // login/register
   uri.pricing,       // pricing page
+  uri.checkout_success,
 ];
 
 /**

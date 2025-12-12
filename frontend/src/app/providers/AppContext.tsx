@@ -95,7 +95,7 @@ export function AppProvider({ children } : AppProviderProps) {
     selectedTab,
     setSelectedTab,
     userData, isUserDataLoading, isErrorUserData
-  }), [theme, user, selectedTab, userData, isUserDataLoading, isErrorUserData]);
+  }), [theme, user,isDarkMode, selectedTab, userData, isUserDataLoading, isErrorUserData]);
   return <AppContext.Provider value={value}>
     {children}
   </AppContext.Provider>;

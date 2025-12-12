@@ -1,0 +1,91 @@
+"use client"
+
+import RootLayout from "@/app/components/common/RootLayout";
+import Image from "next/image";
+import {Button, Card, CardBody} from "@heroui/react";
+
+export default function CheckoutSuccessPage() {
+    return (
+        <RootLayout>
+            <div className="flex justify-center flex-col items-center gap-4 mx-8 md:mx-0">
+                <div className="md:max-w-4xl text-center justify-items-center">
+                    <Image src="/images/check-icon-success.png" alt="Check Success Icon" width="216" height="216" />
+                    <h2 className="text-6xl font-bold subpixel-antialiased">Congratulations! 🎉</h2>
+                    <h3 className="pt-4 text-2xl font-extralight subpixel-antialiased">You've successfully subscribed to the <strong className="font-semibold text-indigo-600">Pro Plan</strong></h3>
+
+                    <p className="pt-4 text-lg subpixel-antialiased font-extralight">Welcome to Billifty Pro! Your account has been upgraded and you now have access to all premium features. Start creating professional invoices right away.</p>
+
+                    <Card className="max-w-screen-2xl mt-6 mb-7">
+                        <CardBody>
+                            <div className="flex flex-row flex-wrap justify-center items-center md:gap-30 gap-12 py-7 px-12">
+                                <div className="text-center justify-items-center">
+                                    <Image src="/images/checkout/premium-plan-icon.png" alt="Pro Plan Icon" width="64" height="64" />
+                                    <h2 className="text-base font-bold subpixel-antialiased pt-2">Plan Type</h2>
+                                    <h3 className="text-base font-extralight subpixel-antialiased">Pro Plan</h3>
+                                </div>
+                                <div className="text-center justify-items-center">
+                                    <Image src="/images/checkout/billing-monthly-icon.png" alt="Pro Plan Icon" width="64" height="64" />
+                                    <h2 className="text-base font-bold subpixel-antialiased pt-2">Billing Cycle</h2>
+                                    <h3 className="text-base font-extralight subpixel-antialiased">Monthly</h3>
+                                </div>
+                                <div className="text-center justify-items-center">
+                                    <Image src="/images/checkout/dollar-icon.png" alt="Pro Plan Icon" width="64" height="64" />
+                                    <h2 className="text-base font-bold subpixel-antialiased pt-2">Amount Paid</h2>
+                                    <h3 className="text-base font-extralight subpixel-antialiased">$4.99/month</h3>
+                                </div>
+                            </div>
+                        </CardBody>
+                    </Card>
+
+                    <div className="mb-10">
+                        <Button className="text-md bg-indigo-600 text-white px-12 py-7 rounded-lg" disableRipple target="_blank" rel="noreferrer">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                            </svg>
+                            View Invoice Dashboard
+                        </Button>
+                    </div>
+
+                    <div className="clear-both"></div>
+
+                    <Card className="max-w-screen-2xl mt-6 mb-7 bg-blue-100 mx-8 md:mx-0">
+                        <CardBody>
+                            <h2 className="text-xl font-bold text-center pt-7">What's Next?</h2>
+                            <div className="flex md:flex-row flex-col justify-center items-baseline md:gap-20 gap-7 py-7 px-12">
+                                <div className="flex flex-row">
+                                    <div>
+                                        <div className="bg-blue-800 text-white px-4 py-2 mx-4 rounded-lg text-lg">1</div>
+                                    </div>
+                                    <div>
+                                        <h2>Set Up Profile</h2>
+                                        <p>Complete your business profile to start creating invoices</p>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-row">
+                                    <div>
+                                        <div className="bg-blue-800 text-white px-4 py-2 mx-4 rounded-lg text-lg">2</div>
+                                    </div>
+                                    <div>
+                                        <h2>Add Clients</h2>
+                                        <p>Import or add your clients to manage invoices easily</p>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-row">
+                                    <div>
+                                        <div className="bg-blue-800 text-white px-4 py-2 mx-4 rounded-lg text-lg">3</div>
+                                    </div>
+                                    <div>
+                                        <h2>Create Invoice</h2>
+                                        <p>Design and send your first professional invoice</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardBody>
+                    </Card>
+                </div>
+            </div>
+        </RootLayout>
+    )
+}

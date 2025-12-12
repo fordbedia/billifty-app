@@ -162,21 +162,21 @@ export default function Pricing() {
                                           {p.code === "free" ? (
                                             <>
                                                 <div className="w-6 flex justify-center">
-                                                  <Image src="/images/price/free-clients.png" width="17" height="14" />
+                                                  <Image alt="Free Client" src="/images/price/free-clients.png" width="17" height="14" />
                                                 </div>
                                                   &nbsp;Up to {p.limits?.clients} Clients
                                             </>
                                           ) : p.code === "pro" ? (
                                             <>
                                                 <div className="w-6 flex justify-center">
-                                                  <Image src="/images/price/pro-clients.png" width="17" height="14" />
+                                                  <Image alt="Pro Client" src="/images/price/pro-clients.png" width="17" height="14" />
                                                 </div>
                                                   &nbsp;Unlimited Clients
                                             </>
                                           ) : (
                                             <>
                                                 <div className="w-6 flex justify-center">
-                                                  <Image src="/images/price/premium-limits.png" width="17" height="8" />
+                                                  <Image alt="Premium Limits" src="/images/price/premium-limits.png" width="17" height="8" />
                                                 </div>
                                                   &nbsp;Unlimited Clients
                                             </>
@@ -186,21 +186,21 @@ export default function Pricing() {
                                             {p.code === "free" ? (
                                                 <>
                                                     <div className="w-6 flex justify-center">
-                                                      <Image src="/images/price/free-invoice.png" width="10" height="14" />
+                                                      <Image alt="Free Invoice" src="/images/price/free-invoice.png" width="10" height="14" />
                                                     </div>
                                                     Up to {p.limits?.invoices_per_month} Invoices
                                                 </>
                                             ) : p.code === "pro" ? (
                                                 <>
                                                     <div className="w-6 flex justify-center">
-                                                      <Image src="/images/price/pro-invoice.png" width="10" height="14" />
+                                                      <Image alt="Pro Invoice" src="/images/price/pro-invoice.png" width="10" height="14" />
                                                     </div>
                                                     Up to {p.limits?.invoices_per_month} invoices/month
                                                 </>
                                             ) : (
                                                 <>
                                                     <div className="w-6 flex justify-center">
-                                                      <Image src="/images/price/premium-limits.png" width="17" height="8" />
+                                                      <Image alt="Premium Limits" src="/images/price/premium-limits.png" width="17" height="8" />
                                                     </div>
                                                     Unlimited Invoices
                                                 </>
@@ -216,11 +216,11 @@ export default function Pricing() {
                                         <li key={i} className="flex items-center gap-3 py-1 font-extralight subpixel-antialiased">
                                            <div className="w-6 flex justify-center">
                                                {p.code === 'free' && (i + 1 === row.length)
-                                                   ? <Image src="/images/price/info-icon.png" width="12" height="8" />
+                                                   ? <Image alt="Info Icon" src="/images/price/info-icon.png" width="12" height="8" />
                                                    : p.code === 'free' && (i + 1 !== row.length)
-                                                   ? <Image src="/images/price/check-green.png" width="12" height="8" />
-                                                   : p.code === 'pro' ? <Image src="/images/price/check-pro.png" width="12" height="8" />
-                                                       : <Image src="/images/price/check-premium.png" width="12" height="8" />}
+                                                   ? <Image alt="Check Green Icon" src="/images/price/check-green.png" width="12" height="8" />
+                                                   : p.code === 'pro' ? <Image alt="Check Pro Icon" src="/images/price/check-pro.png" width="12" height="8" />
+                                                       : <Image alt="Check Premium Icon" src="/images/price/check-premium.png" width="12" height="8" />}
                                             </div>
                                             {v}
                                         </li>
