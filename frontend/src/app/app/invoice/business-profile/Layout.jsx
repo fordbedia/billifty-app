@@ -451,11 +451,17 @@ export default function BusinessProfileAppForm () {
 											</div>
 
 											<div className="errors">
-												{typeof errors !== undefined && errors && Object.keys(errors).length > 0 && (
+												{typeof errors !== 'string' && typeof errors !== undefined && errors && Object.keys(errors).length > 0 && (
 													<Alert color="danger">
 														<ul>
 															{errors?.map((v, k) => (<li key={k}>{v}</li>))}
 														</ul>
+													</Alert>
+												)}
+
+												{typeof errors === 'string' && typeof errors !== undefined && errors && (
+													<Alert color="danger">
+														{errors}
 													</Alert>
 												)}
 											</div>

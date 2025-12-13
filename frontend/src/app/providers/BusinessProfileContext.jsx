@@ -236,8 +236,19 @@ export function BusinessProfileProvider({ children, id, mode }) {
 			e = Object.values(errorHandler).map(([v, k]) => (v))
 			setErrors(e)
 		}
+
 		if (
 			typeof errorSubmit !== undefined &&
+			typeof errorSubmit?.response?.data?.errors === 'undefined' &&
+			typeof errorSubmit?.response?.data?.message !== 'undefined' &&
+			typeof errorSubmit?.response?.data?.error_code !== 'undefined'
+		) {
+			setErrors(errorSubmit?.response?.data?.message)
+		}
+
+		if (
+			typeof errorSubmit !== undefined &&
+			typeof errorSubmit?.response?.data?.errors !== 'undefined' &&
 			errorSubmit?.response?.data?.errors &&
 			Object.keys(errorSubmit?.response?.data?.errors).length > 0
 		) {
