@@ -7,6 +7,7 @@ import {useBusinessProfile} from "@/app/providers/BusinessProfileContext";
 import ConfirmDelete from "@/app/app/invoice/business-profile/modals/ConfirmDelete";
 import NotFound from "@/app/app/invoice/components/errorPages/NotFound";
 import BSpinner from "@/app/components/Spinner";
+import {useApp} from "@/app/providers/AppContext";
 
 export default function BusinessProfileAppForm () {
 	const {
@@ -27,6 +28,10 @@ export default function BusinessProfileAppForm () {
 		isError,
 		isLoading,
 	} = useBusinessProfile()
+
+	const {
+		planCapabilities
+	} = useApp();
 
 	if (isLoading) {
 		 return (
@@ -54,6 +59,7 @@ export default function BusinessProfileAppForm () {
 						 <Card className="mt-4" fullWidth radius="sm">
                 <CardBody>
 									<Form className="w-full px-3 my-4">
+									{planCapabilities.allowed?.logo_upload && (
 										<div>
 											<h2 className="pb-3">Business Logo</h2>
 											<div className="flex items-center gap-6">
@@ -166,6 +172,7 @@ export default function BusinessProfileAppForm () {
 												/>
 											</div>
 										</div>
+									)}
 
 										<div className="w-full">
 											<h2 className="py-7 text-xl font-semibold">Business Information</h2>
