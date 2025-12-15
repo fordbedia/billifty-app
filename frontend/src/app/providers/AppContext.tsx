@@ -40,6 +40,7 @@ interface AppContextValue {
   userData: Record<string, any>;
   isUserDataLoading: boolean
   isErrorUserData: boolean
+  planCapabilities: Record<string, any>
 }
 
 const AppContext = createContext<AppContextValue | null>(null);

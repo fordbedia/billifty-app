@@ -572,6 +572,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 					title: 'Invoice was successfully created!',
 					color: 'success'
 				})
+				queryClient.invalidateQueries({ queryKey: ['me'] })
 				router.replace(`/app/invoice/${r.data?.id}`)
 			}
 		}

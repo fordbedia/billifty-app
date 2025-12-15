@@ -29,6 +29,11 @@ export default function Actions() {
 	if (
 		(
 			typeof createInvoiceError !== 'undefined' &&
+			typeof createInvoiceError?.response?.data?.error_code === 'undefined'
+		)
+			&&
+		(
+			typeof createInvoiceError !== 'undefined' &&
 			createInvoiceError &&
 			Object.keys(createInvoiceError).length > 0
 		) ||
@@ -40,6 +45,12 @@ export default function Actions() {
 	) {
 		errors = createInvoiceError?.response?.data?.errors ?? updateError?.response?.data?.errors;
 	}
+	if(
+			typeof createInvoiceError !== 'undefined' &&
+			typeof createInvoiceError?.response?.data?.error_code !== 'undefined'
+		) {
+		errors = createInvoiceError?.response?.data?.message;
+	}
 
 	return (
 		 <>
@@ -49,7 +60,7 @@ export default function Actions() {
 					</CardHeader>
 					<Divider />
 					<CardBody>
-						{errors && Object.keys(errors).length > 0 && (
+						{errors && typeof errors !== 'string' && Object.keys(errors).length > 0 && (
 							<Alert color="danger">
 								<ul>
 									{Object.entries(errors).map(([k, v]) => (
@@ -58,20 +69,30 @@ export default function Actions() {
 								</ul>
 							</Alert>
 						)}
+						{errors && typeof errors === 'string' && (
+							<Alert color="danger">
+								{errors}
+							</Alert>
+						)}
 						{!invoiceId
-							? (<Button onPress={() => save('save_draft')} disableRipple className="my-2" color="success">Create Invoice</Button>)
+							? (<Button onPress={() => save('save_draft')} disableRipple className="my-2 text-white" color="success">Create Invoice</Button>)
 							: (<Button onPress={() => save('save_changes')} disableRipple className="my-2" color="primary" variant="flat">Save Changes</Button>)}
 						{invoiceId && data.status !== 'issued' && (
 							<Button onPress={confirm} isDisabled={!data.id} disableRipple className="my-2" color="warning" variant="flat">Issue Invoice</Button>
 						)}
-						{invoiceId && data.status === 'issued' && (<Button isDisabled={!data.id} disableRipple className="my-2" color="warning" variant="flat">Download</Button>)}
+
 						{!invoiceId && !isEmpty && (<Button disableRipple className="my-2" color="danger" onPress={clearSticky}>Reset All</Button>)}
-						{invoiceId && (<Button onPress={onOpenConfirmDeleteModal} color="danger">Delete</Button>)}
-
 						{invoiceId && (<Button className="my-2" color="secondary" onPress={onOpenPreviewInvoiceModal}>Preview Invoice</Button>)}
-						{invoiceId && (<Button onPress={generatePdf} className="my-2" color="primary">Download</Button>)}
+						{invoiceId && (<Button onPress={generatePdf} className="my-2" color="primary">Quick Download</Button>)}
 
-						<Button as={Link} href={uri.send_invoice(invoiceId)} color="success">Send Invoice</Button>
+						{invoiceId && (<Button className="my-2 text-white" as={Link} href={uri.send_invoice(invoiceId)} color="success">Send/Download Invoice</Button> )}
+
+						{invoiceId && (
+							<>
+								<Divider className="border-2" />
+								<Button className="my-2 font-bold" onPress={onOpenConfirmDeleteModal} color="danger">Delete</Button>
+							</>
+						)}
 					</CardBody>
 			 </Card>
 		</>

@@ -11,6 +11,7 @@ export const uri = Object.freeze({
 	send_invoice: (param) => `/app/invoice/${param}/send`,
 	// business profile
 	business_profile: {
+		create: '/app/invoice/business-profile/new',
 		lists: '/app/invoice/business-profile'
 	},
 	// Client

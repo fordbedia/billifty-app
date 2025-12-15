@@ -9,6 +9,7 @@ import {useRouter} from "next/navigation";
 import {Chip, Tooltip} from "@heroui/react";
 import {formattedDate} from "@/app/utils/date";
 import {DateRangePicker} from "@heroui/react";
+import {useApp} from "@/app/providers/AppContext";
 
 function Component() {
 	const {
@@ -20,6 +21,10 @@ function Component() {
 		handleSearchKeyDown,
 		setSearch,
 	} = useInvoice()
+	const {
+		planCapabilities
+	} = useApp();
+
 	const router = useRouter()
 	const column = [
 		{key: 'invoice_number', label: 'Invoice #', allowsSorting: true},
@@ -131,14 +136,16 @@ function Component() {
 											</div>
 										</div>
 										<div className="self-center">
-											<Button disableRipple onPress={() => {
-												clearSticky()
-				  							router.replace('/app/invoice/new')
-											}} color="primary" variant="flat">
-												<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-													<path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-												</svg>
-												Create New Invoice</Button>
+											{planCapabilities?.limits?.['current:invoices'] < planCapabilities?.limits?.max_invoices && (
+												<Button disableRipple onPress={() => {
+													clearSticky()
+													router.replace('/app/invoice/new')
+												}} color="primary" variant="flat">
+													<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+														<path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+													</svg>
+													Create New Invoice</Button>
+												)}
 
 												<div className="mt-4 w-64">
 													<Input
