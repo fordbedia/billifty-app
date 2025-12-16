@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import RootLayout from "@/app/components/common/RootLayout";
-import { Card, CardBody, Button } from "@heroui/react";
+import { Card, CardBody, Button, Divider } from "@heroui/react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { useMutation } from "@tanstack/react-query";
@@ -82,9 +82,33 @@ function PaymentMethodForm() {
   );
 }
 
+type PortalPayload = { return_url?: string };
+
 export default function PaymentMethodPage() {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Stripe Billing Portal redirect (low maintenance)
+  const portalMutation = useMutation({
+    mutationFn: async (payload: PortalPayload) => {
+      return await Billing.createPortalSession(payload);
+    },
+    onSuccess: (data: any) => {
+      const url = data?.url ?? data?.data?.url;
+      if (!url) {
+        alert("Portal session did not return a URL.");
+        return;
+      }
+      window.location.href = url;
+    },
+    onError: (err: any) => {
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Unable to open Stripe portal.";
+      alert(msg);
+    },
+  });
 
   useEffect(() => {
     const run = async () => {
@@ -120,6 +144,32 @@ export default function PaymentMethodPage() {
           <p className="text-sm text-slate-600 mb-6">
             Update your card or payment method using Stripe’s secure form.
           </p>
+
+          {/* ✅ Low maintenance: Stripe Billing Portal */}
+          <Card className="mb-6">
+            <CardBody className="p-6 space-y-3">
+              <div>
+                <h2 className="text-lg font-semibold">Manage saved cards</h2>
+                <p className="text-sm text-slate-600">
+                  View saved payment methods, set default card, update billing details, and more using Stripe.
+                </p>
+              </div>
+
+              <Button
+                variant="bordered"
+                onPress={() => portalMutation.mutate({ return_url: window.location.origin + uri.manage_subscriptions })}
+                isDisabled={portalMutation.isPending}
+              >
+                {portalMutation.isPending ? "Opening..." : "Open Stripe Billing Portal"}
+              </Button>
+
+              <p className="text-xs text-slate-500">
+                You’ll be redirected to Stripe. Changes there will reflect back in Billifty automatically.
+              </p>
+            </CardBody>
+          </Card>
+
+          <Divider className="my-6" />
 
           {loadError && <p className="text-red-500">{loadError}</p>}
           {!loadError && !clientSecret && <p>Loading payment form...</p>}

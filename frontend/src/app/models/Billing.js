@@ -36,10 +36,12 @@ export default class Billing extends Model {
   /**
    * Create Stripe Billing Portal session
    */
-  static async createPortalSession() {
-    const res = await this.axios().post("/portal-session");
-    return res.data;
-  }
+ 	static async createPortalSession(payload = {}) {
+		const res = await this.axios().post("/portal-session", payload);
+		return res.data;
+	}
+
+
 
 	static async confirmSubscription(payload) {
 		const res = await this.axios().post("/confirm-subscription", payload);
