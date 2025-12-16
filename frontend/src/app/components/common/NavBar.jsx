@@ -41,16 +41,35 @@ export default function App() {
 	const { user = null } = auth() ?? {};
 
   const menuItems = [
-    "Profile",
-    "Dashboard",
-    "Activity",
-    "Analytics",
-    "System",
-    "Deployments",
-    "My Settings",
-    "Team Settings",
-    "Help & Feedback",
-    "Log Out",
+		{
+			label: "Profile",
+			key: "profile",
+			href: uri.pricing
+		}, {
+			label: "Dashboard",
+			key: "dashboard",
+			href: uri.pricing
+		},{
+			label: "System",
+			key: "system",
+			href: uri.pricing
+		}, {
+			label: "Manage Subscription",
+			key: "manage_subscription",
+			href: uri.manage_subscriptions
+		}, {
+			label: "My Settings",
+			key: "my_settings",
+			href: uri.pricing
+		}, {
+			label: "Help & Feedback",
+			key: "help_and_feedback",
+			href: uri.pricing
+		}, {
+			label: "Log Out",
+			key: "log_out",
+			onPress: () => logout()
+		}
   ];
 
   // @ts-ignore
@@ -120,35 +139,28 @@ export default function App() {
               <p className="font-semibold">Signed in as</p>
               <p className="font-semibold">{user.email ?? ''}</p>
             </DropdownItem>
-            <DropdownItem key="settings">My Settings</DropdownItem>
-            <DropdownItem key="team_settings">Team Settings</DropdownItem>
-            <DropdownItem key="analytics">Analytics</DropdownItem>
-            <DropdownItem key="system">System</DropdownItem>
-            <DropdownItem key="configurations">Configurations</DropdownItem>
-            <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
-            <DropdownItem onPress={logout} key="logout" color="danger">
-              Log Out
-            </DropdownItem>
+						{menuItems && menuItems.length > 0 && menuItems.map((i) => (
+							<>
+							{typeof i.onPress === 'function' ? (
+									<DropdownItem key={i.key} onPress={() => i.onPress()}>{i.label}</DropdownItem>
+								) : (
+									<DropdownItem key={i.key} href={i.href}>{i.label}</DropdownItem>
+								)}
+							</>
+						))}
+
+            {/*<DropdownItem key="team_settings">Manage Subscription</DropdownItem>*/}
+            {/*<DropdownItem key="analytics">Analytics</DropdownItem>*/}
+            {/*<DropdownItem key="system">System</DropdownItem>*/}
+            {/*<DropdownItem key="configurations">Configurations</DropdownItem>*/}
+            {/*<DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>*/}
+            {/*<DropdownItem onPress={logout} key="logout" color="danger">*/}
+            {/*  Log Out*/}
+            {/*</DropdownItem>*/}
           </DropdownMenu>
         </Dropdown>)}
         </NavbarItem>
       </NavbarContent>
-      <NavbarMenu>
-        {menuItems.map((item, index) => (
-          <NavbarMenuItem key={`${item}-${index}`}>
-            <Link
-              className="w-full"
-              color={
-                index === 2 ? "primary" : index === menuItems.length - 1 ? "danger" : "foreground"
-              }
-              href="#"
-              size="lg"
-            >
-              {item}
-            </Link>
-          </NavbarMenuItem>
-        ))}
-      </NavbarMenu>
     </Navbar>
   );
 }

@@ -7,6 +7,8 @@ export const uri = Object.freeze({
 	checkout_success: '/app/checkout/success',
 	invoices: '/app/invoices',
 	create_invoice: '/app/invoice/new',
+	manage_subscriptions: '/app/account/manage-subscription',
+	manage_payment_methods: '/app/account/manage-subscription/payment-method',
 	invoice: (param) => `/app/invoice/${param}`,
 	send_invoice: (param) => `/app/invoice/${param}/send`,
 	// business profile

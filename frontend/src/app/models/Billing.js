@@ -46,4 +46,40 @@ export default class Billing extends Model {
 		return res.data;
 	}
 
+	/**
+   * Change plan (upgrade/downgrade)
+   * POST /api/v1/billing/change-plan
+   */
+  static async changePlan(payload = {}) {
+    const res = await this.axios().post("/subscription/change-plan", payload);
+    return res.data;
+  }
+
+  /**
+   * Cancel subscription
+   * POST /api/v1/billing/cancel-subscription
+   */
+  static async cancelSubscription(payload = {}) {
+    const res = await this.axios().post("/subscription/cancel", payload);
+    return res.data;
+  }
+
+  /**
+   * Create SetupIntent for Payment Element (setup mode)
+   * POST /api/v1/billing/payment-method/setup-intent
+   */
+  static async createPaymentMethodSetupIntent(payload = {}) {
+    const res = await this.axios().post("/payment-method/setup-intent", payload);
+    return res.data;
+  }
+
+  /**
+   * Save default payment method after SetupIntent succeeded
+   * POST /api/v1/billing/payment-method/update
+   */
+  static async updatePaymentMethod(payload = {}) {
+    const res = await this.axios().post("/payment-method/update", payload);
+    return res.data;
+  }
+
 }

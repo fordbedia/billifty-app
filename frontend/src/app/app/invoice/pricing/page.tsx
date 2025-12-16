@@ -11,6 +11,7 @@ import {useApp} from "@/app/providers/AppContext";
 import { auth } from "@/app/helpers/auth";
 import {router} from "next/client";
 import {uri} from "@/app/constants/routePaths";
+import {proceedToPlan} from "@/app/utils/pricing";
 
 export type BillingCycle = "monthly" | "yearly"
 
@@ -50,21 +51,6 @@ export default function Pricing() {
         const compareSection = document.getElementById('compare-features-table');
         const scrollY = compareSection?.getBoundingClientRect().top ?? 0;
         window.scrollTo({top: scrollY, behavior: 'smooth'});
-    }
-
-    const proceedToPlan = (plan: string): void => {
-        if (Array.isArray(planCapabilities) && planCapabilities.length === 0) {
-            // Redirect to checkout
-            console.log('redirecting to checkout')
-            router.replace(`${uri.checkout}/?plan=${plan}`)
-            return;
-        }
-        if (! session) {
-            // Redirect to the login page
-            console.log('redirecting to auth')
-            router.replace(`${uri.auth}/?plan=${plan}`)
-            return;
-        }
     }
 
     return (
@@ -126,7 +112,7 @@ export default function Pricing() {
                                 <div className="flex flex-row items-baseline"><h2 className="py-1 text-6xl font-semibold pr-2">${p.billing[cycleType]?.price}</h2> /{cycleType === 'monthly' ? 'month' : 'year'}</div>
                                 <h3 className="font-extralight subpixel-antialiased">{p.actions?.text1}</h3>
 
-                                <Button onPress={() => proceedToPlan(p.code)} className={'my-8 py-6 font-semibold text-lg ' + (p.code === 'pro'
+                                <Button onPress={() => proceedToPlan(p.code, planCapabilities, session, router)} className={'my-8 py-6 font-semibold text-lg ' + (p.code === 'pro'
                                     ? 'bg-blue-600 text-white' : p.code === 'premium'
                                     ? 'text-black bg-white' : '')} disableRipple>{p.actions?.btn}</Button>
 
