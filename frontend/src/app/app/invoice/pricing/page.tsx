@@ -112,9 +112,18 @@ export default function Pricing() {
                                 <div className="flex flex-row items-baseline"><h2 className="py-1 text-6xl font-semibold pr-2">${p.billing[cycleType]?.price}</h2> /{cycleType === 'monthly' ? 'month' : 'year'}</div>
                                 <h3 className="font-extralight subpixel-antialiased">{p.actions?.text1}</h3>
 
-                                <Button onPress={() => proceedToPlan(p.code, planCapabilities, session, router)} className={'my-8 py-6 font-semibold text-lg ' + (p.code === 'pro'
-                                    ? 'bg-blue-600 text-white' : p.code === 'premium'
-                                    ? 'text-black bg-white' : '')} disableRipple>{p.actions?.btn}</Button>
+                               <Button
+                                  onPress={() => proceedToPlan(p.code, cycleType, planCapabilities, session, router)}
+                                  className={'my-8 py-6 font-semibold text-lg ' + (p.code === 'pro'
+                                    ? 'bg-blue-600 text-white'
+                                    : p.code === 'premium'
+                                      ? 'text-black bg-white'
+                                      : '')}
+                                  disableRipple
+                                >
+                                  {p.actions?.btn}
+                                </Button>
+
 
                                 <ul className="free-plan-limits pb-6">
                                     <li className="flex items-center gap-3 py-1">

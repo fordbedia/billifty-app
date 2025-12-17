@@ -56,6 +56,7 @@ return [
                 'yearly'  => env('STRIPE_PRICE_PREMIUM_YEARLY'),
             ],
         ],
+        'return_url' => env('STRIPE_RETURN_URL'),
     ],
 
 ];

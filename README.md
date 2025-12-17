@@ -97,6 +97,8 @@ curl -i -X POST https://int.getinvoice.com/api/v1/stripe/webhook -d '{}'
 Run:
 ```shell
 stripe listen --forward-to https://int.getinvoice.com/api/v1/stripe/webhook
+
+stripe listen --forward-to https://localhost/api/v1/stripe/webhook --skip-verify
 ```
 Stripe CLI will print:
 `Your webhook signing secret is whsec_...`

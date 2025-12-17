@@ -18,7 +18,7 @@ import {
 import { useApp } from "@/app/providers/AppContext";
 import { useEffect, useMemo, useState } from "react";
 import { BillingCycle, Plan } from "@/app/app/invoice/pricing/page";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import Plans from "@/app/models/Plans";
 import Billing from "@/app/models/Billing";
 import { useRouter } from "next/navigation";
@@ -26,17 +26,14 @@ import { capitalize } from "@/app/utils/strings";
 import { uri } from "@/app/constants/routePaths";
 
 type PlanCode = "free" | "pro" | "premium";
+type ButtonProps = { code: PlanCode; name: string };
 
-type ButtonProps = {
-  code: PlanCode;
-  name: string;
-};
+type PortalPayload = { return_url?: string };
 
 export default function ManageSubscriptionPage() {
   const router = useRouter();
   const { userData } = useApp();
 
-  // Monthly/Yearly toggle (added back)
   const [cycleType, setCycleType] = useState<BillingCycle>("monthly");
 
   const { data } = useQuery<Plan[]>({
@@ -49,23 +46,16 @@ export default function ManageSubscriptionPage() {
   const subscription = userData?.subscription;
   const planCapabilities = userData?.plan_capabilities;
 
-  // if your backend stores billing_cycle on subscription, default UI to it
   useEffect(() => {
     const subCycle = subscription?.billing_cycle as BillingCycle | undefined;
-    if (subCycle === "monthly" || subCycle === "yearly") {
-      setCycleType(subCycle);
-    }
+    if (subCycle === "monthly" || subCycle === "yearly") setCycleType(subCycle);
   }, [subscription?.billing_cycle]);
 
-  // important: "hasStripeSubscription" means paid subscription exists
   const hasStripeSubscription = !!subscription?.stripe_subscription_id;
 
-  // FIX for "Current plan" mismatch:
-  // - use an "effective" plan code that can be updated optimistically after mutation succeeds.
-  // ✅ Source of truth = subscription.plan_code (Stripe billing reality)
   const derivedPlanCode = useMemo<PlanCode>(() => {
-  const subCode = subscription?.plan_code as PlanCode | undefined;
-  const userPlanCode = plan?.code as PlanCode | undefined;
+    const subCode = subscription?.plan_code as PlanCode | undefined;
+    const userPlanCode = plan?.code as PlanCode | undefined;
 
     if (subCode === "free" || subCode === "pro" || subCode === "premium") return subCode;
     if (userPlanCode === "free" || userPlanCode === "pro" || userPlanCode === "premium") return userPlanCode;
@@ -73,51 +63,11 @@ export default function ManageSubscriptionPage() {
     return "free";
   }, [subscription?.plan_code, plan?.code]);
 
-  // UI uses effectivePlanCode, but we only sync it forward from subscription changes
   const [effectivePlanCode, setEffectivePlanCode] = useState<PlanCode>(derivedPlanCode);
 
-  useEffect(() => {
-    // only update if derived changes (ex: subscription updated to premium)
-    setEffectivePlanCode(derivedPlanCode);
-  }, [derivedPlanCode]);
+  useEffect(() => setEffectivePlanCode(derivedPlanCode), [derivedPlanCode]);
 
-
-  const buttonLabel = (code: PlanCode, current: ButtonProps | undefined) => {
-    if (!current) {
-      return { btnLabel: "Loading...", href: "", classnames: "bg-gray-200 text-gray-500" };
-    }
-
-    const arr: Record<PlanCode, { btnLabel: string; href: string; classnames: string }> = {
-      free: {
-        btnLabel: effectivePlanCode === "free" ? "Current Plan" : `Downgrade to ${capitalize(code)}`,
-        href: "",
-        classnames: "bg-gray-200 text-black",
-      },
-      pro: {
-        btnLabel:
-          effectivePlanCode === "pro"
-            ? "Current Plan"
-            : effectivePlanCode === "premium"
-              ? `Downgrade to ${capitalize(code)}`
-              : `Upgrade to ${capitalize(code)}`,
-        href: "",
-        classnames: "bg-indigo-200 text-indigo-700 font-semibold",
-      },
-      premium: {
-        btnLabel: effectivePlanCode === "premium" ? "Current Plan" : `Upgrade to ${capitalize(code)}`,
-        href: "",
-        classnames: "bg-white text-black",
-      },
-    };
-
-    return arr[code];
-  };
-
-  // ----------------------------
-  // Confirmation Modal State
-  // ----------------------------
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
-
   const [pendingTargetCode, setPendingTargetCode] = useState<PlanCode | null>(null);
 
   const pendingPlan = useMemo(() => {
@@ -132,7 +82,6 @@ export default function ManageSubscriptionPage() {
 
   const isUpgradeOrDowngrade = useMemo(() => {
     if (!pendingTargetCode) return null;
-    // simple order: free < pro < premium
     const order: Record<PlanCode, number> = { free: 0, pro: 1, premium: 2 };
     const current = order[effectivePlanCode];
     const target = order[pendingTargetCode];
@@ -141,38 +90,23 @@ export default function ManageSubscriptionPage() {
     return null;
   }, [pendingTargetCode, effectivePlanCode]);
 
-  // --- Mutations ---
-
-  const changePlanMutation = useMutation({
-    mutationFn: async (payload: { plan_code: PlanCode; billing_cycle: BillingCycle }) => {
-      return await Billing.changePlan({
-        plan_code: payload.plan_code,
-        billing_cycle: payload.billing_cycle,
-        proration_behavior: "create_prorations",
-      });
-    },
-    onSuccess: (_data, variables) => {
-      // optimistic update so buttons immediately show Current Plan correctly
-      setEffectivePlanCode(variables.plan_code);
-
-      // close modal
-      onClose();
-
-      // refresh safety net (keeps your behavior)
-      window.location.reload();
+  const portalMutation = useMutation({
+    mutationFn: async (payload: PortalPayload) => await Billing.createPortalSession(payload),
+    onSuccess: (data: any) => {
+      const url = data?.url ?? data?.data?.url;
+      if (!url) return alert("Portal session did not return a URL.");
+      window.location.href = url;
     },
     onError: (err: any) => {
-      const msg = err?.response?.data?.message || err?.message || "Unable to change plan.";
+      const msg = err?.response?.data?.message || err?.message || "Unable to open Stripe portal.";
       alert(msg);
     },
   });
 
-  const cancelSubscriptionMutation = useMutation({
-    mutationFn: async () => {
-      return await Billing.cancelSubscription({ at_period_end: true });
-    },
+  const cancelMutation = useMutation({
+    mutationFn: async () => await Billing.cancelSubscription({}),
     onSuccess: (data: any) => {
-      alert(data?.message ?? "Subscription updated.");
+      alert(data?.message ?? "Subscription canceled.");
       window.location.reload();
     },
     onError: (err: any) => {
@@ -181,51 +115,75 @@ export default function ManageSubscriptionPage() {
     },
   });
 
-  // --- Actions ---
+
+  const openBillingPortal = () => {
+    portalMutation.mutate({
+      return_url: window.location.origin + uri.manage_subscriptions,
+    });
+  };
 
   const handleChangePlan = (targetCode: PlanCode) => {
     if (!plan) return;
-
     if (targetCode === effectivePlanCode) return;
 
-    // If user has NO stripe subscription (Free user), go straight to your pricing checkout
-    // No modal for free -> paid (as requested)
+    // Paid user clicking FREE -> auto cancel immediately
+    if (targetCode === "free" && hasStripeSubscription) {
+      const ok = confirm("Switching to Free will cancel your subscription immediately. Continue?");
+      if (!ok) return;
+      cancelMutation.mutate();
+      return;
+    }
+
+    // Free user -> go to your checkout flow with plan + cycle
     if (!hasStripeSubscription) {
       router.push(`${uri.pricing}?plan=${targetCode}&cycle=${cycleType}`);
       return;
     }
 
-    // For paid users: show confirmation modal first
+    // Paid user -> confirm then open Stripe portal (Stripe handles upgrade/downgrade/payment method/cancel)
     setPendingTargetCode(targetCode);
     onOpen();
   };
 
+
   const confirmChangePlan = () => {
-    if (!pendingTargetCode) return;
-
-    changePlanMutation.mutate({
-      plan_code: pendingTargetCode,
-      billing_cycle: cycleType,
-    });
-  };
-
-  const handleCancelSubscription = () => {
-    if (!hasStripeSubscription) return;
-    const ok = confirm("Are you sure you want to cancel your subscription?");
-    if (!ok) return;
-    cancelSubscriptionMutation.mutate();
+    onClose();
+    // Stripe portal handles upgrade/downgrade/cancel/payment method
+    openBillingPortal();
   };
 
   const goToPaymentMethodPage = () => {
-    router.push(`${uri.manage_payment_methods}`);
+    // You can keep your payment-method page, but Portal already covers this:
+    openBillingPortal();
   };
 
-  const isBusy = changePlanMutation.isPending || cancelSubscriptionMutation.isPending;
+  const isBusy = portalMutation.isPending || cancelMutation.isPending;
 
-  // helpers for UI
   const cycleLabel = cycleType === "monthly" ? "month" : "year";
-  const subscriptionCycleLabel =
-    subscription?.billing_cycle === "yearly" ? "year" : "month";
+  const subscriptionCycleLabel = subscription?.billing_cycle === "yearly" ? "year" : "month";
+
+  const buttonLabel = (code: PlanCode) => {
+    const arr: Record<PlanCode, { btnLabel: string; classnames: string }> = {
+      free: {
+        btnLabel: effectivePlanCode === "free" ? "Current Plan" : `Downgrade to ${capitalize(code)}`,
+        classnames: "bg-gray-200 text-black",
+      },
+      pro: {
+        btnLabel:
+          effectivePlanCode === "pro"
+            ? "Current Plan"
+            : effectivePlanCode === "premium"
+              ? `Downgrade to ${capitalize(code)}`
+              : `Upgrade to ${capitalize(code)}`,
+        classnames: "bg-indigo-200 text-indigo-700 font-semibold",
+      },
+      premium: {
+        btnLabel: effectivePlanCode === "premium" ? "Current Plan" : `Upgrade to ${capitalize(code)}`,
+        classnames: "bg-white text-black",
+      },
+    };
+    return arr[code];
+  };
 
   return (
     <RootLayout>
@@ -236,24 +194,13 @@ export default function ManageSubscriptionPage() {
             Upgrade, downgrade, or manage your billing preferences
           </p>
 
-          {/* Billing cycle toggle */}
           <div className="pt-5 flex items-center gap-3">
             <span className="text-sm text-slate-600">Billing cycle:</span>
             <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant={cycleType === "monthly" ? "solid" : "bordered"}
-                onPress={() => setCycleType("monthly")}
-                isDisabled={isBusy}
-              >
+              <Button size="sm" variant={cycleType === "monthly" ? "solid" : "bordered"} onPress={() => setCycleType("monthly")} isDisabled={isBusy}>
                 Monthly
               </Button>
-              <Button
-                size="sm"
-                variant={cycleType === "yearly" ? "solid" : "bordered"}
-                onPress={() => setCycleType("yearly")}
-                isDisabled={isBusy}
-              >
+              <Button size="sm" variant={cycleType === "yearly" ? "solid" : "bordered"} onPress={() => setCycleType("yearly")} isDisabled={isBusy}>
                 Yearly
               </Button>
             </div>
@@ -262,24 +209,12 @@ export default function ManageSubscriptionPage() {
           <div className="pt-4 flex flex-wrap gap-3">
             {hasStripeSubscription && (
               <Button variant="bordered" className="text-sm" onPress={goToPaymentMethodPage} isDisabled={isBusy}>
-                Update payment method
-              </Button>
-            )}
-
-            {hasStripeSubscription && (
-              <Button
-                color="danger"
-                variant="bordered"
-                className="text-sm"
-                onPress={handleCancelSubscription}
-                isDisabled={isBusy}
-              >
-                {cancelSubscriptionMutation.isPending ? "Cancelling..." : "Cancel subscription"}
+                Manage billing (Stripe)
               </Button>
             )}
           </div>
 
-          <div className="py-3"></div>
+          <div className="py-3" />
 
           <Card className="bg-gradient-to-r from-indigo-500 to-indigo-600">
             <CardBody className="px-7 py-7">
@@ -291,12 +226,10 @@ export default function ManageSubscriptionPage() {
                 <h2 className="text-white text-2xl font-semibold">{userData?.plan?.name} Plan</h2>
 
                 <div>
-                  {effectivePlanCode !== "free" && subscription && Object.keys(subscription).length > 0 ? (
+                  {effectivePlanCode !== "free" && subscription ? (
                     <>
                       <span className="text-5xl text-white font-bold">${subscription?.unit_amount_dollars}</span>
-                      <span className="text-xl text-white font-extralight subpixel-antialiased">
-                        /{subscriptionCycleLabel}
-                      </span>
+                      <span className="text-xl text-white font-extralight subpixel-antialiased">/{subscriptionCycleLabel}</span>
                     </>
                   ) : (
                     <>
@@ -307,7 +240,7 @@ export default function ManageSubscriptionPage() {
                 </div>
 
                 <p className="pt-2 text-white font-extralight subpixel-antialiased">
-                  You&apos;re currently on the {userData?.plan?.name} plan. Your next billing date is {subscription?.renews_at}.
+                  Your next billing date is {subscription?.renews_at}.
                 </p>
               </div>
 
@@ -354,56 +287,21 @@ export default function ManageSubscriptionPage() {
 
               return (
                 <div key={p.code} className="relative w-[400px] shrink-0">
-                  {p.actions?.card_label && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-50 bg-blue-600 text-white rounded-md px-3 py-1 shadow text-xs">
-                      {p.actions.card_label}
-                    </div>
-                  )}
-
-                  <Card
-                    className={
-                      "w-[400px] shrink-0 " +
-                      (p.code === "pro"
-                        ? "border-blue-600 border-2"
-                        : p.code === "free"
-                          ? "border-gray-200 border-2"
-                          : p.code === "premium"
-                            ? "bg-premium-color"
-                            : "")
-                    }
-                  >
+                  <Card className={"w-[400px] shrink-0 " + (p.code === "pro" ? "border-blue-600 border-2" : p.code === "free" ? "border-gray-200 border-2" : p.code === "premium" ? "bg-premium-color" : "")}>
                     <CardBody className={p.code === "pro" ? "py-14" : "py-5"}>
-                      <div
-                        className={
-                          "rounded-md text-sm w-fit px-1 py-1 " +
-                          (p.code === "free"
-                            ? "bg-gray-200 text-black"
-                            : p.code === "premium"
-                              ? "bg-yellow-400 text-black"
-                              : "")
-                        }
-                      >
-                        {p.actions?.upper_text}
-                      </div>
-
                       <h2 className="py-1 pt-3 text-2xl font-semibold">{p.name}</h2>
 
                       <div className="flex flex-row items-baseline">
-                        <h2 className="py-1 text-6xl font-semibold pr-2">
-                          ${p.billing?.[cycleType]?.price}
-                        </h2>
-                        /{cycleLabel}
+                        <h2 className="py-1 text-6xl font-semibold pr-2">${p.billing?.[cycleType]?.price}</h2>/{cycleLabel}
                       </div>
 
-                      <h3 className="font-extralight subpixel-antialiased">{p.actions?.text1}</h3>
-
                       <Button
-                        className={"my-8 py-6 font-semibold text-lg " + buttonLabel(code, plan).classnames}
+                        className={"my-8 py-6 font-semibold text-lg " + buttonLabel(code).classnames}
                         disableRipple
                         onPress={() => handleChangePlan(code)}
                         isDisabled={isBusy || isCurrent}
                       >
-                        {changePlanMutation.isPending && !isCurrent ? "Updating..." : buttonLabel(code, plan).btnLabel}
+                        {isBusy && !isCurrent ? "Loading..." : buttonLabel(code).btnLabel}
                       </Button>
 
                       <Divider />
@@ -427,7 +325,6 @@ export default function ManageSubscriptionPage() {
         </div>
       </div>
 
-      {/* Confirmation modal (only used when hasStripeSubscription) */}
       <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="center">
         <ModalContent>
           {() => (
@@ -438,34 +335,23 @@ export default function ManageSubscriptionPage() {
               <ModalBody>
                 <div className="text-sm text-slate-700">
                   You are about to{" "}
-                  <span className="font-semibold">
-                    {isUpgradeOrDowngrade === "upgrade" ? "upgrade" : "downgrade"}
-                  </span>{" "}
+                  <span className="font-semibold">{isUpgradeOrDowngrade === "upgrade" ? "upgrade" : "downgrade"}</span>{" "}
                   to <span className="font-semibold">{capitalize(pendingTargetCode ?? "")}</span>.
                 </div>
-
                 <div className="text-sm text-slate-700">
                   Billing cycle: <span className="font-semibold">{capitalize(cycleType)}</span>
                 </div>
-
                 <div className="text-sm text-slate-700">
-                  Price:{" "}
-                  <span className="font-semibold">
-                    ${pendingPrice ?? "—"} / {cycleLabel}
-                  </span>
+                  Price: <span className="font-semibold">${pendingPrice ?? "—"} / {cycleLabel}</span>
                 </div>
-
                 <div className="text-sm text-slate-600 pt-2">
-                  This will charge your <span className="font-semibold">saved payment method</span>.
-                  You can update it anytime from <span className="font-semibold">Update payment method</span>.
+                  We’ll open Stripe’s secure billing portal to confirm and manage billing.
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button variant="bordered" onPress={onClose} isDisabled={changePlanMutation.isPending}>
-                  Cancel
-                </Button>
-                <Button color="primary" onPress={confirmChangePlan} isDisabled={changePlanMutation.isPending}>
-                  {changePlanMutation.isPending ? "Confirming..." : "Confirm"}
+                <Button variant="bordered" onPress={onClose} isDisabled={isBusy}>Cancel</Button>
+                <Button color="primary" onPress={confirmChangePlan} isDisabled={isBusy}>
+                  {isBusy ? "Opening..." : "Continue"}
                 </Button>
               </ModalFooter>
             </>
