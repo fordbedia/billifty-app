@@ -13,6 +13,17 @@ export const PUBLIC_ROUTES: string[] = [
   uri.checkout_success,
 ];
 
+export const UNSUBSCRIBE_ROUTES_TO_PRICING: string[] = [
+  uri.invoices,
+  uri.create_invoice,
+  uri.business_profile.create,
+  uri.business_profile.lists,
+  uri.manage_subscriptions,
+  uri.client.create_client,
+  uri.client.clients
+
+]
+
 /**
  * Protected route prefixes.
  * Any route that starts with one of these will require:
@@ -40,4 +51,8 @@ export function isProtectedPath(pathname: string): boolean {
   return PROTECTED_ROUTE_PREFIXES.some((prefix) =>
     pathname.startsWith(prefix)
   );
+}
+
+export function isUnsubscribeRouteToPricing(pathname: string, subscription: Record<string, any> | null): boolean {
+  return (UNSUBSCRIBE_ROUTES_TO_PRICING.includes(pathname) && !subscription);
 }

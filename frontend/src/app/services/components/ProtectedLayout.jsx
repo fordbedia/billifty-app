@@ -6,12 +6,13 @@ import { auth } from "@/app/helpers/auth";
 import { uri } from "@/app/constants/routePaths";
 import BSpinner from "@/app/components/Spinner";
 import { useApp } from "@/app/providers/AppContext";
-import { isProtectedPath } from "@/app/config/protectedRoutes";
+import { isProtectedPath, isUnsubscribeRouteToPricing } from "@/app/config/protectedRoutes";
 import Forbidden from "@/app/app/invoice/components/errorPages/Forbidden";
 
 export default function ProtectedLayout({ children, isProtected = false }) {
-  const { userData, isUserDataLoading, planCapabilities } = useApp(); // ✅ use one source
-  const router = useRouter();
+  const { userData, isUserDataLoading, planCapabilities } = useApp(); // use one source
+  const subscription = userData?.subscription;
+	const router = useRouter();
   const pathname = usePathname();
 
   const [allowed, setAllowed] = useState(false);
@@ -20,6 +21,15 @@ export default function ProtectedLayout({ children, isProtected = false }) {
   useEffect(() => {
     const session = auth();
     const protectedRoute = isProtectedPath(pathname);
+		const unsubscribeToPricing = isUnsubscribeRouteToPricing(pathname);
+
+		// 0) If user tries to access a specific route without a subscription
+		if (unsubscribeToPricing) {
+			setAllowed(false);
+			setForbiddenInfo(null);
+			router.push(uri.pricing);
+			return;
+		}
 
     // 0) Not protected
     if (!protectedRoute) {
@@ -57,7 +67,7 @@ export default function ProtectedLayout({ children, isProtected = false }) {
       return;
     }
 
-    // ✅ 5) Now enforce route limits (we KNOW we have caps)
+    // 5) Now enforce route limits (we KNOW we have caps)
     const rule = LIMIT_RULES.find((r) => r.match(pathname));
     if (rule) {
       const res = checkLimit(planCapabilities, rule);

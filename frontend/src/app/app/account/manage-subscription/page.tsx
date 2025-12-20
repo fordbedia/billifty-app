@@ -24,6 +24,7 @@ import Billing from "@/app/models/Billing";
 import { useRouter } from "next/navigation";
 import { capitalize } from "@/app/utils/strings";
 import { uri } from "@/app/constants/routePaths";
+import {proceedToPlanCheckout} from "@/app/utils/pricing";
 
 type PlanCode = "free" | "pro" | "premium";
 type ButtonProps = { code: PlanCode; name: string };
@@ -135,10 +136,10 @@ export default function ManageSubscriptionPage() {
     }
 
     // Free user -> go to your checkout flow with plan + cycle
-    if (!hasStripeSubscription) {
-      router.push(`${uri.pricing}?plan=${targetCode}&cycle=${cycleType}`);
-      return;
-    }
+    // if (!hasStripeSubscription) {
+    //   router.push(`${uri.pricing}?plan=${targetCode}&cycle=${cycleType}`);
+    //   return;
+    // }
 
     // Paid user -> confirm then open Stripe portal (Stripe handles upgrade/downgrade/payment method/cancel)
     setPendingTargetCode(targetCode);

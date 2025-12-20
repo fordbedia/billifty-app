@@ -57,6 +57,7 @@ return [
             ],
         ],
         'return_url' => env('STRIPE_RETURN_URL'),
+        'manage_subscriptions_url' => env('STRIPE_MANAGE_SUBSCRIPTIONS_URL'),
     ],
 
 ];

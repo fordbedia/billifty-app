@@ -3,7 +3,7 @@ import { uri } from "@/app/constants/routePaths";
 
 export type BillingCycle = "monthly" | "yearly";
 
-export async function proceedToPlan(
+export async function proceedToPlanCheckout(
   planCode: string,
   billingCycle: BillingCycle,
   planCapabilities: any,
@@ -11,14 +11,14 @@ export async function proceedToPlan(
   router: any
 ) {
   // Free plan click: just route user to app/free flow (or register)
-  if (planCode === "free") {
-    router.push(uri.h);
-    return;
-  }
+  // if (planCode === "free") {
+  //   router.push(uri.h);
+  //   return;
+  // }
 
   // If not logged in -> send to login/register, preserve intent
   if (!session) {
-    router.push(`/auth/login?next=${encodeURIComponent(`${uri.pricing}?plan=${planCode}&cycle=${billingCycle}`)}`);
+    router.push(`/auth?next=${encodeURIComponent(`${uri.pricing}?plan_code=${planCode}&billing_cycle=${billingCycle}`)}`);
     return;
   }
 
@@ -27,7 +27,7 @@ export async function proceedToPlan(
 
   const res = await Billing.createCheckoutSession({
     plan_code: planCode,
-    billing_cycle: billingCycle, // ✅ this is what you were missing
+    billing_cycle: billingCycle, // this is what you were missing
     success_url: successUrl,
     cancel_url: cancelUrl,
   });

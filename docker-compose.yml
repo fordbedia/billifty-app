@@ -38,6 +38,7 @@ services:
       - ./backend:/var/www/html
       - ./shared-resources:/var/www/shared-resources
       - ./backend/storage:/var/www/html/storage
+      - ./configs/.env.prod:/var/www/html/.env:ro
     depends_on:
       - postgres
     networks: [ webnet ]

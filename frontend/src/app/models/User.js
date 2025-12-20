@@ -9,8 +9,9 @@ export default class User extends Model {
 			return await this.axios().post('logout')
 		}
 
-		static async register(data) {
-			return await this.axios().post('/', data)
+		static async register(data, next = null) {
+			const uri = next ? `/?next=${next}` : '/';
+			return await this.axios().post(uri, data)
 		}
 
 		static async login(data) {

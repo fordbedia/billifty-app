@@ -1,6 +1,6 @@
 "use client"
 
-import React, {useState} from "react";
+import React, {Suspense, useEffect, useRef, useState} from "react";
 import RootLayout from "@/app/components/common/RootLayout";
 import { useRouter, usePathname } from "next/navigation";
 import {Button, Card, CardBody, Divider, Image, Tab, Tabs} from "@heroui/react";
@@ -11,7 +11,8 @@ import {useApp} from "@/app/providers/AppContext";
 import { auth } from "@/app/helpers/auth";
 import {router} from "next/client";
 import {uri} from "@/app/constants/routePaths";
-import {proceedToPlan} from "@/app/utils/pricing";
+import {useSearchParams} from "next/navigation";
+import {proceedToPlanCheckout} from "@/app/utils/pricing";
 
 export type BillingCycle = "monthly" | "yearly"
 
@@ -31,15 +32,50 @@ export type Plan = {
     features_text: string[];
 };
 
-export default function Pricing() {
+export function PricingComponent() {
     const {
         userData,
         isErrorUserData,
     } = useApp()
     const session = auth()
     const router = useRouter()
+    const searchParams = useSearchParams()
     const [cycleType, setCycleType] = useState<BillingCycle>("monthly")
     const planCapabilities = userData?.plan_capabilities ?? []
+
+    const hasRun = useRef<boolean>(false)
+    const isBillingCycle = (v: string | null): v is BillingCycle =>
+        v === "monthly" || v === "yearly";
+
+    useEffect(() => {
+        if (hasRun.current) return
+
+        const autoCheckout = searchParams.get("auto_checkout")
+        const plan = searchParams.get("plan_code")
+        const billingCycle = searchParams.get('billing_cycle')
+
+        if (!isBillingCycle(billingCycle)) return;
+
+        if (!autoCheckout || !plan) return
+
+        hasRun.current = true
+
+        proceedToPlanCheckout(
+          plan,
+          billingCycle,
+          planCapabilities,
+          session,
+          router
+        )
+    }, [
+      searchParams.get("auto_checkout"),
+      searchParams.get('billing_cycle'),
+      searchParams.get("plan_code"),
+      cycleType,
+      planCapabilities,
+      session,
+      router,
+    ])
 
     const {data} = useQuery<Plan[]>({
         queryKey: ["plan"],
@@ -113,7 +149,7 @@ export default function Pricing() {
                                 <h3 className="font-extralight subpixel-antialiased">{p.actions?.text1}</h3>
 
                                <Button
-                                  onPress={() => proceedToPlan(p.code, cycleType, planCapabilities, session, router)}
+                                  onPress={() => proceedToPlanCheckout(p.code, cycleType, planCapabilities, session, router)}
                                   className={'my-8 py-6 font-semibold text-lg ' + (p.code === 'pro'
                                     ? 'bg-blue-600 text-white'
                                     : p.code === 'premium'
@@ -233,5 +269,10 @@ export default function Pricing() {
             </div>
 
         </RootLayout>
+    )
+}
+export default function Pricing() {
+    return (
+        <Suspense fallback={null}><PricingComponent /></Suspense>
     )
 }

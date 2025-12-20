@@ -25,6 +25,8 @@ services:
       CORS_ALLOWED_ORIGINS: http://int.getinvoice.com,http://localhost:3000
       ASSET_URL: http://localhost:8081/
     command: bash -c "php -v && php-fpm"
+    volumes:
+      - ./configs/.env.local:/var/www/html/.env:ro
 
   frontend:
     environment:

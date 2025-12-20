@@ -1,16 +1,18 @@
 "use client"
 
-import {createContext, useContext, useEffect, useState} from "react";
+import {createContext, Suspense, useContext, useEffect, useState} from "react";
 import {useMutation} from "@tanstack/react-query";
 import User from "@/app/models/User";
 import {useRouter} from "next/navigation";
 import {uri} from "@/app/constants/routePaths";
 import {storeAuth} from "@/app/helpers/auth";
+import {useSearchParams} from "next/navigation";
 
 const UserContext = createContext(null)
 
-export function UserProvider({ children }) {
+export function UserProviderInner({ children }) {
 	const router = useRouter()
+	const searchParams = useSearchParams()
 	const userInitialState = {
 		fname: '',
 		lname: '',
@@ -29,21 +31,42 @@ export function UserProvider({ children }) {
 
 	const {mutate: saveUser, error: userSaveError} = useMutation({
 		mutationFn: async () => {
-			return (await User.register(user))?.data
+			const next = searchParams.get("next") ?? null
+
+			return (await User.register(user, next))?.data
 		},
 		onSuccess: (d) => {
-			storeAuth(d)
-			router.replace(uri.invoices)
-			router.refresh()
+			console.log('dd', d)
+			const {nextUrl, ...rest} = d
+			console.log('rest', rest)
+			storeAuth(rest)
+			if (nextUrl) {
+				router.push(nextUrl)
+			} else {
+				router.push(uri.invoices)
+			}
 		}
 	})
 
 	useEffect(() => {
-		if (userSaveError) {
-			const e = Object.entries(userSaveError?.response?.data?.errors).map(([v, k]) => k[0])
+		if (!userSaveError) return
+
+		const rawErrors = userSaveError?.response?.data?.errors
+
+		if (rawErrors && typeof rawErrors === "object") {
+			const e = Object.values(rawErrors).map((messages) => messages?.[0]).filter(Boolean)
 			setErrors(e)
+			return
 		}
-	}, [userSaveError]);
+
+		// fallback for non-validation errors
+		const message =
+			userSaveError?.response?.data?.message ||
+			userSaveError?.message ||
+			"Something went wrong."
+
+		setErrors([message])
+	}, [userSaveError])
 
 	const value = {
 		user,
@@ -52,15 +75,21 @@ export function UserProvider({ children }) {
 		errors,
 	}
 
-	return <UserContext value={value}>
+	return <UserContext.Provider value={value}>
 		{children}
-	</UserContext>
+	</UserContext.Provider>
+}
+
+export function UserProvider({children}) {
+	return <Suspense fallback={null}>
+		<UserProviderInner>{children}</UserProviderInner>
+	</Suspense>
 }
 
 export const useUser = () => {
 	const ctx = useContext(UserContext)
 	if (!ctx) {
-		throw new Exception('Cannot load UserContext')
+		throw new Error('Cannot load UserContext')
 	}
 	return ctx
 }
