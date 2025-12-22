@@ -34,6 +34,6 @@ export async function proceedToPlanCheckout(
 
   const url = res?.url;
   if (!url) throw new Error("Stripe Checkout session did not return a URL.");
-
+  window.sessionStorage.setItem("success_checkout", JSON.stringify(res.user));
   window.location.href = url;
 }

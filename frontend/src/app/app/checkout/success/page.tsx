@@ -24,10 +24,10 @@ function Inner() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Only runs in browser
     try {
       const raw = window.sessionStorage.getItem("success_checkout")
       const parsed = raw ? (JSON.parse(raw) as SuccessCheckout) : null
+
       setSession(parsed)
     } catch {
       setSession(null)
@@ -40,7 +40,7 @@ function Inner() {
   useEffect(() => {
     if (!ready) return
     if (!session?.subscription) {
-      router.replace(uri.h)
+      // router.replace(uri.h)
     }
   }, [ready, session, router])
 
@@ -53,8 +53,10 @@ function Inner() {
       }
 
       try {
-        await Billing.confirmCheckout({session_id: sessionId});
-        router.replace(uri.manage_subscriptions);
+        //@TODO: FIXED Redirection issue
+        const c = await Billing.confirmCheckout({session_id: sessionId});
+        window.sessionStorage.setItem("success_checkout", JSON.stringify(c.user));
+        window.location.reload();
       } catch (err: any) {
         setError(err?.response?.data?.message || err?.message || "Unable to confirm subscription.");
       }

@@ -36,9 +36,7 @@ export function UserProviderInner({ children }) {
 			return (await User.register(user, next))?.data
 		},
 		onSuccess: (d) => {
-			console.log('dd', d)
 			const {nextUrl, ...rest} = d
-			console.log('rest', rest)
 			storeAuth(rest)
 			if (nextUrl) {
 				router.push(nextUrl)

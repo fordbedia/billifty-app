@@ -1,6 +1,6 @@
 import React, {
     createContext, Dispatch,
-    ReactNode, SetStateAction,
+    ReactNode, SetStateAction, Suspense,
     useContext, useEffect,
     useState
 } from 'react'
@@ -12,6 +12,7 @@ import {useRouter} from "next/navigation";
 import {storeAuth} from "@/app/helpers/auth";
 import {uri} from "@/app/constants/routePaths";
 import type { AxiosError } from "axios";
+import {useSearchParams} from "next/navigation";
 
 type AuthProviderProps = {
     children: ReactNode
@@ -48,6 +49,7 @@ type AuthResult = {
         password: string;
       };
     token: string;
+    url: string | null;
 }
 
 type ErrorProps = {
@@ -61,8 +63,9 @@ type LoginProps = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-export function AuthProvider({ children }: AuthProviderProps) {
+function AuthInnerProvider({ children }: AuthProviderProps) {
     const router = useRouter()
+    const searchParams = useSearchParams()
     const [password, setPassword] = useState<string>("");
     const [submitted, setSubmitted] = useState<object | null>(null);
     const [errors, setErrors] = useState<string | null>(null);
@@ -86,11 +89,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     })
 
     const {mutate: login, error: loginError} = useMutation<AuthResult, AxiosError<ErrorProps>>({
-		mutationFn: async () => (await User.login(user))?.data,
+		mutationFn: async () => {
+            const next: string | null = searchParams.get("next") ?? null
+            return (await User.login(user, next))?.data
+        },
         onSuccess: (d) => {
-            storeAuth(d)
-			router.replace(uri.invoices)
-			router.refresh()
+            const {url, ...rest} = d
+            storeAuth(rest)
+            if (url) {
+                router.push(url)
+            }
         }
 	})
 
@@ -119,6 +127,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return <AuthContext.Provider value={value}>
         {children}
     </AuthContext.Provider>
+}
+
+export function AuthProvider({ children }: AuthProviderProps)
+{
+    return <Suspense fallback={null}>
+        <AuthInnerProvider>{children}</AuthInnerProvider>
+    </Suspense>
 }
 
 export function useAuth(): AuthContextValue {
