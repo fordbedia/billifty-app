@@ -1,6 +1,6 @@
 "use client"
 
-import React, {useState} from "react";
+import React, {Suspense, useEffect, useRef, useState} from "react";
 import RootLayout from "@/app/components/common/RootLayout";
 import { useRouter, usePathname } from "next/navigation";
 import {Button, Card, CardBody, Divider, Image, Tab, Tabs} from "@heroui/react";
@@ -11,6 +11,8 @@ import {useApp} from "@/app/providers/AppContext";
 import { auth } from "@/app/helpers/auth";
 import {router} from "next/client";
 import {uri} from "@/app/constants/routePaths";
+import {useSearchParams} from "next/navigation";
+import {proceedToPlanCheckout, proceedToBillingPortal} from "@/app/utils/pricing";
 
 export type BillingCycle = "monthly" | "yearly"
 
@@ -30,15 +32,51 @@ export type Plan = {
     features_text: string[];
 };
 
-export default function Pricing() {
+export function PricingComponent() {
     const {
         userData,
         isErrorUserData,
     } = useApp()
     const session = auth()
     const router = useRouter()
+    const searchParams = useSearchParams()
     const [cycleType, setCycleType] = useState<BillingCycle>("monthly")
     const planCapabilities = userData?.plan_capabilities ?? []
+    const hasStripeSubscription = !!userData?.subscription?.stripe_subscription_id;
+
+    const hasRun = useRef<boolean>(false)
+    const isBillingCycle = (v: string | null): v is BillingCycle =>
+        v === "monthly" || v === "yearly";
+
+    useEffect(() => {
+        if (hasRun.current) return
+
+        const autoCheckout = searchParams.get("auto_checkout")
+        const plan = searchParams.get("plan_code")
+        const billingCycle = searchParams.get('billing_cycle')
+
+        if (!isBillingCycle(billingCycle)) return;
+
+        if (!autoCheckout || !plan) return
+
+        hasRun.current = true
+
+        proceedToPlanCheckout(
+          plan,
+          billingCycle,
+          planCapabilities,
+          session,
+          router
+        )
+    }, [
+      searchParams.get("auto_checkout"),
+      searchParams.get('billing_cycle'),
+      searchParams.get("plan_code"),
+      cycleType,
+      planCapabilities,
+      session,
+      router,
+    ])
 
     const {data} = useQuery<Plan[]>({
         queryKey: ["plan"],
@@ -52,19 +90,12 @@ export default function Pricing() {
         window.scrollTo({top: scrollY, behavior: 'smooth'});
     }
 
-    const proceedToPlan = (plan: string): void => {
-        if (Array.isArray(planCapabilities) && planCapabilities.length === 0) {
-            // Redirect to checkout
-            console.log('redirecting to checkout')
-            router.replace(`${uri.checkout}/?plan=${plan}`)
-            return;
+    const handlePlanButton = async (code: string, cycleType: BillingCycle, planCapabilities: any, session: any, router: any) => {
+        if (hasStripeSubscription) {
+            await proceedToBillingPortal({return_url: window.location.origin + uri.manage_subscriptions,})
+            return
         }
-        if (! session) {
-            // Redirect to the login page
-            console.log('redirecting to auth')
-            router.replace(`${uri.auth}/?plan=${plan}`)
-            return;
-        }
+        await proceedToPlanCheckout(code, cycleType, planCapabilities, session, router)
     }
 
     return (
@@ -126,9 +157,18 @@ export default function Pricing() {
                                 <div className="flex flex-row items-baseline"><h2 className="py-1 text-6xl font-semibold pr-2">${p.billing[cycleType]?.price}</h2> /{cycleType === 'monthly' ? 'month' : 'year'}</div>
                                 <h3 className="font-extralight subpixel-antialiased">{p.actions?.text1}</h3>
 
-                                <Button onPress={() => proceedToPlan(p.code)} className={'my-8 py-6 font-semibold text-lg ' + (p.code === 'pro'
-                                    ? 'bg-blue-600 text-white' : p.code === 'premium'
-                                    ? 'text-black bg-white' : '')} disableRipple>{p.actions?.btn}</Button>
+                               <Button
+                                  onPress={() => handlePlanButton(p.code, cycleType, planCapabilities, session, router)}
+                                  className={'my-8 py-6 font-semibold text-lg ' + (p.code === 'pro'
+                                    ? 'bg-blue-600 text-white'
+                                    : p.code === 'premium'
+                                      ? 'text-black bg-white'
+                                      : '')}
+                                  disableRipple
+                                >
+                                  {p.actions?.btn}
+                                </Button>
+
 
                                 <ul className="free-plan-limits pb-6">
                                     <li className="flex items-center gap-3 py-1">
@@ -238,5 +278,10 @@ export default function Pricing() {
             </div>
 
         </RootLayout>
+    )
+}
+export default function Pricing() {
+    return (
+        <Suspense fallback={null}><PricingComponent /></Suspense>
     )
 }

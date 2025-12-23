@@ -2,7 +2,7 @@
 
 import {createContext, useContext, useEffect, useRef, useState} from "react";
 import {Exception} from "sass";
-import {useMutation, useQuery} from "@tanstack/react-query";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import BusinessProfile from "@/app/models/BusinessProfile";
 import { useRouter, useSearchParams, useParams, usePathname } from "next/navigation";
 import {useDisclosure} from "@heroui/react";
@@ -57,7 +57,7 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		message: '',
 		color: 'primary',
 	}
-
+	const queryClient = useQueryClient()
 	const [hasToast, setHasToast] = useState(initialToastState)
 	const [businessProfileForm, setBusinessProfileForm] = useState({...businessProfileInitialState})
 	const [paymentInfoForm, setPaymentInfoForm] = useState({...paymentInfoInitialState})
@@ -166,6 +166,7 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		},
 		onSuccess: () => {
 			setHasToast({title: 'New business profile has been successfully created!', color: 'success'})
+			queryClient.invalidateQueries({ queryKey: ['me'] })
 			router.replace(uri.business_profile.lists)
 		}
 	})
@@ -236,8 +237,19 @@ export function BusinessProfileProvider({ children, id, mode }) {
 			e = Object.values(errorHandler).map(([v, k]) => (v))
 			setErrors(e)
 		}
+
 		if (
 			typeof errorSubmit !== undefined &&
+			typeof errorSubmit?.response?.data?.errors === 'undefined' &&
+			typeof errorSubmit?.response?.data?.message !== 'undefined' &&
+			typeof errorSubmit?.response?.data?.error_code !== 'undefined'
+		) {
+			setErrors(errorSubmit?.response?.data?.message)
+		}
+
+		if (
+			typeof errorSubmit !== undefined &&
+			typeof errorSubmit?.response?.data?.errors !== 'undefined' &&
 			errorSubmit?.response?.data?.errors &&
 			Object.keys(errorSubmit?.response?.data?.errors).length > 0
 		) {

@@ -14,6 +14,8 @@ import Boolean = types.Boolean;
 import {useQuery} from "@tanstack/react-query";
 import User from "@/app/models/User";
 import { auth } from "@/app/helpers/auth";
+import {usePathname} from "next/navigation";
+import {uri} from "@/app/constants/routePaths";
 
 type AppProviderProps = {
   children: ReactNode
@@ -38,6 +40,7 @@ interface AppContextValue {
   userData: Record<string, any>;
   isUserDataLoading: boolean
   isErrorUserData: boolean
+  planCapabilities: Record<string, any>
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -48,6 +51,7 @@ export function AppProvider({ children } : AppProviderProps) {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<string>('signin')
   const session = auth()
+  const pathname = usePathname()
   // SignUp
   const [password, setPassword] = useState("");
   const [submitted, setSubmitted] = useState(null);
@@ -56,8 +60,8 @@ export function AppProvider({ children } : AppProviderProps) {
   const {data: userData, isLoading: isUserDataLoading, isError: isErrorUserData} = useQuery({
     queryKey: ['me'],
     queryFn: async () => (await User.me())?.data,
-    retry: false,
-    enabled: !!session
+    retry: true,
+    enabled: !!session || pathname === uri.business_profile.lists
   })
 
   useEffect(() => {
@@ -86,6 +90,8 @@ export function AppProvider({ children } : AppProviderProps) {
     }
   }, []);
 
+  const planCapabilities = useMemo(() => userData?.plan_capabilities ?? {}, [userData])
+
   const value = useMemo<AppContextValue>(() => ({
     theme,
     setTheme,
@@ -94,8 +100,8 @@ export function AppProvider({ children } : AppProviderProps) {
     isDarkMode,
     selectedTab,
     setSelectedTab,
-    userData, isUserDataLoading, isErrorUserData
-  }), [theme, user,isDarkMode, selectedTab, userData, isUserDataLoading, isErrorUserData]);
+    userData, isUserDataLoading, isErrorUserData, planCapabilities
+  }), [theme, user,isDarkMode, selectedTab, userData, isUserDataLoading, isErrorUserData, planCapabilities]);
   return <AppContext.Provider value={value}>
     {children}
   </AppContext.Provider>;

@@ -47,7 +47,6 @@
 
 /backend/*.log
 /backend/.DS_Store
-/backend/.env
 /backend/.env.backup
 /backend/.env.production
 /backend/.phpactor.json

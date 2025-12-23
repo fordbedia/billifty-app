@@ -1,11 +1,12 @@
-import {Image, Button, Link} from "@heroui/react";
+import {Button, Link} from "@heroui/react";
 import {uri} from "@/app/constants/routePaths";
+import Image from "next/image";
 
 export default function NotFound() {
 	return (
 		<div className="error error-404 flex justify-center">
 			<div className="box text-center justify-items-center my-12 py-8 px-12">
-				<Image className="text-center my-8" priority quality={100} width={128} height={128} src="/images/warning-red.png" />
+				<Image alt="Warning Icon" className="text-center my-8" priority quality={100} width={128} height={128} src="/images/warning-red.png" />
 				<h2 className="text-8xl font-bold pt-5">404</h2>
 				<h3 className="text-2xl">Invoice Not Found</h3>
 				<p className="text-xl py-4">The invoice you're looking for doesn't exist or may have been deleted. Please check the URL or return to the dashboard.</p>

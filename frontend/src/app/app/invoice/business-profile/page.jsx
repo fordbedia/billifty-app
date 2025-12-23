@@ -5,6 +5,7 @@ import RootLayout from "@/app/components/common/RootLayout";
 import {Button, Card, CardBody, CardHeader, DateRangePicker, Input, Link} from "@heroui/react";
 import TableData from "@/app/components/Table";
 import {useBusinessProfile} from "@/app/providers/BusinessProfileContext";
+import {useApp} from "@/app/providers/AppContext";
 
 function Component () {
 	const {
@@ -14,6 +15,9 @@ function Component () {
 		setSearch,
 		handleSearchKeyDown,
 	} = useBusinessProfile()
+	const {
+		planCapabilities
+	} = useApp()
 
 	const column = [
 		{key: 'name', label: 'Business Name'},
@@ -61,11 +65,13 @@ function Component () {
 											{/*</div>*/}
 										</div>
 										<div className="self-center">
-											<Button as={Link} href="/app/invoice/business-profile/new" color="primary">
-												<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-													<path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-												</svg>
-												Create New Business Profile</Button>
+											{planCapabilities?.limits?.['current:businessProfiles'] < planCapabilities?.limits?.max_business_profiles && (
+												<Button as={Link} href="/app/invoice/business-profile/new" color="primary">
+													<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+														<path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+													</svg>
+													Create New Business Profile</Button>
+											)}
 
 												<div className="mt-4 w-64">
 													<Input

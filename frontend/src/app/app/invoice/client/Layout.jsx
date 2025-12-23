@@ -208,11 +208,17 @@ export default function ClientApp () {
 
 
 											<div className="errors">
-												{typeof errors !== undefined && errors && Object.keys(errors).length > 0 && (
+												{typeof errors !== 'string' && typeof errors !== undefined && errors && Object.keys(errors).length > 0 && (
 													<Alert color="danger" className="mt-7">
 														<ul>
 															{errors?.map((v, k) => (<li key={k}>{v}</li>))}
 														</ul>
+													</Alert>
+												)}
+												{console.log('errors', errors)}
+												{typeof errors === 'string' && typeof errors !== undefined && errors && Object.keys(errors).length > 0 && (
+													<Alert color="danger" className="mt-7">
+														{errors}
 													</Alert>
 												)}
 											</div>

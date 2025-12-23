@@ -113,11 +113,21 @@ export function ClientProvider({ children, mode, id }) {
 			let errorArr = error?.response?.data?.errors;
 			return errorArr ? Object.entries(errorArr).map(([v, k]) => k[0]) : []
 		}
+
+		if (
+			typeof createError !== undefined &&
+			typeof createError?.response?.data?.errors === 'undefined' &&
+			typeof createError?.response?.data?.message !== 'undefined' &&
+			typeof createError?.response?.data?.error_code !== 'undefined'
+		) {
+			e = createError?.response?.data?.message
+		}
+
 		if (typeof createError !== 'undefined' &&
 			createError &&
-			Object.keys(createError).length > 0
+			Object.keys(createError).length > 0 &&
+			typeof createError?.response?.data?.error_code === 'undefined'
 		) {
-			console.log('createError', createError)
 			e = handleError(createError)
 		}
 
