@@ -38,32 +38,43 @@ function Inner() {
 
   // Redirect once we know we’re in the browser & session is missing/invalid
   useEffect(() => {
-    if (!ready) return
-    if (!session?.subscription) {
-      // router.replace(uri.h)
+    const sessionId = sp.get("session_id");
+    if (!ready) return;
+
+    if (!session?.subscription && !sessionId) {
+      router.replace(uri.h);
     }
-  }, [ready, session, router])
+  }, [ready, session, sp, router]);
 
   useEffect(() => {
     const run = async () => {
       const sessionId = sp.get("session_id");
       if (!sessionId) {
         setError("Missing session_id from Stripe redirect.");
+        setReady(true);
         return;
       }
 
       try {
-        //@TODO: FIXED Redirection issue
-        const c = await Billing.confirmCheckout({session_id: sessionId});
-        window.sessionStorage.setItem("success_checkout", JSON.stringify(c.user));
-        window.location.reload();
+        const res = await Billing.confirmSubscription();
+        // Save to sessionStorage for future visits
+        window.sessionStorage.setItem("success_checkout", JSON.stringify(res.user));
+        // Also update React state so the UI re-renders *now*
+        setSession(res.user);
       } catch (err: any) {
-        setError(err?.response?.data?.message || err?.message || "Unable to confirm subscription.");
+        setError(
+          err?.response?.data?.message ||
+          err?.message ||
+          "Unable to confirm subscription."
+        );
+      } finally {
+        setReady(true);
       }
     };
 
     run();
-  }, [sp, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sp]); // router isn't actually needed as a dependency here
 
   const {planLabel, cycle, dollars} = useMemo(() => {
     const planCode = session?.subscription?.plan_code ?? ""

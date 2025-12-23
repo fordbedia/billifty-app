@@ -25,6 +25,7 @@ import { useRouter } from "next/navigation";
 import { capitalize } from "@/app/utils/strings";
 import { uri } from "@/app/constants/routePaths";
 import {proceedToPlanCheckout} from "@/app/utils/pricing";
+import {auth} from "@/app/helpers/auth";
 
 type PlanCode = "free" | "pro" | "premium";
 type ButtonProps = { code: PlanCode; name: string };
@@ -117,10 +118,22 @@ export default function ManageSubscriptionPage() {
   });
 
 
-  const openBillingPortal = () => {
-    portalMutation.mutate({
-      return_url: window.location.origin + uri.manage_subscriptions,
-    });
+  const openPaymentStripePortal = async () => {
+    const code = pendingTargetCode;
+    if (!code) {
+      alert("Missing target plan.");
+      return;
+    }
+
+    if (hasStripeSubscription || code === 'free') {
+      portalMutation.mutate({
+        return_url: window.location.origin + uri.manage_subscriptions,
+      });
+      return;
+    }
+
+    const session = auth()
+    await proceedToPlanCheckout(code, cycleType, planCapabilities, session, router);
   };
 
   const handleChangePlan = (targetCode: PlanCode) => {
@@ -128,18 +141,12 @@ export default function ManageSubscriptionPage() {
     if (targetCode === effectivePlanCode) return;
 
     // Paid user clicking FREE -> auto cancel immediately
-    if (targetCode === "free" && hasStripeSubscription) {
-      const ok = confirm("Switching to Free will cancel your subscription immediately. Continue?");
-      if (!ok) return;
-      cancelMutation.mutate();
+    if (hasStripeSubscription) {
+      portalMutation.mutate({
+        return_url: window.location.origin + uri.manage_subscriptions,
+      });
       return;
     }
-
-    // Free user -> go to your checkout flow with plan + cycle
-    // if (!hasStripeSubscription) {
-    //   router.push(`${uri.pricing}?plan=${targetCode}&cycle=${cycleType}`);
-    //   return;
-    // }
 
     // Paid user -> confirm then open Stripe portal (Stripe handles upgrade/downgrade/payment method/cancel)
     setPendingTargetCode(targetCode);
@@ -150,12 +157,12 @@ export default function ManageSubscriptionPage() {
   const confirmChangePlan = () => {
     onClose();
     // Stripe portal handles upgrade/downgrade/cancel/payment method
-    openBillingPortal();
+    openPaymentStripePortal();
   };
 
   const goToPaymentMethodPage = () => {
     // You can keep your payment-method page, but Portal already covers this:
-    openBillingPortal();
+    openPaymentStripePortal();
   };
 
   const isBusy = portalMutation.isPending || cancelMutation.isPending;

@@ -12,7 +12,7 @@ import { auth } from "@/app/helpers/auth";
 import {router} from "next/client";
 import {uri} from "@/app/constants/routePaths";
 import {useSearchParams} from "next/navigation";
-import {proceedToPlanCheckout} from "@/app/utils/pricing";
+import {proceedToPlanCheckout, proceedToBillingPortal} from "@/app/utils/pricing";
 
 export type BillingCycle = "monthly" | "yearly"
 
@@ -42,6 +42,7 @@ export function PricingComponent() {
     const searchParams = useSearchParams()
     const [cycleType, setCycleType] = useState<BillingCycle>("monthly")
     const planCapabilities = userData?.plan_capabilities ?? []
+    const hasStripeSubscription = !!userData?.subscription?.stripe_subscription_id;
 
     const hasRun = useRef<boolean>(false)
     const isBillingCycle = (v: string | null): v is BillingCycle =>
@@ -87,6 +88,14 @@ export function PricingComponent() {
         const compareSection = document.getElementById('compare-features-table');
         const scrollY = compareSection?.getBoundingClientRect().top ?? 0;
         window.scrollTo({top: scrollY, behavior: 'smooth'});
+    }
+
+    const handlePlanButton = async (code: string, cycleType: BillingCycle, planCapabilities: any, session: any, router: any) => {
+        if (hasStripeSubscription) {
+            await proceedToBillingPortal({return_url: window.location.origin + uri.manage_subscriptions,})
+            return
+        }
+        await proceedToPlanCheckout(code, cycleType, planCapabilities, session, router)
     }
 
     return (
@@ -149,7 +158,7 @@ export function PricingComponent() {
                                 <h3 className="font-extralight subpixel-antialiased">{p.actions?.text1}</h3>
 
                                <Button
-                                  onPress={() => proceedToPlanCheckout(p.code, cycleType, planCapabilities, session, router)}
+                                  onPress={() => handlePlanButton(p.code, cycleType, planCapabilities, session, router)}
                                   className={'my-8 py-6 font-semibold text-lg ' + (p.code === 'pro'
                                     ? 'bg-blue-600 text-white'
                                     : p.code === 'premium'

@@ -21,15 +21,6 @@ export default function ProtectedLayout({ children, isProtected = false }) {
   useEffect(() => {
     const session = auth();
     const protectedRoute = isProtectedPath(pathname);
-		const unsubscribeToPricing = isUnsubscribeRouteToPricing(pathname);
-
-		// 0) If user tries to access a specific route without a subscription
-		if (unsubscribeToPricing) {
-			setAllowed(false);
-			setForbiddenInfo(null);
-			router.push(uri.pricing);
-			return;
-		}
 
     // 0) Not protected
     if (!protectedRoute) {
@@ -53,6 +44,19 @@ export default function ProtectedLayout({ children, isProtected = false }) {
 
     // 3) Wait for userData
     if (isUserDataLoading) return;
+
+		// NOW it's safe to check subscription
+		const unsubscribeToPricing = isUnsubscribeRouteToPricing(
+			pathname,
+			userData?.subscription ?? null
+		);
+
+		if (unsubscribeToPricing) {
+			setAllowed(false);
+			setForbiddenInfo(null);
+			router.replace(uri.pricing);
+			return;
+		}
 
     const hasPlan = !!userData?.plan_id;
 

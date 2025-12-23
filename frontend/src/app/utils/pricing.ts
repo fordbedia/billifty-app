@@ -1,7 +1,9 @@
 import Billing from "@/app/models/Billing";
 import { uri } from "@/app/constants/routePaths";
+import {useMutation} from "@tanstack/react-query";
 
 export type BillingCycle = "monthly" | "yearly";
+type PortalPayload = { return_url?: string };
 
 export async function proceedToPlanCheckout(
   planCode: string,
@@ -10,11 +12,6 @@ export async function proceedToPlanCheckout(
   session: any,
   router: any
 ) {
-  // Free plan click: just route user to app/free flow (or register)
-  // if (planCode === "free") {
-  //   router.push(uri.h);
-  //   return;
-  // }
 
   // If not logged in -> send to login/register, preserve intent
   if (!session) {
@@ -23,7 +20,7 @@ export async function proceedToPlanCheckout(
   }
 
   const successUrl = window.location.origin + uri.checkout_success; // where you want them after payment
-  const cancelUrl = window.location.origin + uri.pricing;              // back to pricing if they cancel
+  const cancelUrl = window.location.origin + uri.manage_subscriptions;              // back to pricing if they cancel
 
   const res = await Billing.createCheckoutSession({
     plan_code: planCode,
@@ -34,6 +31,11 @@ export async function proceedToPlanCheckout(
 
   const url = res?.url;
   if (!url) throw new Error("Stripe Checkout session did not return a URL.");
-  window.sessionStorage.setItem("success_checkout", JSON.stringify(res.user));
   window.location.href = url;
+}
+
+export async function proceedToBillingPortal(payload: PortalPayload) {
+  const res = await Billing.createPortalSession(payload);
+  if (!res?.url) throw new Error("Stripe Checkout session did not return a URL.");
+  window.location.href = res.url;
 }

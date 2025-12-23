@@ -36,4 +36,9 @@ export default class Billing extends Model {
 		const res = await this.axios().post("/confirm-checkout", payload);
 		return res.data;
 	}
+
+	static async confirmSubscription() {
+		const res = await this.axios().post("/confirm-subscription");
+		return res.data;
+	}
 }
