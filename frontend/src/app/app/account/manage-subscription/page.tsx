@@ -120,10 +120,6 @@ export default function ManageSubscriptionPage() {
 
   const openPaymentStripePortal = async () => {
     const code = pendingTargetCode;
-    if (!code) {
-      alert("Missing target plan.");
-      return;
-    }
 
     if (hasStripeSubscription || code === 'free') {
       portalMutation.mutate({
@@ -131,7 +127,7 @@ export default function ManageSubscriptionPage() {
       });
       return;
     }
-
+    if (!code) return;
     const session = auth()
     await proceedToPlanCheckout(code, cycleType, planCapabilities, session, router);
   };
