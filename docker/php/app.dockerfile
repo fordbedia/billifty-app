@@ -3,7 +3,9 @@ FROM php:8.3-fpm
 
 RUN apt-get update && apt-get install -y \
     git unzip libzip-dev libonig-dev libxml2-dev libicu-dev libpng-dev libjpeg-dev libfreetype6-dev \
-    libssl-dev libpq-dev vim bash curl && rm -rf /var/lib/apt/lists/*
+    libssl-dev libpq-dev vim bash curl \
+    postgresql-client \
+ && rm -rf /var/lib/apt/lists/*
 
 # PHP core extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
