@@ -24,7 +24,7 @@ import Billing from "@/app/models/Billing";
 import { useRouter } from "next/navigation";
 import { capitalize } from "@/app/utils/strings";
 import { uri } from "@/app/constants/routePaths";
-import {proceedToPlanCheckout} from "@/app/utils/pricing";
+import {directionFlow, proceedToPlanCheckout} from "@/app/utils/pricing";
 import {auth} from "@/app/helpers/auth";
 
 type PlanCode = "free" | "pro" | "premium";
@@ -71,6 +71,7 @@ export default function ManageSubscriptionPage() {
 
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const [pendingTargetCode, setPendingTargetCode] = useState<PlanCode | null>(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const pendingPlan = useMemo(() => {
     if (!pendingTargetCode || !data) return null;
@@ -100,6 +101,7 @@ export default function ManageSubscriptionPage() {
       window.location.href = url;
     },
     onError: (err: any) => {
+      setIsRedirecting(false);
       const msg = err?.response?.data?.message || err?.message || "Unable to open Stripe portal.";
       alert(msg);
     },
@@ -119,25 +121,31 @@ export default function ManageSubscriptionPage() {
 
 
   const openPaymentStripePortal = async () => {
+    setIsRedirecting(true);
+    const kind = await directionFlow('manageSubscription')
     const code = pendingTargetCode;
 
-    if (hasStripeSubscription || code === 'free') {
+    if (kind === 'billing_portal') {
       portalMutation.mutate({
         return_url: window.location.origin + uri.manage_subscriptions,
       });
       return;
     }
     if (!code) return;
-    const session = auth()
-    await proceedToPlanCheckout(code, cycleType, planCapabilities, session, router);
+    if (kind === 'checkout') {
+      const session = auth()
+      await proceedToPlanCheckout(code, cycleType, planCapabilities, session, router);
+    }
   };
 
-  const handleChangePlan = (targetCode: PlanCode) => {
+  const handleChangePlan = async (targetCode: PlanCode) => {
     if (!plan) return;
+    const kind = await directionFlow('manageSubscription')
     if (targetCode === effectivePlanCode) return;
 
     // Paid user clicking FREE -> auto cancel immediately
-    if (hasStripeSubscription) {
+    if (kind === 'billing_portal') {
+      setIsRedirecting(true);
       portalMutation.mutate({
         return_url: window.location.origin + uri.manage_subscriptions,
       });
@@ -161,7 +169,7 @@ export default function ManageSubscriptionPage() {
     openPaymentStripePortal();
   };
 
-  const isBusy = portalMutation.isPending || cancelMutation.isPending;
+  const isBusy = isRedirecting || portalMutation.isPending || cancelMutation.isPending;
 
   const cycleLabel = cycleType === "monthly" ? "month" : "year";
   const subscriptionCycleLabel = subscription?.billing_cycle === "yearly" ? "year" : "month";

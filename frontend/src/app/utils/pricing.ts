@@ -5,6 +5,10 @@ import {useMutation} from "@tanstack/react-query";
 export type BillingCycle = "monthly" | "yearly";
 type PortalPayload = { return_url?: string };
 
+export async function directionFlow(source: string) {
+  return await Billing.getDirection({source})
+}
+
 export async function proceedToPlanCheckout(
   planCode: string,
   billingCycle: BillingCycle,
