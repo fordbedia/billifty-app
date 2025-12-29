@@ -12,7 +12,7 @@ import { auth } from "@/app/helpers/auth";
 import {router} from "next/client";
 import {uri} from "@/app/constants/routePaths";
 import {useSearchParams} from "next/navigation";
-import {proceedToPlanCheckout, proceedToBillingPortal} from "@/app/utils/pricing";
+import {proceedToPlanCheckout, proceedToBillingPortal, directionFlow} from "@/app/utils/pricing";
 
 export type BillingCycle = "monthly" | "yearly"
 
@@ -91,11 +91,17 @@ export function PricingComponent() {
     }
 
     const handlePlanButton = async (code: string, cycleType: BillingCycle, planCapabilities: any, session: any, router: any) => {
-        if (hasStripeSubscription) {
-            await proceedToBillingPortal({return_url: window.location.origin + uri.manage_subscriptions,})
-            return
+        const kind = await directionFlow('pricing')
+        console.log('kind', kind)
+        if (kind === 'checkout') {
+            await proceedToPlanCheckout(code, cycleType, planCapabilities, session, router)
+        } else if (kind === 'billing_portal') {
+            await proceedToBillingPortal({return_url: window.location.origin + uri.manage_subscriptions})
+        } else if (kind === 'manage_subscription'){
+            router.push(uri.manage_subscriptions)
+        } else {
+            router.push(`/auth?next=${encodeURIComponent(`${uri.pricing}?plan_code=${code}&billing_cycle=${cycleType}`)}`);
         }
-        await proceedToPlanCheckout(code, cycleType, planCapabilities, session, router)
     }
 
     return (

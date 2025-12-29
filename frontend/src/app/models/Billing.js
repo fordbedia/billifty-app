@@ -5,6 +5,11 @@ import Model from "@/foundation/Model";
 export default class Billing extends Model {
   static resource = "billing";
 
+	static async getDirection(payload = {}) {
+		const res = await this.axios().post("/direction-flow", payload);
+		return res.data;
+	}
+
   static async createCheckoutSession(payload = {}) {
     // POST /api/v1/billing/checkout-session
     const res = await this.axios().post("/checkout-session", payload);
