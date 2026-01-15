@@ -44,11 +44,11 @@ export default function App() {
 		{
 			label: "Profile",
 			key: "profile",
-			href: uri.pricing
+			href: uri.profile
 		}, {
 			label: "Dashboard",
 			key: "dashboard",
-			href: uri.pricing
+			href: uri.invoices
 		},{
 			label: "System",
 			key: "system",
@@ -131,7 +131,7 @@ export default function App() {
               color="primary"
               name="Jason Hughes"
               size="sm"
-              src={auth()?.user?.avatar ?? 'https://i.pravatar.cc/150?u=a042581f4e29026704d'}
+              src={auth()?.user?.image_url ?? 'https://i.pravatar.cc/150?u=a042581f4e29026704d'}
             />
           </DropdownTrigger>
           <DropdownMenu aria-label="Profile Actions" variant="flat">

@@ -22,4 +22,8 @@ export default class User extends Model {
 		static async me() {
 			return await this.axios().get('/me')
 		}
+
+		static async edit(payload) {
+			return await this.axios().post(`/${payload.get('id')}`, payload)
+		}
 }

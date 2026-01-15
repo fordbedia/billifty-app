@@ -23,5 +23,6 @@ export const uri = Object.freeze({
 	},
 	api: {
 		downloadPdf: (invoiceId) => `/api/v1/invoice/${invoiceId}/pdf/download`
-	}
+	},
+	profile: '/app/profile'
 })
