@@ -26,6 +26,10 @@ Or clear only the default DB (#0):
 ```shell
 redis-cli FLUSHDB
 ```
+### Generate Passport API Tokens --personal option
+```shell
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec backend php artisan passport:client --personal
+```
 
 ### What command do I run in Laravel to start the queue worker?
 Inside your backend container:
