@@ -10,6 +10,7 @@ import {Chip, Tooltip} from "@heroui/react";
 import {formattedDate} from "@/app/utils/date";
 import {DateRangePicker} from "@heroui/react";
 import {useApp} from "@/app/providers/AppContext";
+import DashboardSidebar from "@/app/app/component/DashboardSidebar";
 
 function Component() {
 	const {
@@ -122,9 +123,9 @@ function Component() {
 		return (
     <RootLayout isProtected>
       <div className="app app-wrapper outer-bg">
-        <div className="m-auto max-w-screen-xl py-5">
-          <div className="w-full flex mb-5 gap-4">
-            <div className="w-full">
+        <div className="m-auto max-w-screen-xl py-5 md:px-0 px-5">
+          <div className="flex md:flex-row flex-col mb-5 gap-4">
+            <div className="md:w-4/5 w-full">
               <Card className="mb-5 px-3 py-3" fullWidth radius="sm">
                 <CardHeader>
 									<div className="w-full flex justify-between content-center">
@@ -136,7 +137,7 @@ function Component() {
 											</div>
 										</div>
 										<div className="self-center">
-											{planCapabilities?.limits?.['current:invoices'] < planCapabilities?.limits?.max_invoices && (
+											{planCapabilities?.limits?.['current:invoices'] < planCapabilities?.limits?.max_invoices_per_month && (
 												<Button disableRipple onPress={() => {
 													clearSticky()
 													router.replace('/app/invoice/new')
@@ -176,13 +177,9 @@ function Component() {
               </Card>
             </div>
 
-           	{/*<div className="w-1/4">*/}
-						{/*	<Card className="mb-5" fullWidth radius="sm">*/}
-            {/*    <CardHeader className="flex gap-3">*/}
-            {/*      <h2>Create New Invoice</h2>*/}
-            {/*    </CardHeader>*/}
-						{/*	</Card>*/}
-						{/*</div>*/}
+						<div className="md:w-1/5 w-full">
+           		<DashboardSidebar />
+						</div>
 
           </div>
         </div>

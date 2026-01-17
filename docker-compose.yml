@@ -23,24 +23,19 @@ services:
       context: .
       dockerfile: ./docker/php/app.dockerfile
     environment:
-      APP_ENV: production
-      APP_KEY: ${APP_KEY}
-      APP_URL: http://billifty.com
-      APP_DEBUG: "false"
-      DB_CONNECTION: pgsql
-      DB_HOST: postgres
-      DB_PORT: 5432
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
       DB_DATABASE: ${DB_DATABASE}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      CORS_ALLOWED_ORIGINS: http://billifty.com,http://www.billifty.com
+      DB_USERNAME: billifty_u
+      DB_PASSWORD: b1ll1iftykamikalara0213
     volumes:
       - ./backend:/var/www/html
       - ./shared-resources:/var/www/shared-resources
       - ./backend/storage:/var/www/html/storage
       - ./configs/.env.prod:/var/www/html/.env:ro
     depends_on:
-      - postgres
+      - mysql
     networks: [ webnet ]
 
   composer:
@@ -72,17 +67,31 @@ services:
       timeout: 5s
       retries: 5
 
-  postgres:
-    image: postgres:15
+#  postgres:
+#    image: postgres:15
+#    environment:
+#      POSTGRES_DB: ${DB_DATABASE}
+#      POSTGRES_USER: ${DB_USERNAME}
+#      POSTGRES_PASSWORD: ${DB_PASSWORD}
+#    volumes:
+#      - pgdata:/var/lib/postgresql/data
+#    ports:
+#      - "5432:5432"
+#    networks: [ webnet ]
+
+  mysql:
+    image: mysql:latest
     environment:
-      POSTGRES_DB: ${DB_DATABASE}
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: billifty_u
+      MYSQL_PASSWORD: b1ll1iftykamikalara0213
+      MYSQL_ROOT_PASSWORD: root
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - mysqldata:/var/lib/mysql
     ports:
-      - "5432:5432"
+      - "3306:3306"
     networks: [ webnet ]
+
   redis:
     image: redis:7-alpine
     command: ["redis-server", "--appendonly", "yes"]
@@ -119,7 +128,7 @@ services:
       - ./backend/storage:/var/www/html/storage
       - ./configs/.env.prod:/var/www/html/.env:ro
     depends_on:
-      - postgres
+      - mysql
       - redis
     networks: [ webnet ]
     command: sh -c "while true; do php artisan schedule:run --no-interaction; sleep 60; done"
@@ -130,8 +139,9 @@ networks:
   webnet:
 
 volumes:
-  pgdata:
+#  pgdata:
   storage:
   certbot-www:
   certbot-certs:
   redis-data:
+  mysqldata:

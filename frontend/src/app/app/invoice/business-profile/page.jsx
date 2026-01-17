@@ -6,6 +6,7 @@ import {Button, Card, CardBody, CardHeader, DateRangePicker, Input, Link} from "
 import TableData from "@/app/components/Table";
 import {useBusinessProfile} from "@/app/providers/BusinessProfileContext";
 import {useApp} from "@/app/providers/AppContext";
+import DashboardSidebar from "@/app/app/component/DashboardSidebar";
 
 function Component () {
 	const {
@@ -52,9 +53,10 @@ function Component () {
 	return (
 		<RootLayout>
 			<div className="app app-wrapper outer-bg">
-        <div className="m-auto max-w-screen-xl py-5">
-          <div className="w-full flex mb-5 gap-4">
-            <div className="w-full">
+        <div className="m-auto max-w-screen-xl py-5 md:px-0 px-5">
+          <div className="w-full flex md:flex-row flex-col mb-5 gap-4">
+
+            <div className="md:w-4/5 w-full">
               <Card className="mb-5 px-3 py-3" fullWidth radius="sm">
                 <CardHeader>
 									<div className="w-full flex justify-between content-center">
@@ -100,6 +102,10 @@ function Component () {
                 </CardBody>
               </Card>
             </div>
+
+						<div className="md:w-1/5 w-full">
+           		<DashboardSidebar />
+						</div>
 					</div>
 				</div>
 			</div>
