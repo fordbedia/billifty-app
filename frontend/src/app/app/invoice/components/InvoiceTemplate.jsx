@@ -14,9 +14,12 @@ export default function InvoiceTemplate() {
         <>
 			<Templates />
 			<ColorSchemes />
-            <Card fullWidth radius="sm" className="mb-2">
+            <Card fullWidth radius="sm" className="mb-2 workspace-card invoice-side-card">
                 <CardHeader className="flex gap-3">
-                    Invoices Templates
+                    <div>
+                        <h3>Invoice Templates</h3>
+                        <p className="text-sm text-default-500">Choose a style that matches your brand voice.</p>
+                    </div>
                 </CardHeader>
                 <Divider />
                 <CardBody>

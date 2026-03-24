@@ -116,6 +116,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 
 	const [toGenerateANdDownload, setToGenerateANdDownload] = useState(false);
   const [pollCount, setPollCount] = useState(0);
+	const MAX_PDF_POLL_COUNT = 80; // ~2 minutes at 1.5s interval
 
 	const [selectedCurrency, setSelectedCurrency] = useState({})
 	const [exportOption, setExportOption] = useState(exportOptionInitialState)
@@ -345,7 +346,6 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			// 2) Start polling
 			setPollCount(0);
 			setToGenerateANdDownload(true);
-			setExportOption(prev => ({...prev, status: 'done'}))
 		},
 	});
 
@@ -382,19 +382,32 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		if (status === "ready") {
 			setToGenerateANdDownload(false);
 			downloadInvoicePdf(invoiceId);
+			setExportOption(prev => ({...prev, status: 'done'}));
 		} else if (status === "failed") {
 			setToGenerateANdDownload(false);
+			setExportOption(prev => ({...prev, status: null}));
+			addToast({
+				title: "Invoice PDF generation failed",
+				description: fetchedInvoice?.pdf_error ?? "Please try again.",
+				color: "danger",
+			});
 		} else {
 			// queued/processing
 			setPollCount((prev) => {
 				const next = prev + 1;
-				if (next >= 5) {
+				if (next >= MAX_PDF_POLL_COUNT) {
 					setToGenerateANdDownload(false);
+					setExportOption(prevState => ({...prevState, status: null}));
+					addToast({
+						title: "PDF generation is taking longer than expected",
+						description: "Please try again in a moment.",
+						color: "warning",
+					});
 				}
 				return next;
 			});
 		}
-	}, [fetchedInvoice, toGenerateANdDownload, invoiceId]);
+	}, [fetchedInvoice, toGenerateANdDownload, invoiceId, MAX_PDF_POLL_COUNT]);
 	// Send Copy to my email
 	const { mutate: sendCopyToMyEmail } = useMutation({
 		mutationFn: async () => {

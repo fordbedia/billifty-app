@@ -19,7 +19,7 @@ export default function InvoiceItem({ item, index, onChange, removeItem }) {
   const lineTotalCents = computedItem.line_total_cents ?? 0;
 
   return (
-    <div className="box-card px-4 py-4 my-3">
+    <div className="box-card px-4 py-4 my-3 invoice-item-card">
       <div className="flex flex-col md:flex-row gap-5">
         <div className="md:w-1/3">
           Description
@@ -99,8 +99,8 @@ export default function InvoiceItem({ item, index, onChange, removeItem }) {
           />
         </div>
 
-        <div className="self-center">
-          <Link onPress={() => removeItem(index)}>
+        <div className="self-center invoice-item-remove">
+          <Link onPress={() => removeItem(index)} className="trash-link">
             <i className="trash-icon"></i>
           </Link>
         </div>

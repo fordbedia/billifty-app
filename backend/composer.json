@@ -7,7 +7,6 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "barryvdh/laravel-dompdf": "^3.1",
         "billifty/shared-resources": "*",
         "intervention/image": "^3.11",
         "intervention/image-laravel": "^1.5",

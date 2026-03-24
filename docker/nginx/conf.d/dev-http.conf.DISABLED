@@ -1,6 +1,6 @@
 server {
   listen 80;
-  server_name int.getinvoice.com;
+  server_name int.billifty.com;
 
   # Quick diagnostic stays
   location = /api/ping {

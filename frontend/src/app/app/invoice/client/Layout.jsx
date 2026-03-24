@@ -39,16 +39,18 @@ export default function ClientApp () {
 	return (
 		<RootLayout>
 			<ConfirmDeleteModal />
-			 <div className="m-auto max-w-screen-xl py-5">
+			 <div className="app app-wrapper outer-bg form-page">
+			 <div className="m-auto max-w-screen-xl py-6 md:px-0 px-5">
           <div className="w-full mb-5">
-						<div className="text-center py-7">
+						<div className="text-center py-7 form-page-hero">
+							<p className="workspace-eyebrow">Client Directory</p>
 							<h2 className="text-4xl font-bold">Set Up Your Client</h2>
-							<h3 className="text-lg">Add your Client to create professional invoices that reflect your brand identity.</h3>
+							<h3 className="text-lg">Keep client records clean and complete so every invoice is ready to send.</h3>
 						</div>
 
-						 <Card className="mt-4" fullWidth radius="sm">
+						 <Card className="mt-4 workspace-card form-card" fullWidth radius="sm">
                 <CardBody>
-									<Form className="w-full px-3 my-4">
+									<Form className="w-full px-3 my-4 modern-form">
 										<div className="w-full">
 											<h2 className="py-7 text-xl font-semibold">Client Information</h2>
 
@@ -215,7 +217,6 @@ export default function ClientApp () {
 														</ul>
 													</Alert>
 												)}
-												{console.log('errors', errors)}
 												{typeof errors === 'string' && typeof errors !== undefined && errors && Object.keys(errors).length > 0 && (
 													<Alert color="danger" className="mt-7">
 														{errors}
@@ -225,7 +226,7 @@ export default function ClientApp () {
 
 											<div className="flex gap-4 py-4 justify-between">
 												<div>
-													<Button className="mr-2" as={Link} href="/app/invoice/business-profile">{mode === 'new' ? 'Cancel' : 'Back'}</Button>
+													<Button className="mr-2" as={Link} href="/app/invoice/client">{mode === 'new' ? 'Cancel' : 'Back'}</Button>
 													<Button className="mr-2" type="button" onPress={save} color="primary" variant="flat">{mode === 'new' ? 'Submit' : 'Save Changes'}</Button>
 												</div>
 												<div>
@@ -244,6 +245,7 @@ export default function ClientApp () {
 						 </Card>
 
 					</div>
+			 </div>
 			 </div>
 		</RootLayout>
 	)

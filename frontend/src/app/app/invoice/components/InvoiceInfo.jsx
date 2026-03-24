@@ -39,12 +39,15 @@ export default function InvoiceInfo() {
   	const isPercent = data.discount_mode === "percent";
   	const isPerLine = data.discount_mode === "per-line";
     return (
-        <Card className="mb-5" fullWidth radius="sm">
+        <Card className="mb-5 workspace-card invoice-info-card" fullWidth radius="sm">
             <CardHeader className="flex gap-3">
-                <h2>Create New Invoice</h2>
+                <div>
+                    <h2>Create New Invoice</h2>
+                    <p className="text-sm text-default-500">Set invoice details, client, currency, and optional shipping.</p>
+                </div>
             </CardHeader>
             <CardBody>
-                <div className="flex flex-col md:flex-row gap-2 py-2">
+                <div className="flex flex-col md:flex-row gap-2 py-2 invoice-info-row">
                     <div className="md:w-1/2">
                         Business Profile
                         <Select
@@ -78,7 +81,7 @@ export default function InvoiceInfo() {
                           />
                     </div>
                 </div>
-                <div className="flex flex-col md:flex-row gap-2 py-2">
+                <div className="flex flex-col md:flex-row gap-2 py-2 invoice-info-row">
                      <div className="md:w-1/2">
                         Issue Date
                         <DatePicker
@@ -102,7 +105,7 @@ export default function InvoiceInfo() {
 						/>
                     </div>
                 </div>
-                <div className="flex flex-col md:flex-row gap-2 py-2">
+                <div className="flex flex-col md:flex-row gap-2 py-2 invoice-info-row">
                     <div className="md:w-1/2">
                         Your Client/Bill To
                         <Select
@@ -191,7 +194,7 @@ export default function InvoiceInfo() {
                     </div>
                 </div>
 
-				<div className="flex flex-col md:flex-row gap-2 py-2">
+				<div className="flex flex-col md:flex-row gap-2 py-2 invoice-info-row">
 					<div className="md:w-1/2">
 						<Select
 							isDisabled={data.status === 'issued'}
@@ -222,7 +225,7 @@ export default function InvoiceInfo() {
 				</div>
 
 				{/* 🔹 NEW: Discount Mode + Inputs */}
-				<div className="flex flex-col md:flex-row gap-2 py-2">
+				<div className="flex flex-col md:flex-row gap-2 py-2 invoice-info-row">
 					<div className="md:w-1/2">Discount Mode
 						<Select
 							className="max-w-xs"

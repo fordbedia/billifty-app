@@ -91,18 +91,23 @@ Example patterns we used:
 
 Ping / DNS sanity check
 ```shell
-ping -c 1 int.getinvoice.com
+ping -c 1 int.billifty.com
 ```
 Make sure POST works (GET will return 405)
 ```shell
-curl -i -X POST https://int.getinvoice.com/api/v1/stripe/webhook -d '{}'
+curl -i -X POST https://int.billifty.com/api/v1/stripe/webhook -d '{}'
 ```
 ## Start Stripe CLI Listener (Forward to Your INT URL)
 Run:
 ```shell
-stripe listen --forward-to https://int.getinvoice.com/api/v1/stripe/webhook
+stripe listen --forward-to https://int.billifty.com/api/v1/stripe/webhook
 
 stripe listen --forward-to https://localhost/api/v1/stripe/webhook --skip-verify
+
+stripe listen \
+  --api-key sk_test_51Sd1WjEgxqQWB3tM7oALSNQagKSFVapPtlfLXTkM0snt92OEmBl7feGLQaWCUKF221JZT5ac2v9sf1hSWjWSkcmx00r7yj80PL
+  --forward-to https://int.billifty.com/api/v1/stripe/webhook \
+  --skip-verify
 ```
 Stripe CLI will print:
 `Your webhook signing secret is whsec_...`
@@ -119,4 +124,3 @@ You should see events like:
 - `charge.succeeded`
 - `charge.updated`
 And Stripe CLI should show 200 responses once the webhook is correct.
-

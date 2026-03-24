@@ -26,6 +26,7 @@ export default function TableData({
   onPageChange,           // callback to change page
   renderCell,             // optional
   renderActions,          // optional
+	classNames = "",
 	paginationColor = 'primary',
 }) {
 	// --- sorting state ---
@@ -86,6 +87,7 @@ export default function TableData({
   return (
     <Table
       aria-label="Reusable table with pagination"
+			className={classNames}
 			sortDescriptor={sortDescriptor}
       onSortChange={setSortDescriptor}
       bottomContent={
@@ -102,7 +104,9 @@ export default function TableData({
         </div>
       }
       classNames={{
-        wrapper: "min-h-[222px]",
+        wrapper: "min-h-[222px] border border-slate-200 rounded-xl shadow-[0_10px_30px_-24px_rgba(15,23,42,0.35)]",
+        th: "bg-slate-50 text-slate-600",
+        td: "text-slate-700",
       }}
     >
       <TableHeader columns={columns}>

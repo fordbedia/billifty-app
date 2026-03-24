@@ -7,7 +7,7 @@ services:
       - backend
       - frontend
     ports:
-      - "80:80"
+      - "${NGINX_HTTP_PORT:-80}:80"
       # Enable 443 after you add SSL + prod-https.conf:
 #      - "443:443"
     volumes:
@@ -29,6 +29,7 @@ services:
       DB_DATABASE: ${DB_DATABASE}
       DB_USERNAME: billifty_u
       DB_PASSWORD: b1ll1iftykamikalara0213
+      PLAYWRIGHT_PDF_SERVICE_URL: ${PLAYWRIGHT_PDF_SERVICE_URL:-http://playwright:3000}
     volumes:
       - ./backend:/var/www/html
       - ./shared-resources:/var/www/shared-resources
@@ -36,6 +37,7 @@ services:
       - ./configs/.env.prod:/var/www/html/.env:ro
     depends_on:
       - mysql
+      - playwright
     networks: [ webnet ]
 
   composer:
@@ -53,8 +55,6 @@ services:
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_API_URL: /api
-    volumes:
-      - ./frontend:/usr/src/app
     # IMPORTANT: bind to 0.0.0.0 so nginx can reach it
     command: ["npm","run","start"]
     expose:
@@ -62,10 +62,11 @@ services:
     networks: [ webnet ]
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/ >/dev/null 2>&1 || exit 1"]
       interval: 20s
-      timeout: 5s
-      retries: 5
+      timeout: 15s
+      retries: 6
+      start_period: 90s
 
 #  postgres:
 #    image: postgres:15
@@ -121,6 +122,14 @@ services:
     build:
       context: .
       dockerfile: ./docker/php/app.dockerfile
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: billifty_u
+      DB_PASSWORD: b1ll1iftykamikalara0213
+      PLAYWRIGHT_PDF_SERVICE_URL: ${PLAYWRIGHT_PDF_SERVICE_URL:-http://playwright:3000}
     working_dir: /var/www/html
     volumes:
       - ./backend:/var/www/html
@@ -130,8 +139,44 @@ services:
     depends_on:
       - mysql
       - redis
+      - playwright
     networks: [ webnet ]
     command: sh -c "while true; do php artisan schedule:run --no-interaction; sleep 60; done"
+    restart: unless-stopped
+
+  queue-worker:
+    build:
+      context: .
+      dockerfile: ./docker/php/app.dockerfile
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: billifty_u
+      DB_PASSWORD: b1ll1iftykamikalara0213
+      PLAYWRIGHT_PDF_SERVICE_URL: ${PLAYWRIGHT_PDF_SERVICE_URL:-http://playwright:3000}
+    working_dir: /var/www/html
+    volumes:
+      - ./backend:/var/www/html
+      - ./shared-resources:/var/www/shared-resources
+      - ./backend/storage:/var/www/html/storage
+      - ./configs/.env.prod:/var/www/html/.env:ro
+    depends_on:
+      - mysql
+      - redis
+      - playwright
+    networks: [ webnet ]
+    command: sh -c "php artisan queue:work --sleep=1 --tries=5 --timeout=120 --backoff=5 --queue=default"
+    restart: unless-stopped
+
+  playwright:
+    build:
+      context: .
+      dockerfile: ./docker/playwright/Dockerfile
+    expose:
+      - "3000"
+    networks: [ webnet ]
     restart: unless-stopped
 
 
@@ -145,3 +190,5 @@ volumes:
   certbot-certs:
   redis-data:
   mysqldata:
+  frontend-node-modules:
+  frontend-next:

@@ -74,11 +74,11 @@ export default function App() {
 
   // @ts-ignore
   return (
-    <Navbar maxWidth={'xl'} onMenuOpenChange={setIsMenuOpen}>
+    <Navbar maxWidth={"xl"} onMenuOpenChange={setIsMenuOpen} className="billifty-navbar">
       <NavbarContent>
         <NavbarMenuToggle
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-          className="sm:hidden"
+          className="sm:hidden text-slate-700"
         />
         <NavbarBrand>
           <BilliftyLogo />
@@ -109,7 +109,7 @@ export default function App() {
 					</NavbarItem>
 				) : (
 					<NavbarItem className="hidden lg:flex">
-						<Link href={uri.invoices} color="primary" className="inline-menu-color font-semibold ">
+						<Link href={uri.invoices} color="primary" className="inline-menu-color font-semibold nav-inline-link">
 							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
 								<path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" />
 							</svg>
@@ -119,7 +119,7 @@ export default function App() {
 				)}
         <NavbarItem>
           {!auth() ? (
-          <Button disableRipple as={Link} color="primary" className="main-button" href={uri.intro} variant="flat">
+          <Button disableRipple as={Link} color="primary" className="main-button nav-cta-button" href={uri.intro} variant="flat">
             Get Started
           </Button>) :
           (<Dropdown placement="bottom-end">
@@ -127,7 +127,7 @@ export default function App() {
             <Avatar
               isBordered
               as="button"
-              className="transition-transform"
+              className="transition-transform border border-blue-100 shadow-sm"
               color="primary"
               name="Jason Hughes"
               size="sm"
@@ -140,13 +140,11 @@ export default function App() {
               <p className="font-semibold">{user.email ?? ''}</p>
             </DropdownItem>
 						{menuItems && menuItems.length > 0 && menuItems.map((i) => (
-							<>
-							{typeof i.onPress === 'function' ? (
-									<DropdownItem key={i.key} onPress={() => i.onPress()}>{i.label}</DropdownItem>
-								) : (
-									<DropdownItem key={i.key} href={i.href}>{i.label}</DropdownItem>
-								)}
-							</>
+							typeof i.onPress === 'function' ? (
+								<DropdownItem key={i.key} onPress={() => i.onPress()}>{i.label}</DropdownItem>
+							) : (
+								<DropdownItem key={i.key} href={i.href}>{i.label}</DropdownItem>
+							)
 						))}
 
             {/*<DropdownItem key="team_settings">Manage Subscription</DropdownItem>*/}
@@ -161,7 +159,36 @@ export default function App() {
         </Dropdown>)}
         </NavbarItem>
       </NavbarContent>
+      <NavbarMenu className="billifty-navbar-menu">
+        {!auth() ? (
+          <>
+            <NavbarMenuItem>
+              <Link className="w-full" href={uri.pricing} size="lg">
+                Pricing
+              </Link>
+            </NavbarMenuItem>
+            <NavbarMenuItem>
+              <Link className="w-full" href={uri.intro} size="lg">
+                Get Started
+              </Link>
+            </NavbarMenuItem>
+          </>
+        ) : (
+          menuItems.map((item) => (
+            <NavbarMenuItem key={item.key}>
+              {typeof item.onPress === "function" ? (
+                <Link className="w-full" href="#" size="lg" onPress={item.onPress}>
+                  {item.label}
+                </Link>
+              ) : (
+                <Link className="w-full" href={item.href} size="lg">
+                  {item.label}
+                </Link>
+              )}
+            </NavbarMenuItem>
+          ))
+        )}
+      </NavbarMenu>
     </Navbar>
   );
 }
-

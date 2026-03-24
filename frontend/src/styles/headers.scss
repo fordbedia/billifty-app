@@ -3,46 +3,89 @@
 /* --------------- */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
-
+  --foreground: #0f172a;
   --header-bg: #ffffff;
-  --header-text: #000000;
-
-  --header-divider-color: #e4e5e7;
-}
-
-/* --------------------- */
-/* AUTO DARK DETECTION   */
-/* --------------------- */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-
-    --header-bg: #121212;
-    --header-text: #ffffff;
-    --header-divider-color: #F3F4F6;
-  }
-}
-
-/* --------------- */
-/* MANUAL DARK MODE */
-/* (use .dark class) */
-/* --------------- */
-.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --header-bg: #121212;
-  --header-text: #ffffff;
+  --header-text: #0f172a;
+  --header-divider-color: #e2e8f0;
+  --app-header-height: 5.5rem;
 }
 
 /* --------------------- */
 /* Global element styles */
 /* --------------------- */
 header {
-  background-color: var(--header-bg);
-  color: var(--header-text);
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 60;
+  padding: 0;
+  backdrop-filter: blur(18px);
+  background: rgba(252, 252, 251, 0.9);
 }
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 9999;
+  background: #FFF;
+}
+
+.app-shell {
+  padding-top: var(--app-header-height);
+}
+.billifty-navbar {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0.35rem 1.1rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.inline-menu-color {
+  color: #425168;
+  font-weight: 600;
+}
+
+.inline-menu-color:hover {
+  color: #2957c8;
+}
+
+.nav-inline-link {
+  gap: 0.3rem;
+}
+
+.nav-cta-button {
+  border-radius: 9999px;
+  padding-inline: 1rem;
+  min-height: 2.75rem;
+}
+
+.billifty-navbar-menu {
+  margin-top: 0;
+  border-top: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 0;
+  box-shadow: none;
+}
+
 hr.divider-color {
   background-color: var(--header-divider-color);
+  opacity: 0.9;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --app-header-height: 4.75rem;
+  }
+
+  .billifty-navbar {
+    padding-inline: 0.8rem;
+  }
 }

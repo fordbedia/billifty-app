@@ -49,16 +49,18 @@ export default function BusinessProfileAppForm () {
 	return (
 		<RootLayout>
 			<ConfirmDelete />
-			 <div className="m-auto max-w-screen-xl py-5">
+			 <div className="app app-wrapper outer-bg form-page">
+			 <div className="m-auto max-w-screen-xl py-6 md:px-0 px-5">
           <div className="w-full mb-5">
-						<div className="text-center py-7">
+						<div className="text-center py-7 form-page-hero">
+							<p className="workspace-eyebrow">Business Identity Setup</p>
 							<h2 className="text-4xl font-bold">Set Up Your Business Profile</h2>
-							<h3 className="text-lg">Add your business information to create professional invoices that reflect your brand identity.</h3>
+							<h3 className="text-lg">Add your business information and payment details to keep every invoice professional and consistent.</h3>
 						</div>
 
-						 <Card className="mt-4" fullWidth radius="sm">
+						 <Card className="mt-4 workspace-card form-card" fullWidth radius="sm">
                 <CardBody>
-									<Form className="w-full px-3 my-4">
+									<Form className="w-full px-3 my-4 modern-form">
 									{planCapabilities.allowed?.logo_upload && (
 										<div>
 											<h2 className="pb-3">Business Logo</h2>
@@ -494,6 +496,7 @@ export default function BusinessProfileAppForm () {
 						 </Card>
 
 					</div>
+			 </div>
 			 </div>
 		</RootLayout>
 	)

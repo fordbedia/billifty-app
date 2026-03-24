@@ -13,8 +13,9 @@ export default function RootLayout({ children } : RootLayoutProps) {
         <>
             <ProtectedLayout>
                 <Header />
-                <Divider className="divider-color fixed" />
-                {children}
+                <main className="app-shell">
+                    {children}
+                </main>
                 <Divider className="divider-color" />
                 <Footer />
             </ProtectedLayout>

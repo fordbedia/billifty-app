@@ -60,21 +60,22 @@ export default function Layout() {
 
   return (
     <RootLayout>
-      <div className="app app-wrapper outer-bg">
+      <div className="app app-wrapper outer-bg invoice-page">
 				<ConfirmDeleteModal />
         <ConfirmIssueInvoiceModal />
 				<ConfirmNewInvoice />
 				<InvoicePreviewPage invoiceId={invoiceId} />
-        <div className="m-auto max-w-screen-xl py-5">
-          <div className="w-full flex mb-5">
-            <div className="w-2/3">
+        <div className="m-auto max-w-screen-xl py-6 md:px-0 px-5">
+          <div className="w-full flex flex-col md:flex-row mb-5 gap-3 md:gap-0 invoice-page-head">
+            <div className="md:w-2/3">
+              {/*<p className="workspace-eyebrow">Invoice Studio</p>*/}
               <h1 className="py-1">Invoice Portal</h1>
               <h2 className="py-1">
-                Create and customize your invoice with items and templates
+                Create and customize your invoice with a premium, minimal workflow.
               </h2>
             </div>
-            <div className="w-1/3 flex justify-end items-center">
-              <Button variant="flat" color="success" onPress={() => {
+            <div className="md:w-1/3 flex justify-start md:justify-end items-center">
+              <Button variant="flat" color="success" className="workspace-primary-btn" onPress={() => {
 				  clearSticky()
 				  router.replace('/app/invoice/new')
 			  }}>
@@ -86,10 +87,10 @@ export default function Layout() {
             </div>
           </div>
 
-          <div className="w-full flex">
-            <div className="w-2/3 mr-2">
+          <div className="w-full flex flex-col xl:flex-row gap-4">
+            <div className="xl:w-2/3 w-full min-w-0">
               <InvoiceInfo />
-              <Card fullWidth radius="sm">
+              <Card fullWidth radius="sm" className="workspace-card">
                 <CardHeader className="flex gap-3">
                   <div className="flex w-full justify-between items-center">
                     <h2>Invoice Items</h2>
@@ -184,7 +185,7 @@ export default function Layout() {
               </Card>
             </div>
 
-            <div className="w-1/3 ml-2">
+            <div className="xl:w-1/3 w-full min-w-0">
               <InvoiceTemplate />
               <Actions />
             </div>

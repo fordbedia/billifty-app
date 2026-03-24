@@ -1,208 +1,235 @@
-"use client"
+"use client";
 
-import RootLayout from "@/app/components/common/RootLayout"
-import Image from "next/image"
-import { Button, Card, CardBody } from "@heroui/react"
-import {Suspense, useEffect, useMemo, useState} from "react"
-import {useRouter, useSearchParams} from "next/navigation"
-import { uri } from "@/app/constants/routePaths"
+import RootLayout from "@/app/components/common/RootLayout";
+import BSpinner from "@/app/components/Spinner";
+import Image from "next/image";
+import { Button, Card, CardBody } from "@heroui/react";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { uri } from "@/app/constants/routePaths";
 import Billing from "@/app/models/Billing";
 
 type SuccessCheckout = {
   subscription?: {
-    plan_code?: string
-    billing_cycle?: string
-    unit_amount?: number
-  }
+    plan_code?: string;
+    billing_cycle?: string;
+    unit_amount?: number;
+    status?: string;
+  } | null;
+  plan?: {
+    code?: string;
+  } | null;
+};
+
+type CheckoutConfirmation = {
+  plan_code?: string;
+  billing_cycle?: string;
+  user?: SuccessCheckout | null;
+};
+
+function formatLabel(value?: string) {
+  if (!value) return "";
+  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 }
 
 function Inner() {
-  const router = useRouter()
-  const [session, setSession] = useState<SuccessCheckout | null>(null)
-  const [ready, setReady] = useState(false)
-  const sp = useSearchParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get("session_id");
+
+  const [session, setSession] = useState<SuccessCheckout | null>(null);
+  const [confirmation, setConfirmation] = useState<CheckoutConfirmation | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const raw = window.sessionStorage.getItem("success_checkout")
-      const parsed = raw ? (JSON.parse(raw) as SuccessCheckout) : null
-
-      setSession(parsed)
-    } catch {
-      setSession(null)
-    } finally {
-      setReady(true)
+    if (!sessionId) {
+      setError("Missing session_id from Stripe redirect.");
+      setIsLoading(false);
+      return;
     }
-  }, [])
 
-  // Redirect once we know we’re in the browser & session is missing/invalid
-  useEffect(() => {
-    const sessionId = sp.get("session_id");
-    if (!ready) return;
-
-    if (!session?.subscription && !sessionId) {
-      router.replace(uri.h);
-    }
-  }, [ready, session, sp, router]);
-
-  useEffect(() => {
     const run = async () => {
-      const sessionId = sp.get("session_id");
-      if (!sessionId) {
-        setError("Missing session_id from Stripe redirect.");
-        setReady(true);
-        return;
-      }
-
       try {
-        const res = await Billing.confirmSubscription();
-        // Save to sessionStorage for future visits
-        window.sessionStorage.setItem("success_checkout", JSON.stringify(res.user));
-        // Also update React state so the UI re-renders *now*
-        setSession(res.user);
+        setError(null);
+
+        const res = await Billing.confirmCheckout({ session_id: sessionId });
+        const user = res?.user ?? null;
+
+        setConfirmation(res);
+        setSession(user);
+
+        if (user) {
+          window.sessionStorage.setItem("success_checkout", JSON.stringify(user));
+        }
       } catch (err: any) {
+        try {
+          const cached = window.sessionStorage.getItem("success_checkout");
+          const parsed = cached ? (JSON.parse(cached) as SuccessCheckout) : null;
+
+          if (parsed?.subscription) {
+            setSession(parsed);
+          }
+        } catch {
+          // Ignore cache parse errors and show request error below.
+        }
+
         setError(
           err?.response?.data?.message ||
           err?.message ||
           "Unable to confirm subscription."
         );
       } finally {
-        setReady(true);
+        setIsLoading(false);
       }
     };
 
     run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sp]); // router isn't actually needed as a dependency here
+  }, [sessionId]);
 
-  const {planLabel, cycle, dollars} = useMemo(() => {
-    const planCode = session?.subscription?.plan_code ?? ""
-    const billingCycle = session?.subscription?.billing_cycle ?? ""
-    const cents = session?.subscription?.unit_amount ?? 0
+  const subscription = session?.subscription ?? null;
 
-    const planLabel = planCode
-        ? planCode.charAt(0).toUpperCase() + planCode.slice(1).toLowerCase()
-        : ""
+  const summary = useMemo(() => {
+    const planCode = subscription?.plan_code ?? confirmation?.plan_code ?? session?.plan?.code ?? "";
+    const billingCycle = subscription?.billing_cycle ?? confirmation?.billing_cycle ?? "";
+    const cents = subscription?.unit_amount ?? 0;
 
-    const cycle = billingCycle
-        ? billingCycle.charAt(0).toUpperCase() + billingCycle.slice(1).toLowerCase()
-        : ""
+    return {
+      planLabel: formatLabel(planCode),
+      cycleLabel: formatLabel(billingCycle),
+      priceLabel: cents > 0 ? `$${(cents / 100).toFixed(2)}` : "Active",
+    };
+  }, [confirmation, session?.plan?.code, subscription]);
 
-    const dollars = cents / 100
+  if (isLoading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-4">
+        <div className="flex items-center gap-3 rounded-2xl bg-white px-6 py-4 shadow-sm ring-1 ring-slate-200">
+          <BSpinner />
+          <span className="text-sm text-slate-600">Confirming your subscription…</span>
+        </div>
+      </div>
+    );
+  }
 
-    return {planLabel, cycle, dollars}
-  }, [session])
-
-  // While loading session on the client, show nothing (or a loader)
-  if (!ready) return null
-
-  // If redirecting, render nothing
-  if (!session?.subscription) return null
-
-  return (
-      <>
-        <div className="flex justify-center flex-col items-center gap-4 mx-8 md:mx-0">
-          <div className="md:max-w-4xl text-center justify-items-center">
-            <Image src="/images/check-icon-success.png" alt="Check Success Icon" width={216} height={216}/>
-            <h2 className="text-6xl font-bold subpixel-antialiased">Congratulations! 🎉</h2>
-            <h3 className="pt-4 text-2xl font-extralight subpixel-antialiased">
-              You&#39;ve successfully subscribed to the{" "}
-              <strong className="font-semibold text-indigo-600">{planLabel} Plan</strong>
-            </h3>
-
-            <p className="pt-4 text-lg subpixel-antialiased font-extralight">
-              Welcome to Billifty Pro! Your account has been upgraded and you now have access to all premium features.
-              Start creating professional invoices right away.
-            </p>
-
-            <Card className="max-w-screen-2xl mt-6 mb-7">
-              <CardBody>
-                <div className="flex flex-row flex-wrap justify-center items-center md:gap-30 gap-12 py-7 px-12">
-                  <div className="text-center justify-items-center">
-                    <Image src="/images/checkout/premium-plan-icon.png" alt="Plan Icon" width={64} height={64}/>
-                    <h2 className="text-base font-bold subpixel-antialiased pt-2">Plan Type</h2>
-                    <h3 className="text-base font-extralight subpixel-antialiased">{planLabel} Plan</h3>
-                  </div>
-
-                  <div className="text-center justify-items-center">
-                    <Image src="/images/checkout/billing-monthly-icon.png" alt="Billing Icon" width={64} height={64}/>
-                    <h2 className="text-base font-bold subpixel-antialiased pt-2">Billing Cycle</h2>
-                    <h3 className="text-base font-extralight subpixel-antialiased">{cycle}</h3>
-                  </div>
-
-                  <div className="text-center justify-items-center">
-                    <Image src="/images/checkout/dollar-icon.png" alt="Dollar Icon" width={64} height={64}/>
-                    <h2 className="text-base font-bold subpixel-antialiased pt-2">Amount Paid</h2>
-                    <h3 className="text-base font-extralight subpixel-antialiased">
-                      ${dollars}/{cycle}
-                    </h3>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-
-            <div className="mb-10">
-              <Button
-                  className="text-md bg-indigo-600 text-white px-12 py-7 rounded-lg"
-                  disableRipple
-                  onPress={() => router.push(uri.invoices)} // change to your dashboard route if you have one
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
-                     stroke="currentColor" className="size-6">
-                  <path strokeLinecap="round" strokeLinejoin="round"
-                        d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>
-                </svg>
-                View Invoice Dashboard
+  if (error && !subscription) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-4">
+        <Card className="w-full max-w-xl border border-rose-200 bg-white shadow-sm">
+          <CardBody className="gap-4 p-8 text-center">
+            <h1 className="text-3xl font-semibold text-slate-900">We couldn&apos;t load your checkout result</h1>
+            <p className="text-sm text-slate-600">{error}</p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <Button className="bg-indigo-600 text-white" onPress={() => router.push(uri.manage_subscriptions)}>
+                Manage Subscription
+              </Button>
+              <Button variant="bordered" onPress={() => router.push(uri.invoices)}>
+                Go to Invoices
               </Button>
             </div>
+          </CardBody>
+        </Card>
+      </div>
+    );
+  }
 
-            <Card className="max-w-screen-2xl mt-6 mb-7 bg-blue-100 mx-8 md:mx-0">
-              <CardBody>
-                <h2 className="text-xl font-bold text-center pt-7">What&#39;s Next?</h2>
-                <div className="flex md:flex-row flex-col justify-center items-baseline md:gap-20 gap-7 py-7 px-12">
-                  <div className="flex flex-row">
-                    <div>
-                      <div className="bg-blue-800 text-white px-4 py-2 mx-4 rounded-lg text-lg">1</div>
-                    </div>
-                    <div>
-                      <h2>Set Up Profile</h2>
-                      <p>Complete your business profile to start creating invoices</p>
-                    </div>
-                  </div>
+  return (
+    <div className="mx-auto flex min-h-screen max-w-5xl flex-col items-center px-4 py-10">
+      <div className="w-full rounded-[2rem] bg-gradient-to-br from-slate-50 via-white to-emerald-50 px-6 py-10 text-center shadow-[0_30px_80px_-40px_rgba(15,23,42,0.35)] ring-1 ring-slate-200 md:px-12">
+        <div className="mx-auto max-w-3xl">
+          <Image
+            src="/images/check-icon-success.png"
+            alt="Check Success Icon"
+            width={216}
+            height={216}
+            className="mx-auto"
+          />
 
-                  <div className="flex flex-row">
-                    <div>
-                      <div className="bg-blue-800 text-white px-4 py-2 mx-4 rounded-lg text-lg">2</div>
-                    </div>
-                    <div>
-                      <h2>Add Clients</h2>
-                      <p>Import or add your clients to manage invoices easily</p>
-                    </div>
-                  </div>
+          <h1 className="text-4xl font-bold tracking-tight text-slate-900 md:text-6xl">
+            Subscription confirmed
+          </h1>
 
-                  <div className="flex flex-row">
-                    <div>
-                      <div className="bg-blue-800 text-white px-4 py-2 mx-4 rounded-lg text-lg">3</div>
-                    </div>
-                    <div>
-                      <h2>Create Invoice</h2>
-                      <p>Design and send your first professional invoice</p>
-                    </div>
-                  </div>
+          <p className="pt-4 text-lg font-light text-slate-700">
+            Your account is now on the <strong className="font-semibold text-emerald-700">{summary.planLabel || "paid"}</strong> plan.
+            You can start using the upgraded billing features immediately.
+          </p>
+
+          {error ? (
+            <p className="pt-3 text-sm text-amber-700">
+              We showed the latest cached subscription details because the confirmation request returned an error: {error}
+            </p>
+          ) : null}
+
+          <Card className="mt-8 border border-slate-200 bg-white/90">
+            <CardBody>
+              <div className="grid gap-8 py-5 md:grid-cols-3">
+                <div className="text-center">
+                  <Image src="/images/checkout/premium-plan-icon.png" alt="Plan Icon" width={64} height={64} className="mx-auto" />
+                  <h2 className="pt-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Plan</h2>
+                  <p className="pt-1 text-lg text-slate-900">{summary.planLabel || "Active plan"}</p>
                 </div>
-              </CardBody>
-            </Card>
+
+                <div className="text-center">
+                  <Image src="/images/checkout/billing-monthly-icon.png" alt="Billing Icon" width={64} height={64} className="mx-auto" />
+                  <h2 className="pt-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Billing Cycle</h2>
+                  <p className="pt-1 text-lg text-slate-900">{summary.cycleLabel || "On file"}</p>
+                </div>
+
+                <div className="text-center">
+                  <Image src="/images/checkout/dollar-icon.png" alt="Dollar Icon" width={64} height={64} className="mx-auto" />
+                  <h2 className="pt-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Amount</h2>
+                  <p className="pt-1 text-lg text-slate-900">
+                    {summary.priceLabel}
+                    {summary.cycleLabel ? ` / ${summary.cycleLabel.toLowerCase()}` : ""}
+                  </p>
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <Button className="bg-indigo-600 px-8 text-white" onPress={() => router.push(uri.invoices)}>
+              View Invoice Dashboard
+            </Button>
+            <Button variant="bordered" onPress={() => router.push(uri.manage_subscriptions)}>
+              Manage Subscription
+            </Button>
           </div>
+
+          <Card className="mt-8 border border-emerald-100 bg-emerald-50/80 text-left">
+            <CardBody className="p-8">
+              <h2 className="text-center text-2xl font-semibold text-slate-900">What&apos;s next</h2>
+              <div className="mt-6 grid gap-4 md:grid-cols-3">
+                <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-emerald-100">
+                  <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-600 text-sm font-semibold text-white">1</div>
+                  <h3 className="text-lg font-semibold text-slate-900">Set up your profile</h3>
+                  <p className="mt-2 text-sm text-slate-600">Finish your business details so invoices and payment flows are ready to send.</p>
+                </div>
+
+                <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-emerald-100">
+                  <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-600 text-sm font-semibold text-white">2</div>
+                  <h3 className="text-lg font-semibold text-slate-900">Add clients</h3>
+                  <p className="mt-2 text-sm text-slate-600">Bring in your customers now so your first invoice only takes a few clicks.</p>
+                </div>
+
+                <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-emerald-100">
+                  <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-600 text-sm font-semibold text-white">3</div>
+                  <h3 className="text-lg font-semibold text-slate-900">Create your first invoice</h3>
+                  <p className="mt-2 text-sm text-slate-600">Use the upgraded plan immediately and send a polished invoice from the dashboard.</p>
+                </div>
+              </div>
+            </CardBody>
+          </Card>
         </div>
-      </>
-  )
+      </div>
+    </div>
+  );
 }
 
-  export default function CheckoutSuccessPage() {
+export default function CheckoutSuccessPage() {
   return (
     <RootLayout>
-      <Suspense>
+      <Suspense fallback={<div className="w-full flex justify-center py-16"><BSpinner /></div>}>
         <Inner />
       </Suspense>
     </RootLayout>

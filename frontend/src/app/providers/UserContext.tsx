@@ -174,10 +174,10 @@ export function UserProviderInner({ children }: { children: React.ReactNode }) {
   const { mutate: saveUser, error: userSaveError } = useMutation({
     mutationFn: async () => {
       const next: string | null = searchParams.get("next") ?? null;
-	  if (typeof next !== 'undefined' || !next) return;
       return (await User.register(user, next))?.data;
     },
     onSuccess: (d: any) => {
+      if (!d) return;
       const { nextUrl, ...rest } = d;
       storeAuth(rest);
       router.push(nextUrl ?? uri.invoices);

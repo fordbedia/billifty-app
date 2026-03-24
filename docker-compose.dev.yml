@@ -1,9 +1,8 @@
 services:
   nginx:
     ports:
-      - "80:80"
-      - "443:443"
-      - "8081:8081"
+      - "${NGINX_HTTPS_PORT:-443}:443"
+      - "${NGINX_PREVIEW_PORT:-8086}:8081"
     volumes:
       - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
       - ./docker/certs:/etc/nginx/certs:ro
@@ -22,6 +21,35 @@ services:
     volumes:
       - ./configs/.env.local:/var/www/html/.env:ro
 
+  queue-worker:
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: billifty_u
+      DB_PASSWORD: b1ll1iftykamikalara0213
+    command: sh -c "php artisan queue:work --sleep=1 --tries=5 --timeout=120 --backoff=5 --queue=default"
+    volumes:
+      - ./backend:/var/www/html
+      - ./shared-resources:/var/www/shared-resources
+      - ./backend/storage:/var/www/html/storage
+      - ./configs/.env.local:/var/www/html/.env:ro
+
+  scheduler:
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: billifty_u
+      DB_PASSWORD: b1ll1iftykamikalara0213
+    volumes:
+      - ./backend:/var/www/html
+      - ./shared-resources:/var/www/shared-resources
+      - ./backend/storage:/var/www/html/storage
+      - ./configs/.env.local:/var/www/html/.env:ro
+
   frontend:
     environment:
       NODE_ENV: development
@@ -30,9 +58,17 @@ services:
       WATCHPACK_POLLING: "true"
       WATCHPACK_POLL_INTERVAL: "300"
       CHOKIDAR_USEPOLLING: "true"   # harmless with Turbopack; helps some setups
-    command: ["sh", "-c", "npm install && npm run dev"]
+    command: ["sh", "-c", "npm install && mkdir -p .next/static/development && npm run dev"]
     volumes:
-      - ./frontend:/usr/src/app:delegated  # delegated improves perf o
+      - ./frontend:/usr/src/app:delegated
+      - frontend-node-modules:/usr/src/app/node_modules
+      - frontend-next:/usr/src/app/.next
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/ >/dev/null 2>&1 || exit 1"]
+      interval: 20s
+      timeout: 15s
+      retries: 6
+      start_period: 120s
 
 #  postgres:
 #    ports:
@@ -51,4 +87,4 @@ services:
 
   redis:
     ports:
-      - "6379:6379"
+      - "${REDIS_HOST_PORT:-6380}:6379"

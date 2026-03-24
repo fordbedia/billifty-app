@@ -60,4 +60,9 @@ return [
         'manage_subscriptions_url' => env('STRIPE_MANAGE_SUBSCRIPTIONS_URL'),
     ],
 
+    'playwright_pdf' => [
+        'url' => env('PLAYWRIGHT_PDF_SERVICE_URL', 'http://playwright:3000'),
+        'timeout' => env('PLAYWRIGHT_PDF_TIMEOUT', 60),
+    ],
+
 ];
