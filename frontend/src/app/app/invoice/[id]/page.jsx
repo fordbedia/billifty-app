@@ -9,7 +9,7 @@ export default function App({ params }) {
 
 	return (
 		<InvoiceProvider initialId={resolveParams?.id} mode="edit">
-			<Layout />
+			<Layout showAiAssistant />
 		</InvoiceProvider>
 	)
 }

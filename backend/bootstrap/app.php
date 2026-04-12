@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,16 +15,18 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
        $middleware->alias([
-           'plan.capability' => \BilliftySDK\SharedResources\Modules\User\Http\Middleware\EnsurePlanCapability::class,
-           'plan.limit' => \BilliftySDK\SharedResources\Modules\User\Http\Middleware\EnsurePlanLimit::class,
+           'plan.capability' => \BilliftySDK\SharedResources\Modules\Billing\Http\Middleware\EnsurePlanCapability::class,
+           'plan.limit' => \BilliftySDK\SharedResources\Modules\Billing\Http\Middleware\EnsurePlanLimit::class,
            'auth' => \App\Http\Middleware\Authenticate::class,
        ]);
     })
-     ->withProviders([
+    ->withProviders([
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class, // <— register the Passport config here
         BilliftySDK\SharedResources\SharedResourceServiceProvider::class,
     ])
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->shouldRenderJsonWhen(function (Request $request): bool {
+            return $request->expectsJson() || $request->is('api/*');
+        });
     })->create();

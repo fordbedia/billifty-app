@@ -14,8 +14,10 @@ import NotFound from "@/app/app/invoice/components/errorPages/NotFound";
 import BSpinner from "@/app/components/Spinner";
 import ConfirmDeleteModal from "@/app/app/invoice/components/modals/ConfirmDeleteModal";
 import InvoicePreviewPage from "@/app/app/invoice/components/InvoicePreviewPage";
+import ChatWidget from "@/app/components/common/ChatWidget";
+import { useApp } from "@/app/providers/AppContext";
 
-export default function Layout() {
+export default function Layout({ showAiAssistant = false }) {
   const {
     data,
     addItems,
@@ -29,6 +31,9 @@ export default function Layout() {
 		isLoadingInvoice,
 		invoiceId,
   } = useInvoice();
+  const { planCapabilities } = useApp();
+  const canUseAiAssistant =
+    Boolean(showAiAssistant) && Boolean(planCapabilities?.allowed?.ai_invoice_assistant);
 
   const currencySymbol = selectedCurrency?.symbol ?? "";
 
@@ -192,6 +197,7 @@ export default function Layout() {
           </div>
         </div>
       </div>
+      {canUseAiAssistant ? <ChatWidget /> : null}
     </RootLayout>
   );
 }

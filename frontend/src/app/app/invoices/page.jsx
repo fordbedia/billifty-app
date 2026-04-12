@@ -138,7 +138,7 @@ function Component() {
 											</div>
 										</div>
 										<div className="self-start lg:self-center workspace-actions">
-											{planCapabilities?.limits?.['current:invoices'] < planCapabilities?.limits?.max_invoices_per_month && (
+											{((planCapabilities?.limits?.max_invoices_per_month === null) || (planCapabilities?.limits?.['current:invoices'] < planCapabilities?.limits?.max_invoices_per_month)) && (
 												<Button disableRipple onPress={() => {
 													clearSticky()
 													router.replace('/app/invoice/new')

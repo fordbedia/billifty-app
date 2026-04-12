@@ -31,25 +31,43 @@ type PlanCode = "free" | "pro" | "premium";
 type ButtonProps = { code: PlanCode; name: string };
 
 type PortalPayload = { return_url?: string };
+type FAQItem = { question: string; answer: string[] };
 
 const PLAN_ORDER: PlanCode[] = ["free", "pro", "premium"];
 const CURRENT_PLAN_GRADIENT = "from-[#247CFF] via-[#4467FF] to-[#8B3DFF]";
 
-const FAQ_ITEMS = [
+const FAQ_ITEMS: FAQItem[] = [
   {
-    question: "Can I change my plan anytime?",
-    answer:
-      "Yes. You can upgrade or downgrade at any time. Plan changes continue through the same secure billing flow you already use.",
+    question: "How do I upgrade my plan?",
+    answer: [
+      "Choose the higher plan you want on this page, then click the upgrade button under that plan.",
+      "After you confirm, you will be taken to Stripe to complete the change securely.",
+      "Once Stripe confirms the update, your subscription will move to the new plan.",
+    ],
   },
   {
-    question: "How do I update billing details or payment methods?",
-    answer:
-      "Use the billing management action below. It opens Stripe so you can securely update payment methods and subscription settings.",
+    question: "How do I change or downgrade my plan?",
+    answer: [
+      "Select the plan you want to move to and click the button shown for that plan.",
+      "We will open Stripe so you can review and confirm the plan change using the same secure billing flow.",
+      "Your billing settings and subscription details stay connected to the same account.",
+    ],
   },
   {
-    question: "What happens if I move to the Free plan?",
-    answer:
-      "Your workspace stays available, but your account will follow the limits and features included with the Free plan.",
+    question: "How do I download invoices or billing receipts?",
+    answer: [
+      "Click Manage Billing or Open Stripe Billing in the billing section on this page.",
+      "Inside Stripe, open your invoice history and choose the invoice or receipt you want to download.",
+      "Stripe provides the downloadable billing documents for your subscription.",
+    ],
+  },
+  {
+    question: "What happens if I downgrade to the Free plan?",
+    answer: [
+      "If you downgrade from a paid plan to Free, your current paid access will remain available until your current billing cycle ends.",
+      "The downgrade does not remove paid access immediately. The Free plan takes effect after the active billing period lapses.",
+      "After that date, your account will continue on the Free plan with Free plan limits and features.",
+    ],
   },
 ];
 
@@ -97,6 +115,7 @@ export default function ManageSubscriptionPage() {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const [pendingTargetCode, setPendingTargetCode] = useState<PlanCode | null>(null);
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   const pendingPlan = useMemo(() => {
     if (!pendingTargetCode || !data) return null;
@@ -531,12 +550,41 @@ export default function ManageSubscriptionPage() {
               <CardBody className="px-6 py-6 sm:px-8">
                 <h2 className="text-2xl font-semibold">Frequently Asked Questions</h2>
                 <div className="mt-6 space-y-4">
-                  {FAQ_ITEMS.map((item) => (
-                    <div key={item.question} className="rounded-2xl bg-slate-50 p-5">
-                      <h3 className="text-sm font-semibold text-slate-900">{item.question}</h3>
-                      <p className="mt-2 text-sm leading-6 text-slate-600">{item.answer}</p>
-                    </div>
-                  ))}
+                  {FAQ_ITEMS.map((item, index) => {
+                    const isFaqOpen = openFaqIndex === index;
+
+                    return (
+                      <div key={item.question} className="rounded-2xl bg-slate-50 p-5">
+                        <button
+                          type="button"
+                          className="flex w-full items-start justify-between gap-4 text-left"
+                          onClick={() => setOpenFaqIndex(isFaqOpen ? null : index)}
+                          aria-expanded={isFaqOpen}
+                        >
+                          <h3 className="text-sm font-semibold text-slate-900">{item.question}</h3>
+                          <span
+                            className={cn(
+                              "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-lg leading-none text-slate-500 transition-transform",
+                              isFaqOpen && "rotate-45"
+                            )}
+                            aria-hidden="true"
+                          >
+                            +
+                          </span>
+                        </button>
+
+                        {isFaqOpen && (
+                          <div className="mt-3 space-y-2">
+                            {item.answer.map((paragraph) => (
+                              <p key={paragraph} className="text-sm leading-6 text-slate-600">
+                                {paragraph}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </CardBody>
             </Card>

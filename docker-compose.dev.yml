@@ -10,6 +10,8 @@ services:
       NGINX_ENV: dev
 
   backend:
+    env_file:
+      - ./configs/.env.local
     environment:
       DB_CONNECTION: mysql
       DB_HOST: mysql
@@ -18,10 +20,10 @@ services:
       DB_USERNAME: billifty_u
       DB_PASSWORD: b1ll1iftykamikalara0213
     command: bash -c "php -v && php-fpm"
-    volumes:
-      - ./configs/.env.local:/var/www/html/.env:ro
 
   queue-worker:
+    env_file:
+      - ./configs/.env.local
     environment:
       DB_CONNECTION: mysql
       DB_HOST: mysql
@@ -34,9 +36,10 @@ services:
       - ./backend:/var/www/html
       - ./shared-resources:/var/www/shared-resources
       - ./backend/storage:/var/www/html/storage
-      - ./configs/.env.local:/var/www/html/.env:ro
 
   scheduler:
+    env_file:
+      - ./configs/.env.local
     environment:
       DB_CONNECTION: mysql
       DB_HOST: mysql
@@ -48,7 +51,6 @@ services:
       - ./backend:/var/www/html
       - ./shared-resources:/var/www/shared-resources
       - ./backend/storage:/var/www/html/storage
-      - ./configs/.env.local:/var/www/html/.env:ro
 
   frontend:
     environment:

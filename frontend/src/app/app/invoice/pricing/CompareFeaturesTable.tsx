@@ -148,13 +148,10 @@ const rows: RowDef[] = [
     },
   },
   {
-    label: "Attachments per Invoice",
+    label: "AI Invoice Assistant",
     getValue: (plan) => {
       if (!plan) return "–";
-      const value = plan.features?.attachments;
-
-      if (value === "unlimited") return "Unlimited";
-      return String(value ?? "–");
+      return plan.features?.ai_invoice_assistant ? <CheckIcon /> : <CrossIcon />;
     },
   },
   {
