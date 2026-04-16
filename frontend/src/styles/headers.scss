@@ -69,7 +69,6 @@ header {
 .footer-logo-wrap img {
   display: block;
   width: auto;
-  height: 24px;
   object-fit: contain;
 }
 
@@ -97,7 +96,7 @@ header {
 .billifty-navbar a,
 .billifty-navbar button {
   font-family: var(--font-family);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 1;
 }
@@ -143,8 +142,8 @@ header {
 }
 
 .billifty-avatar-button {
-  width: 34px;
-  height: 34px;
+  width: 50px;
+  height: 50px;
   display: inline-flex;
   align-items: center;
   justify-content: center;

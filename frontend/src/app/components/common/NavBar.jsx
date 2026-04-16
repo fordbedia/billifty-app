@@ -12,8 +12,8 @@ export const BilliftyLogo = () => {
   return (
     <Link href={path.lp} className="billifty-logo-link"><Image
         alt="Billifty Logo"
-        width={92}
-        height={35}
+        width={80}
+        height={80}
         priority
         quality={100}
         className="billifty-logo-img"
