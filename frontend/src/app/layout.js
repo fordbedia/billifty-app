@@ -21,7 +21,7 @@ const geistMono = Geist_Mono({
 export const metadata = {
   metadataBase: new URL(siteUrl),
   title: "Billifty",
-  description: "Billifty invoicing platform",
+  description: "Create clean, professional invoices with Billifty.",
 };
 
 export default function RootLayout({ children }) {

@@ -23,7 +23,9 @@ export default function ConfirmIssueInvoiceModal() {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">Issue Invoice</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">
+								<h2 className="px-6 py-3">Issue Invoice</h2>
+							</ModalHeader>
               <ModalBody>
                 <strong>Are you sure you want to issue this invoice? This action cannot be undone.</strong>
 				  <p>Once issued, the following fields can no longer be edited: Invoice Number, Client, Issue Date, Due Date and Currency.</p>

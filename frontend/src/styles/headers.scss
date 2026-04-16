@@ -6,8 +6,8 @@
   --foreground: #0f172a;
   --header-bg: #ffffff;
   --header-text: #0f172a;
-  --header-divider-color: #e2e8f0;
-  --app-header-height: 5.5rem;
+  --header-divider-color: #eef1f5;
+  --app-header-height: 58px;
 }
 
 /* --------------------- */
@@ -31,7 +31,10 @@ header {
   right: 0;
   width: 100%;
   z-index: 9999;
-  background: #FFF;
+  background: rgba(255, 255, 255, 0.82);
+  border-bottom: 1px solid rgba(238, 241, 245, 0.88);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .app-shell {
@@ -39,53 +42,262 @@ header {
 }
 .billifty-navbar {
   width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 0.35rem 1.1rem;
-  border: 0;
-  border-radius: 0;
+  height: var(--app-header-height);
   background: transparent;
-  box-shadow: none;
 }
 
-.inline-menu-color {
-  color: #425168;
+.billifty-navbar-shell {
+  width: min(100%, 1180px);
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 24px;
+}
+
+.billifty-logo-link,
+.footer-logo-wrap {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  text-decoration: none;
+}
+
+.billifty-logo-img,
+.footer-logo-wrap img {
+  display: block;
+  width: auto;
+  height: 24px;
+  object-fit: contain;
+}
+
+.billifty-navbar-brand {
+  display: flex;
+  align-items: center;
+}
+
+.billifty-navbar-links,
+.billifty-navbar-actions {
+  display: flex;
+  align-items: center;
+}
+
+.billifty-navbar-links {
+  justify-content: center;
+  gap: 34px;
+}
+
+.billifty-navbar-actions {
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.billifty-navbar a,
+.billifty-navbar button {
+  font-family: var(--font-family);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.billifty-navbar-links a,
+.billifty-nav-link,
+.billifty-mobile-menu a,
+.billifty-mobile-menu button {
+  color: #181f2c;
+  text-decoration: none;
+  transition: color 0.18s ease, background-color 0.18s ease;
+}
+
+.billifty-navbar-links a:hover,
+.billifty-nav-link:hover,
+.billifty-mobile-menu a:hover,
+.billifty-mobile-menu button:hover {
+  color: #169eea;
+}
+
+.billifty-nav-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  background: #20a8f3;
+  color: #ffffff !important;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.billifty-nav-button:hover {
+  background: #0c98e5;
+}
+
+.billifty-account-menu {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.billifty-avatar-button {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dceeff;
+  border-radius: 50%;
+  background: #ffffff;
+  padding: 2px;
+  cursor: pointer;
+  box-shadow: 0 10px 28px -22px rgba(17, 24, 39, 0.6);
+}
+
+.billifty-avatar-button:hover,
+.billifty-avatar-button[aria-expanded="true"] {
+  border-color: #20a8f3;
+}
+
+.billifty-avatar-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 50%;
+  background-color: #eff8ff;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.billifty-account-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 220px;
+  display: grid;
+  gap: 2px;
+  border: 1px solid #eef1f5;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 8px;
+  box-shadow: 0 24px 60px -44px rgba(17, 24, 39, 0.54);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.billifty-account-summary {
+  min-width: 0;
+  border-bottom: 1px solid #eef1f5;
+  margin-bottom: 4px;
+  padding: 8px 8px 10px;
+}
+
+.billifty-account-summary span {
+  display: block;
+  color: #7a8494;
+  font-size: 11px;
   font-weight: 600;
 }
 
-.inline-menu-color:hover {
-  color: #2957c8;
+.billifty-account-summary strong {
+  display: block;
+  overflow: hidden;
+  color: #181f2c;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.nav-inline-link {
-  gap: 0.3rem;
+.billifty-account-dropdown a,
+.billifty-account-dropdown button {
+  width: 100%;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #181f2c;
+  padding: 0 8px;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
 }
 
-.nav-cta-button {
-  border-radius: 9999px;
-  padding-inline: 1rem;
-  min-height: 2.75rem;
+.billifty-account-dropdown a:hover,
+.billifty-account-dropdown button:hover {
+  background: #f4fbff;
+  color: #169eea;
 }
 
-.billifty-navbar-menu {
-  margin-top: 0;
-  border-top: 1px solid #e2e8f0;
-  background: rgba(255, 255, 255, 0.96);
-  border-radius: 0;
-  box-shadow: none;
+.billifty-mobile-toggle {
+  display: none;
+  justify-self: end;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  padding: 9px 7px;
+}
+
+.billifty-mobile-toggle span {
+  display: block;
+  height: 2px;
+  background: #181f2c;
+}
+
+.billifty-mobile-toggle span + span {
+  margin-top: 6px;
+}
+
+.billifty-mobile-menu {
+  display: grid;
+  gap: 2px;
+  padding: 10px 24px 18px;
+  border-top: 1px solid rgba(238, 241, 245, 0.88);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.billifty-mobile-menu a,
+.billifty-mobile-menu button {
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  padding: 11px 0;
+  text-align: left;
+  cursor: pointer;
 }
 
 hr.divider-color {
-  background-color: var(--header-divider-color);
-  opacity: 0.9;
+  display: none;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 760px) {
   :root {
-    --app-header-height: 4.75rem;
+    --app-header-height: 58px;
   }
 
-  .billifty-navbar {
-    padding-inline: 0.8rem;
+  .billifty-navbar-shell {
+    grid-template-columns: 1fr auto;
+    padding-inline: 18px;
+  }
+
+  .billifty-navbar-links,
+  .billifty-navbar-actions {
+    display: none;
+  }
+
+  .billifty-mobile-toggle {
+    display: block;
   }
 }

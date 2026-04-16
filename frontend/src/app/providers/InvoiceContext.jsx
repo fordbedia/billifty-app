@@ -58,6 +58,17 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
         meta: ''
     }
 
+	const makeSortableId = () => {
+		if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+			return crypto.randomUUID()
+		}
+
+		return `invoice-item-${Date.now()}-${Math.random().toString(36).slice(2)}`
+	}
+
+	const withSortableIds = (items) =>
+		items.map((item) => item?._sortable_id ? item : {...item, _sortable_id: makeSortableId()})
+
 	const initialState = {
 		id: null,
 		business_profile_id: null,
@@ -273,11 +284,11 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
     }))
 
     const withItemPositions = (items) =>
-        items.map((item, index) => ({...item, position: index + 1}))
+        withSortableIds(items).map((item, index) => ({...item, position: index + 1}))
 
     const addItems = () => setData((prev) => ({
         ...prev,
-        invoice_items: withItemPositions([...prev.invoice_items, {...invoiceItemsInitialState}])
+        invoice_items: withItemPositions([...prev.invoice_items, {...invoiceItemsInitialState, _sortable_id: makeSortableId()}])
     }))
 
     const updateItems = (index, field, value) => setData((prev) => {
@@ -292,7 +303,13 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		return {...prev, invoice_items: withItemPositions(items)}
 	})
 
-	const reorderItems = (fromIndex, toIndex) => setData(prev => {
+	const reorderItems = (itemsOrFromIndex, toIndex) => setData(prev => {
+		if (Array.isArray(itemsOrFromIndex)) {
+			return {...prev, invoice_items: withItemPositions(itemsOrFromIndex)}
+		}
+
+		const fromIndex = itemsOrFromIndex
+
 		if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) {
 			return prev
 		}
@@ -556,7 +573,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	  setData((prev) => ({
 		...prev,
 		...fetchedInvoice,
-		invoice_items: [...(fetchedInvoice.items ?? [])],
+		invoice_items: withItemPositions([...(fetchedInvoice.items ?? [])]),
 	  }));
 
 	  // Optional: derive flags from fetched invoice once
