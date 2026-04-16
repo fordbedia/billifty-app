@@ -272,7 +272,13 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
         invoice_items: [...prev.invoice_items, ]
     }))
 
-    const addItems = () => setData((prev) => ({...prev, invoice_items: [...prev.invoice_items, invoiceItemsInitialState]}))
+    const withItemPositions = (items) =>
+        items.map((item, index) => ({...item, position: index + 1}))
+
+    const addItems = () => setData((prev) => ({
+        ...prev,
+        invoice_items: withItemPositions([...prev.invoice_items, {...invoiceItemsInitialState}])
+    }))
 
     const updateItems = (index, field, value) => setData((prev) => {
         const updated = [...prev.invoice_items]
@@ -283,7 +289,23 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	const removeItem = (index) => setData(prev => {
 		const items = [...prev.invoice_items]
 		items.splice(index, 1)
-		return {...prev, invoice_items: items}
+		return {...prev, invoice_items: withItemPositions(items)}
+	})
+
+	const reorderItems = (fromIndex, toIndex) => setData(prev => {
+		if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) {
+			return prev
+		}
+
+		const items = [...prev.invoice_items]
+		if (fromIndex >= items.length || toIndex >= items.length) {
+			return prev
+		}
+
+		const [movedItem] = items.splice(fromIndex, 1)
+		items.splice(toIndex, 0, movedItem)
+
+		return {...prev, invoice_items: withItemPositions(items)}
 	})
 
 	// Template Category
@@ -667,6 +689,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			onDataChange,
 			addItems,
 			updateItems,
+			reorderItems,
 			setHasShipping,
 			hasShipping,
 			isTaxable,

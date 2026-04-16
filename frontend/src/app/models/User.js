@@ -14,7 +14,7 @@ export default class User extends Model {
 			 * @param {string | null} [next=null]
 			 */
 			static async register(data, next = null) {
-				const uri = next ? `/?next=${next}` : '/';
+				const uri = next ? `/?next=${encodeURIComponent(next)}` : '/';
 				return await this.axios().post(uri, data)
 			}
 
@@ -23,7 +23,7 @@ export default class User extends Model {
 			 * @param {string | null} [next=null]
 			 */
 			static async login(data, next) {
-				const uri = next ? `/login?next=${next}` : '/login';
+				const uri = next ? `/login?next=${encodeURIComponent(next)}` : '/login';
 				return await this.axios().post(uri, data)
 			}
 

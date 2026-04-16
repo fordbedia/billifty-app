@@ -3,7 +3,18 @@ import { centsToDollarsStr, dollarsToCents } from "@/app/utils/computeInvoice";
 import { useInvoice } from "@/app/providers/InvoiceContext";
 
 // Helpers
-export default function InvoiceItem({ item, index, onChange, removeItem }) {
+export default function InvoiceItem({
+  item,
+  index,
+  onChange,
+  removeItem,
+  isDragging = false,
+  isDragOver = false,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+}) {
   const { data, selectedCurrency, invoiceComputed } = useInvoice();
   const showPerLine = (data.discount_mode ?? "none") === "per-line";
 
@@ -19,8 +30,28 @@ export default function InvoiceItem({ item, index, onChange, removeItem }) {
   const lineTotalCents = computedItem.line_total_cents ?? 0;
 
   return (
-    <div className="box-card px-4 py-4 my-3 invoice-item-card">
+    <div
+      className={`box-card px-4 py-4 my-3 invoice-item-card${isDragging ? " is-dragging" : ""}${isDragOver ? " is-drag-over" : ""}`}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+    >
       <div className="flex flex-col md:flex-row gap-5">
+        <div className="invoice-item-drag-control">
+          <button
+            type="button"
+            className="invoice-item-drag-handle"
+            draggable
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+            aria-label={`Drag invoice item ${index + 1} to reorder`}
+            title="Drag to reorder"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+
         <div className="md:w-1/3">
           Description
           <Input

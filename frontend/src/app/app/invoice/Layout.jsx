@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import RootLayout from "@/app/components/common/RootLayout";
-import { Button, Card, CardHeader, CardBody, CardFooter, Divider, Link } from "@heroui/react";
+import { Button, Card, CardHeader, CardBody, CardFooter, Divider } from "@heroui/react";
 import InvoiceItem from "@/app/app/invoice/components/InvoiceItem";
 import AddMoreItems from "@/app/app/invoice/components/buttons/AddMoreItems";
 import InvoiceInfo from "@/app/app/invoice/components/InvoiceInfo";
@@ -22,6 +23,7 @@ export default function Layout({ showAiAssistant = false }) {
     data,
     addItems,
     updateItems,
+    reorderItems,
     removeItem,
     selectedCurrency,
     invoiceComputed,
@@ -32,6 +34,8 @@ export default function Layout({ showAiAssistant = false }) {
 		invoiceId,
   } = useInvoice();
   const { planCapabilities } = useApp();
+  const [draggedItemIndex, setDraggedItemIndex] = useState(null);
+  const [dragOverItemIndex, setDragOverItemIndex] = useState(null);
   const canUseAiAssistant =
     Boolean(showAiAssistant) && Boolean(planCapabilities?.allowed?.ai_invoice_assistant);
 
@@ -48,6 +52,38 @@ export default function Layout({ showAiAssistant = false }) {
     invoiceComputed?.total_cents ?? data.total_cents ?? 0;
   const discountRow =
     invoiceComputed?.display_discount_row ?? data.display_discount_row ?? null;
+
+  const resetDragState = () => {
+    setDraggedItemIndex(null);
+    setDragOverItemIndex(null);
+  };
+
+  const handleItemDragStart = (event, index) => {
+    setDraggedItemIndex(index);
+    setDragOverItemIndex(index);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", String(index));
+  };
+
+  const handleItemDragOver = (event, index) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    setDragOverItemIndex(index);
+  };
+
+  const handleItemDrop = (event, index) => {
+    event.preventDefault();
+
+    const transferValue = event.dataTransfer.getData("text/plain");
+    const transferIndex = transferValue === "" ? null : Number(transferValue);
+    const fromIndex = draggedItemIndex ?? transferIndex;
+
+    if (Number.isInteger(fromIndex)) {
+      reorderItems(fromIndex, index);
+    }
+
+    resetDragState();
+  };
 
 	if (typeof isLoadingInvoice !== undefined && isLoadingInvoice) {
 		return (
@@ -117,10 +153,16 @@ export default function Layout({ showAiAssistant = false }) {
                       data.invoice_items.map((item, index) => (
                         <InvoiceItem
                           item={item}
-                          key={index}
+                          key={item.id ?? `invoice-item-${item.position ?? index}-${index}`}
                           index={index}
                           onChange={updateItems}
                           removeItem={removeItem}
+                          isDragging={draggedItemIndex === index}
+                          isDragOver={dragOverItemIndex === index && draggedItemIndex !== index}
+                          onDragStart={(event) => handleItemDragStart(event, index)}
+                          onDragOver={(event) => handleItemDragOver(event, index)}
+                          onDrop={(event) => handleItemDrop(event, index)}
+                          onDragEnd={resetDragState}
                         />
                       ))}
 
