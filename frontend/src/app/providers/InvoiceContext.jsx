@@ -41,7 +41,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
     const tz = getLocalTimeZone();
 
     const issueDateISO = toISO(today(tz));
-	const dueDateISO = toISO(today(tz).add({ months: 1 }));
+		const dueDateISO = null;
 
     const invoiceItemsInitialState = {
         position: 1,

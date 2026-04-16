@@ -96,13 +96,13 @@ export default function InvoiceInfo() {
                     <div className="md:w-1/2">
                         Due Date
                         <DatePicker
-						  isDisabled={data.status === 'issued'}
-						  className="max-w-[284px]"
-						  label="Due date"
-						  granularity="day"
-						  value={toDateValue(data.due_on)}
-						  onChange={(v) => onDataChange('due_on', toISO(v))}
-						/>
+													isDisabled={data.status === 'issued'}
+													className="max-w-[284px]"
+													label="Due date"
+													granularity="day"
+													value={toDateValue(data.due_on)}
+													onChange={(v) => onDataChange('due_on', toISO(v))}
+												/>
                     </div>
                 </div>
                 <div className="flex flex-col md:flex-row gap-2 py-2 invoice-info-row">
@@ -222,6 +222,18 @@ export default function InvoiceInfo() {
 							))}
 						</Select>
 					</div>
+					<div className="md:w-1/2">Note:
+						<Textarea
+							labelPlacement="outside"
+							name="notes"
+							placeholder="Add a Note"
+							type="text"
+							variant="bordered"
+							radius="sm"
+							value={data.notes}
+							onValueChange={(val) => onDataChange('notes', val)}
+						/>
+					</div>
 				</div>
 
 				{/* 🔹 NEW: Discount Mode + Inputs */}
@@ -240,22 +252,32 @@ export default function InvoiceInfo() {
 							<SelectItem key="percent">Invoice-level (Percent)</SelectItem>
 							<SelectItem key="per-line">Per-line discounts</SelectItem>
 						</Select>
+
+						{/* If per-line: nothing here; fields will show inside each item row */}
+						{isPerLine && (<div className="md:w-1/2 pl-2"><small className="text-default-500">Per-line discounts are enabled. Each item can set a discount in dollars or percent.</small></div>)}
+
+						{/* Invoice-level fields (amount/percent) */}
+						{isAmount && (<div className="md:w-1/2 pl-2">Discount Amount ($)<Input type="number" variant="bordered" radius="sm" value={centsToDollarsStr(data.discount_cents ?? 0)} onValueChange={(val) => onDataChange('discount_cents', dollarsToCents(val))}/></div>)}
+						{isPercent && (<div className="md:w-1/2 pl-2">Discount Percent (%)<Input type="number" variant="bordered" radius="sm" value={String(data.discount_rate ?? 0)} onValueChange={(val) => onDataChange('discount_rate', parseFloat(val) || 0)}/></div>)}
 					</div>
-					{/* Invoice-level fields (amount/percent) */}
-					{isAmount && (<div className="md:w-1/2">Discount Amount ($)<Input type="number" variant="bordered" radius="sm" value={centsToDollarsStr(data.discount_cents ?? 0)} onValueChange={(val) => onDataChange('discount_cents', dollarsToCents(val))}
+					<div className="md:w-1/2">Terms:
+						<Textarea
+							labelPlacement="outside"
+							name="terms"
+							placeholder="Add a Term"
+							type="text"
+							variant="bordered"
+							radius="sm"
+							value={data.terms}
+							onValueChange={(val) => onDataChange('terms', val)}
 						/>
 					</div>
-					)}
-					{isPercent && (<div className="md:w-1/2">Discount Percent (%)<Input type="number" variant="bordered" radius="sm" value={String(data.discount_rate ?? 0)} onValueChange={(val) => onDataChange('discount_rate', parseFloat(val) || 0)}
-						/>
-					</div>
-					)}
-					{/* If per-line: nothing here; fields will show inside each item row */}
-					{isPerLine && (<div className="md:w-1/2"><small className="text-default-500">Per-line discounts are enabled. Each item can set a discount in dollars or percent.
-					</small>
-					</div>
-					)}
 				</div>
+
+				<div className="flex flex-col md:flex-row gap-2 py-2 invoice-info-row">
+
+				</div>
+
             </CardBody>
         </Card>
     )

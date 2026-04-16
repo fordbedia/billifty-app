@@ -26,22 +26,22 @@ export default function Templates() {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
-				  Template Selection
-			  </ModalHeader>
+              <ModalHeader className="flex flex-col gap-4">
+								<h2 className="mx-4 py-4">Template Selection</h2>
+			  			</ModalHeader>
               <ModalBody>
-				  <div className="flex">
-					  {templates && Object.keys(templates).length > 0 && templates.map(t => (
-						  <div key={t.id} className="w-1/2">
+					<div className="grid grid-cols-3 gap-4">
+					  {Array.isArray(templates) && templates.length > 0 && templates.map(t => (
+						  <div key={t.id}>
 							  <div className="box flex justify-center px-2 py-5" onClick={() => {
 								  setSelectedTemplate(t);
 								  onOpenColorScheme();
 								  onClose();
 							  }}>
 								  <Image
-									alt={t.display_name}
-									src={t.preview_url}
-									width={300}
+										alt={t.display_name}
+										src={t.preview_url}
+										width={200}
 								  />
 							  </div>
 						  </div>

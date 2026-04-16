@@ -28,8 +28,8 @@ export default function ColorSchemes() {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-				  Template Selection
-			  </ModalHeader>
+								<h2 className="mx-4 py-4">Template Selection</h2>
+			  			</ModalHeader>
               <ModalBody>
 				  <div className="flex">
 						  <div className="box-design-wrapper">
