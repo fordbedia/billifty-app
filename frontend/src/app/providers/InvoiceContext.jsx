@@ -580,7 +580,8 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	  if (fetchedInvoice.shipping_address || fetchedInvoice.shipping_cents) {
 		setHasShipping(true);
 	  }
-	  if (fetchedInvoice.shipping_tax_rate) {
+		const shippingIsTaxable = Boolean(parseInt(fetchedInvoice.shipping_tax_rate))
+	  if (shippingIsTaxable) {
 		setIsTaxable(true);
 	  }
 		if (fetchedInvoice?.currency) {
