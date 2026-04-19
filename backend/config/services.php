@@ -63,6 +63,7 @@ return [
     'playwright_pdf' => [
         'url' => env('PLAYWRIGHT_PDF_SERVICE_URL', 'http://playwright:3000'),
         'timeout' => env('PLAYWRIGHT_PDF_TIMEOUT', 60),
+        'asset_base_url' => env('PLAYWRIGHT_PDF_ASSET_BASE_URL', 'http://nginx:8081'),
     ],
 
 ];

@@ -31,7 +31,7 @@ const cannedReplies = [
 
 function AssistantBadge() {
   return (
-    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-cyan-400 text-white shadow-[0_12px_24px_-16px_rgba(37,99,235,0.9)]">
+    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#dceeff] bg-[#f4fbff] text-[#169eea]">
       <Bot size={16} strokeWidth={2.1} />
     </div>
   );
@@ -44,10 +44,10 @@ function MessageBubble({ role, text }) {
     <div className={`flex items-end gap-2 ${isUser ? "justify-end" : "justify-start"}`}>
       {!isUser ? <AssistantBadge /> : null}
       <div
-        className={`max-w-[82%] rounded-[20px] px-4 py-3 text-sm leading-6 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.55)] ${
+        className={`max-w-[82%] rounded-lg px-4 py-3 text-sm leading-6 shadow-[0_16px_34px_-30px_rgba(17,24,39,0.5)] ${
           isUser
-            ? "rounded-br-md bg-gradient-to-r from-blue-600 to-blue-500 text-white"
-            : "rounded-bl-md border border-slate-200 bg-white text-slate-700"
+            ? "rounded-br-sm border border-[#cfeeff] bg-[#eef9ff] text-[#181f2c]"
+            : "rounded-bl-sm border border-[#eef1f5] bg-white text-[#4f5968]"
         }`}
       >
         {text}
@@ -139,31 +139,31 @@ export default function ChatWidget() {
         {isOpen ? (
           <motion.div
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            className="pointer-events-auto w-[calc(100vw-1rem)] max-w-sm sm:w-[23.5rem]"
+            className="pointer-events-auto w-[calc(100vw-1rem)] max-w-sm sm:w-[23rem]"
             exit={{ opacity: 0, y: 18, scale: 0.96 }}
             id="billifty-chat-widget"
             initial={{ opacity: 0, y: 18, scale: 0.96 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
           >
             <Card
-              className="overflow-hidden rounded-[28px] border border-white/80 bg-white/95 shadow-[0_32px_70px_-30px_rgba(15,23,42,0.45)] backdrop-blur"
-              radius="lg"
+              className="overflow-hidden rounded-lg border border-[#eef1f5] bg-white/95 shadow-[0_26px_70px_-44px_rgba(17,24,39,0.55)] backdrop-blur"
+              radius="sm"
             >
-              <CardHeader className="flex items-start justify-between gap-3 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400 px-5 py-4 text-white">
+              <CardHeader className="flex items-start justify-between gap-3 border-b border-[#eef1f5] bg-white px-5 py-4 text-[#181f2c]">
                 <div className="flex items-center gap-3">
                   <Avatar
-                    className="border border-white/30 bg-white/15 text-white"
+                    className="border border-[#dceeff] bg-[#f4fbff] text-[#169eea]"
                     fallback={<Bot size={18} strokeWidth={2.1} />}
                     name="AI Assistant"
                     size="sm"
                   />
                   <div>
-                    <p className="text-base font-semibold leading-none">AI Assistant</p>
+                    <p className="text-sm font-semibold leading-none text-[#181f2c]">AI Assistant</p>
                     <Chip
-                      className="mt-2 border-white/0 bg-white/12 text-white"
+                      className="mt-2 border border-[#dceeff] bg-[#f4fbff] text-[#4f5968]"
                       radius="sm"
                       size="sm"
-                      startContent={<span className="ml-1 h-2 w-2 rounded-full bg-emerald-300"></span>}
+                      startContent={<span className="ml-1 h-2 w-2 rounded-full bg-[#20a8f3]"></span>}
                       variant="flat"
                     >
                       Online
@@ -173,7 +173,7 @@ export default function ChatWidget() {
 
                 <Button
                   aria-label="Close chat"
-                  className="min-w-0 bg-white/14 text-white hover:bg-white/20"
+                  className="min-w-0 border border-[#eef1f5] bg-white text-[#6b7280] hover:bg-[#f4fbff] hover:text-[#169eea]"
                   isIconOnly
                   radius="full"
                   size="sm"
@@ -184,7 +184,7 @@ export default function ChatWidget() {
                 </Button>
               </CardHeader>
 
-              <CardBody className="bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_55%)] p-0">
+              <CardBody className="bg-[#fbfcfd] p-0">
                 <div className="flex h-[23rem] flex-col">
                   <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4" ref={messagesRef}>
                     {messages.map((message) => (
@@ -194,11 +194,11 @@ export default function ChatWidget() {
                     {isResponding ? (
                       <div className="flex items-end gap-2">
                         <AssistantBadge />
-                        <div className="rounded-[20px] rounded-bl-md border border-slate-200 bg-white px-4 py-3 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.55)]">
+                        <div className="rounded-lg rounded-bl-sm border border-[#eef1f5] bg-white px-4 py-3 shadow-[0_16px_34px_-30px_rgba(17,24,39,0.5)]">
                           <div className="flex items-center gap-1.5">
-                            <span className="h-2 w-2 animate-bounce rounded-full bg-blue-500 [animation-delay:-0.2s]"></span>
-                            <span className="h-2 w-2 animate-bounce rounded-full bg-blue-400 [animation-delay:-0.1s]"></span>
-                            <span className="h-2 w-2 animate-bounce rounded-full bg-cyan-400"></span>
+                            <span className="h-2 w-2 animate-bounce rounded-full bg-[#20a8f3] [animation-delay:-0.2s]"></span>
+                            <span className="h-2 w-2 animate-bounce rounded-full bg-[#8dd7ff] [animation-delay:-0.1s]"></span>
+                            <span className="h-2 w-2 animate-bounce rounded-full bg-[#c7eefe]"></span>
                           </div>
                         </div>
                       </div>
@@ -206,13 +206,13 @@ export default function ChatWidget() {
                   </div>
 
                   <form
-                    className="border-t border-slate-200 bg-white/90 px-3 py-3"
+                    className="border-t border-[#eef1f5] bg-white px-3 py-3"
                     onSubmit={handleSubmit}
                   >
                     <div className="flex items-center gap-2">
                       <Button
                         aria-label="Attach file"
-                        className="min-w-0 border border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100"
+                        className="min-w-0 border border-[#eef1f5] bg-[#fbfcfd] text-[#7a8494] hover:bg-[#f4fbff] hover:text-[#169eea]"
                         isIconOnly
                         radius="full"
                         size="sm"
@@ -228,11 +228,11 @@ export default function ChatWidget() {
                         classNames={{
                           base: "w-full",
                           inputWrapper:
-                            "h-11 rounded-full border border-slate-200 bg-slate-50 shadow-none data-[hover=true]:bg-slate-100 group-data-[focus=true]:bg-white group-data-[focus=true]:border-blue-300",
-                          input: "text-sm text-slate-700 placeholder:text-slate-400",
+                            "h-11 rounded-lg border border-[#eef1f5] bg-[#fbfcfd] shadow-none data-[hover=true]:bg-[#f4fbff] group-data-[focus=true]:bg-white group-data-[focus=true]:border-[#20a8f3]",
+                          input: "text-sm text-[#181f2c] placeholder:text-[#9aa3af]",
                         }}
                         placeholder="Type a message..."
-                        radius="full"
+                        radius="sm"
                         value={draft}
                         variant="flat"
                         onValueChange={setDraft}
@@ -240,10 +240,10 @@ export default function ChatWidget() {
 
                       <Button
                         aria-label="Send message"
-                        className="min-w-0 bg-gradient-to-r from-blue-600 to-cyan-400 text-white shadow-[0_20px_36px_-24px_rgba(37,99,235,0.85)]"
+                        className="min-w-0 bg-[#20a8f3] text-white shadow-[0_18px_34px_-26px_rgba(32,168,243,0.8)] hover:bg-[#0c98e5]"
                         isDisabled={!draft.trim() || isResponding}
                         isIconOnly
-                        radius="full"
+                        radius="sm"
                         type="submit"
                       >
                         <SendHorizontal size={16} strokeWidth={2.2} />
@@ -261,7 +261,7 @@ export default function ChatWidget() {
         aria-controls="billifty-chat-widget"
         aria-expanded={isOpen}
         aria-label={isOpen ? "Close chat" : "Open chat"}
-        className="pointer-events-auto h-16 w-16 min-w-0 rounded-full bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-400 text-white shadow-[0_26px_48px_-20px_rgba(37,99,235,0.9)] transition-transform duration-200 hover:scale-[1.02]"
+        className="pointer-events-auto h-14 w-14 min-w-0 rounded-full border border-[#dceeff] bg-white text-[#169eea] shadow-[0_20px_44px_-26px_rgba(17,24,39,0.5)] transition-transform duration-200 hover:scale-[1.02] hover:bg-[#f4fbff]"
         isIconOnly
         onPress={() => setIsOpen((current) => !current)}
       >

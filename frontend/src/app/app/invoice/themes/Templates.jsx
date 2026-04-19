@@ -33,7 +33,7 @@ export default function Templates() {
 					<div className="grid grid-cols-3 gap-4">
 					  {Array.isArray(templates) && templates.length > 0 && templates.map(t => (
 						  <div key={t.id}>
-							  <div className="box flex justify-center px-2 py-5" onClick={() => {
+							  <div className="box flex justify-center px-2 py-5 flex-col" onClick={() => {
 								  setSelectedTemplate(t);
 								  onOpenColorScheme();
 								  onClose();
@@ -43,6 +43,7 @@ export default function Templates() {
 										src={t.preview_url}
 										width={200}
 								  />
+									<h2  className="font-bold">{t.display_name}</h2>
 							  </div>
 						  </div>
 					  ))}
