@@ -585,7 +585,6 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		setIsTaxable(true);
 	  }
 		if (fetchedInvoice?.currency) {
-			console.log('fetchedInvoice?.currency', fetchedInvoice?.currency)
 			setSelectedCurrency(fetchedInvoice?.currency)
 		}
 	}, [fetchedInvoice]);

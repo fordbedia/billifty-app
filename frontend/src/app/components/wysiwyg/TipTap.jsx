@@ -69,141 +69,193 @@ function MenuBar({ editor }) {
 
   if (!editorState) return null;
 
+  const buttonGroups = [
+    {
+      label: "Text",
+      items: [
+        {
+          label: "B",
+          title: "Bold",
+          onClick: () => editor.chain().focus().toggleBold().run(),
+          disabled: !editorState.canBold,
+          active: editorState.isBold,
+          className: "font-bold",
+        },
+        {
+          label: "I",
+          title: "Italic",
+          onClick: () => editor.chain().focus().toggleItalic().run(),
+          disabled: !editorState.canItalic,
+          active: editorState.isItalic,
+          className: "italic",
+        },
+        {
+          label: "S",
+          title: "Strike",
+          onClick: () => editor.chain().focus().toggleStrike().run(),
+          disabled: !editorState.canStrike,
+          active: editorState.isStrike,
+          className: "line-through",
+        },
+        {
+          label: "<>",
+          title: "Inline code",
+          onClick: () => editor.chain().focus().toggleCode().run(),
+          disabled: !editorState.canCode,
+          active: editorState.isCode,
+        },
+      ],
+    },
+    {
+      label: "Style",
+      items: [
+        {
+          label: "P",
+          title: "Paragraph",
+          onClick: () => editor.chain().focus().setParagraph().run(),
+          active: editorState.isParagraph,
+        },
+        {
+          label: "H1",
+          title: "Heading 1",
+          onClick: () =>
+            editor.chain().focus().toggleHeading({ level: 1 }).run(),
+          active: editorState.isHeading1,
+        },
+        {
+          label: "H2",
+          title: "Heading 2",
+          onClick: () =>
+            editor.chain().focus().toggleHeading({ level: 2 }).run(),
+          active: editorState.isHeading2,
+        },
+        {
+          label: "H3",
+          title: "Heading 3",
+          onClick: () =>
+            editor.chain().focus().toggleHeading({ level: 3 }).run(),
+          active: editorState.isHeading3,
+        },
+      ],
+    },
+    {
+      label: "Blocks",
+      items: [
+        {
+          label: "Bullets",
+          title: "Bullet list",
+          onClick: () => editor.chain().focus().toggleBulletList().run(),
+          active: editorState.isBulletList,
+          wide: true,
+        },
+        {
+          label: "Numbers",
+          title: "Numbered list",
+          onClick: () => editor.chain().focus().toggleOrderedList().run(),
+          active: editorState.isOrderedList,
+          wide: true,
+        },
+        {
+          label: "Quote",
+          title: "Blockquote",
+          onClick: () => editor.chain().focus().toggleBlockquote().run(),
+          active: editorState.isBlockquote,
+          wide: true,
+        },
+        {
+          label: "Code",
+          title: "Code block",
+          onClick: () => editor.chain().focus().toggleCodeBlock().run(),
+          active: editorState.isCodeBlock,
+          wide: true,
+        },
+      ],
+    },
+    {
+      label: "Insert",
+      items: [
+        {
+          label: "Rule",
+          title: "Horizontal rule",
+          onClick: () => editor.chain().focus().setHorizontalRule().run(),
+          wide: true,
+        },
+        {
+          label: "Break",
+          title: "Hard break",
+          onClick: () => editor.chain().focus().setHardBreak().run(),
+          wide: true,
+        },
+      ],
+    },
+    {
+      label: "History",
+      items: [
+        {
+          label: "Undo",
+          title: "Undo",
+          onClick: () => editor.chain().focus().undo().run(),
+          disabled: !editorState.canUndo,
+          wide: true,
+        },
+        {
+          label: "Redo",
+          title: "Redo",
+          onClick: () => editor.chain().focus().redo().run(),
+          disabled: !editorState.canRedo,
+          wide: true,
+        },
+      ],
+    },
+  ];
+
   return (
-    <div className="control-group">
-      <div className="button-group">
-        <button
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          disabled={!editorState.canBold}
-          className={editorState.isBold ? "is-active" : ""}
-        >
-          Bold
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          disabled={!editorState.canItalic}
-          className={editorState.isItalic ? "is-active" : ""}
-        >
-          Italic
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          disabled={!editorState.canStrike}
-          className={editorState.isStrike ? "is-active" : ""}
-        >
-          Strike
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleCode().run()}
-          disabled={!editorState.canCode}
-          className={editorState.isCode ? "is-active" : ""}
-        >
-          Code
-        </button>
-        <button onClick={() => editor.chain().focus().unsetAllMarks().run()}>
-          Clear marks
-        </button>
-        <button onClick={() => editor.chain().focus().clearNodes().run()}>
-          Clear nodes
-        </button>
-        <button
-          onClick={() => editor.chain().focus().setParagraph().run()}
-          className={editorState.isParagraph ? "is-active" : ""}
-        >
-          Paragraph
-        </button>
-        <button
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 1 }).run()
-          }
-          className={editorState.isHeading1 ? "is-active" : ""}
-        >
-          H1
-        </button>
-        <button
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 2 }).run()
-          }
-          className={editorState.isHeading2 ? "is-active" : ""}
-        >
-          H2
-        </button>
-        <button
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 3 }).run()
-          }
-          className={editorState.isHeading3 ? "is-active" : ""}
-        >
-          H3
-        </button>
-        <button
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 4 }).run()
-          }
-          className={editorState.isHeading4 ? "is-active" : ""}
-        >
-          H4
-        </button>
-        <button
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 5 }).run()
-          }
-          className={editorState.isHeading5 ? "is-active" : ""}
-        >
-          H5
-        </button>
-        <button
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 6 }).run()
-          }
-          className={editorState.isHeading6 ? "is-active" : ""}
-        >
-          H6
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={editorState.isBulletList ? "is-active" : ""}
-        >
-          Bullet list
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={editorState.isOrderedList ? "is-active" : ""}
-        >
-          Ordered list
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-          className={editorState.isCodeBlock ? "is-active" : ""}
-        >
-          Code block
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          className={editorState.isBlockquote ? "is-active" : ""}
-        >
-          Blockquote
-        </button>
-        <button
-          onClick={() => editor.chain().focus().setHorizontalRule().run()}
-        >
-          Horizontal rule
-        </button>
-        <button onClick={() => editor.chain().focus().setHardBreak().run()}>
-          Hard break
-        </button>
-        <button
-          onClick={() => editor.chain().focus().undo().run()}
-          disabled={!editorState.canUndo}
-        >
-          Undo
-        </button>
-        <button
-          onClick={() => editor.chain().focus().redo().run()}
-          disabled={!editorState.canRedo}
-        >
-          Redo
-        </button>
+    <div className="tiptap-toolbar" aria-label="Message editor toolbar">
+      {buttonGroups.map((group) => (
+        <div className="tiptap-toolbar-group" key={group.label}>
+          <span className="tiptap-toolbar-label">{group.label}</span>
+          <div className="tiptap-button-group">
+            {group.items.map((item) => (
+              <button
+                key={item.title}
+                type="button"
+                title={item.title}
+                aria-label={item.title}
+                aria-pressed={item.active || false}
+                onClick={item.onClick}
+                disabled={item.disabled}
+                className={[
+                  item.active ? "is-active" : "",
+                  item.wide ? "is-wide" : "",
+                  item.className || "",
+                ].join(" ")}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <div className="tiptap-toolbar-group tiptap-toolbar-group-clean">
+        <span className="tiptap-toolbar-label">Reset</span>
+        <div className="tiptap-button-group">
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().unsetAllMarks().run()}
+            disabled={!editorState.canClearMarks}
+            className="is-wide"
+          >
+            Clear marks
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().clearNodes().run()}
+            className="is-wide"
+          >
+            Clear blocks
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -265,8 +317,21 @@ export default function TipTap({ initialValue, onCommit }) {
 
   return (
     <div className="tiptap-root">
+      <div className="tiptap-header">
+        <div>
+          <p className="tiptap-eyebrow">Client message</p>
+          <h3>Email body</h3>
+        </div>
+        <span>Sent with invoice</span>
+      </div>
       <MenuBar editor={editor} />
-      <EditorContent editor={editor} onBlur={handleBlur} />
+      <div className="tiptap-editor-shell">
+        <EditorContent editor={editor} onBlur={handleBlur} />
+      </div>
+      <div className="tiptap-footer">
+        <span>Use invoice variables like {"{{client.name}}"} and {"{{invoice.number}}"}.</span>
+        <span>Changes save when you leave the editor.</span>
+      </div>
     </div>
   );
 }
