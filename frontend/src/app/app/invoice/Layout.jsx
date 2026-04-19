@@ -18,6 +18,9 @@ import InvoicePreviewPage from "@/app/app/invoice/components/InvoicePreviewPage"
 import ChatWidget from "@/app/components/common/ChatWidget";
 import { useApp } from "@/app/providers/AppContext";
 
+const workspacePrimaryButtonClass =
+  "group h-auto min-h-[54px] rounded-[8px] bg-[#1d84c6] px-5 py-3 text-base font-semibold tracking-normal text-white shadow-[0_16px_32px_-22px_rgba(29,132,198,0.9)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-[#166fa8] hover:shadow-[0_22px_38px_-24px_rgba(29,132,198,0.95)] focus-visible:ring-2 focus-visible:ring-[#72bee9] focus-visible:ring-offset-2";
+
 export default function Layout({ showAiAssistant = false }) {
   const {
     data,
@@ -67,26 +70,30 @@ export default function Layout({ showAiAssistant = false }) {
 
   return (
     <RootLayout>
-      <div className="app app-wrapper outer-bg invoice-page">
+      <div className="app app-wrapper min-h-screen bg-white invoice-page">
 				<ConfirmDeleteModal />
         <ConfirmIssueInvoiceModal />
 				<ConfirmNewInvoice />
 				<InvoicePreviewPage invoiceId={invoiceId} />
-        <div className="m-auto max-w-screen-xl py-6 md:px-0 px-5">
-          <div className="w-full flex flex-col md:flex-row mb-5 gap-3 md:gap-0 invoice-page-head">
-            <div className="md:w-2/3">
-              {/*<p className="workspace-eyebrow">Invoice Studio</p>*/}
-              <h1 className="py-1">Invoice Portal</h1>
-              <h2 className="py-1">
+        <div className="mx-auto w-full max-w-[1440px] px-5 pb-12 pt-10 sm:px-8 lg:px-10 sm:pt-12 lg:pt-16">
+          <div className="mb-9 flex w-full flex-col gap-5 md:flex-row md:items-end md:justify-between invoice-page-head">
+            <div className="max-w-[680px]">
+              <p className="text-sm font-semibold uppercase tracking-normal text-[#4b9cdc]">
+                Invoice Studio
+              </p>
+              <h1 className="mt-3 text-[40px] font-light leading-tight tracking-normal text-[#202020] sm:text-[54px]">
+                Invoice Portal
+              </h1>
+              <h2 className="mt-4 text-lg font-light leading-7 text-[#4e4e4e]">
                 Create and customize your invoice with a premium, minimal workflow.
               </h2>
             </div>
-            <div className="md:w-1/3 flex justify-start md:justify-end items-center">
-              <Button variant="flat" color="success" className="workspace-primary-btn" onPress={() => {
+            <div className="flex justify-start md:justify-end">
+              <Button variant="flat" className={workspacePrimaryButtonClass} onPress={() => {
 				  clearSticky()
 				  router.replace('/app/invoice/new')
 			  }}>
-				 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+				 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 transition-transform duration-300 group-hover:rotate-90">
 				  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
 				</svg>
 				  New Invoice
@@ -94,18 +101,25 @@ export default function Layout({ showAiAssistant = false }) {
             </div>
           </div>
 
-          <div className="w-full flex flex-col xl:flex-row gap-4">
-            <div className="xl:w-2/3 w-full min-w-0">
+          <div className="grid w-full grid-cols-1 gap-5 2xl:grid-cols-[minmax(0,1fr)_390px] xl:grid-cols-[minmax(0,1fr)_360px]">
+            <div className="w-full min-w-0">
               <InvoiceInfo />
-              <Card fullWidth radius="sm" className="workspace-card">
-                <CardHeader className="flex gap-3">
+              <Card fullWidth radius="sm" className="border border-[#dbe7f3] bg-white shadow-[0_28px_64px_-48px_rgba(22,54,88,0.46)]">
+                <CardHeader className="flex gap-3 px-5 py-5 sm:px-6">
                   <div className="flex w-full justify-between items-center">
-                    <h2>Invoice Items</h2>
+                    <div>
+                      <p className="text-sm font-semibold uppercase tracking-normal text-[#738496]">
+                        Line items
+                      </p>
+                      <h2 className="mt-1 text-xl font-semibold text-[#24323f]">
+                        Invoice Items
+                      </h2>
+                    </div>
                     <Button
                       onPress={addItems}
                       disableRipple
                       radius="sm"
-                      className="add-invoice-item-btn"
+                      className="group rounded-[8px] border border-[#c9ddec] bg-white px-4 py-2 text-sm font-semibold text-[#28516d] shadow-[0_10px_24px_-22px_rgba(34,74,104,0.65)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#79b8e2] hover:bg-[#f2f9ff] hover:text-[#1f75ad]"
                     >
                       <i className="plus-icon"></i>
                       Add Item
@@ -113,7 +127,7 @@ export default function Layout({ showAiAssistant = false }) {
                   </div>
                 </CardHeader>
                 <Divider />
-                <CardBody>
+                <CardBody className="px-4 py-5 sm:px-5">
                   <div className="px-1 py-1">
                     {data.invoice_items?.length > 0 && (
                       <Reorder.Group
@@ -139,7 +153,7 @@ export default function Layout({ showAiAssistant = false }) {
                   </div>
                 </CardBody>
                 <Divider />
-                <CardFooter>
+                <CardFooter className="bg-[#f8fbfe] px-5 py-5 sm:px-6">
                   <section className="invoice-summary">
                     <div className="summary-row">
                       <span className="label">Subtotal (before tax):</span>
@@ -201,7 +215,7 @@ export default function Layout({ showAiAssistant = false }) {
               </Card>
             </div>
 
-            <div className="xl:w-1/3 w-full min-w-0">
+            <div className="w-full min-w-0">
               <InvoiceTemplate />
               <Actions />
             </div>

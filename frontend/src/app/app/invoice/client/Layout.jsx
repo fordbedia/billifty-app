@@ -8,6 +8,12 @@ import NotFound from "@/app/app/invoice/components/errorPages/NotFound";
 import BSpinner from "@/app/components/Spinner";
 import ConfirmDeleteModal from "@/app/app/invoice/client/modals/ConfirmDeleteModal";
 
+const formPrimaryButtonClass =
+	"group h-auto min-h-[52px] rounded-[8px] bg-[#1d84c6] px-5 py-3 text-base font-semibold tracking-normal text-white shadow-[0_16px_32px_-22px_rgba(29,132,198,0.9)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-[#166fa8] hover:shadow-[0_22px_38px_-24px_rgba(29,132,198,0.95)] focus-visible:ring-2 focus-visible:ring-[#72bee9] focus-visible:ring-offset-2";
+
+const formSecondaryButtonClass =
+	"h-auto min-h-[52px] rounded-[8px] border border-[#c9ddec] bg-white px-5 py-3 text-base font-semibold tracking-normal text-[#28516d] shadow-[0_10px_24px_-22px_rgba(34,74,104,0.65)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[#79b8e2] hover:bg-[#f2f9ff] hover:text-[#1f75ad]";
+
 export default function ClientApp () {
 	const {
 		mode,
@@ -39,24 +45,24 @@ export default function ClientApp () {
 	return (
 		<RootLayout>
 			<ConfirmDeleteModal />
-			 <div className="app app-wrapper outer-bg form-page">
-			 <div className="m-auto max-w-screen-xl py-6 md:px-0 px-5">
+			 <div className="app app-wrapper min-h-screen bg-white form-page">
+			 <div className="mx-auto w-full max-w-[980px] px-5 pb-12 pt-10 sm:px-8 sm:pt-12 lg:pt-16">
           <div className="w-full mb-5">
-						<div className="text-center py-7 form-page-hero">
-							<p className="workspace-eyebrow">Client Directory</p>
-							<h2 className="text-4xl font-bold">Set Up Your Client</h2>
-							<h3 className="text-lg">Keep client records clean and complete so every invoice is ready to send.</h3>
+						<div className="mx-auto max-w-[720px] text-center form-page-hero">
+							<p className="text-sm font-semibold uppercase tracking-normal text-[#4b9cdc]">Client Directory</p>
+							<h2 className="mt-3 text-[40px] font-light leading-tight tracking-normal text-[#202020] sm:text-[54px]">Set Up Your Client</h2>
+							<h3 className="mt-4 text-lg font-light leading-7 text-[#4e4e4e]">Keep client records clean and complete so every invoice is ready to send.</h3>
 						</div>
 
-						 <Card className="mt-4 workspace-card form-card" fullWidth radius="sm">
-                <CardBody>
-									<Form className="w-full px-3 my-4 modern-form">
+						 <Card className="mt-9 border border-[#dbe7f3] bg-white shadow-[0_28px_64px_-48px_rgba(22,54,88,0.46)] form-card" fullWidth radius="sm">
+                <CardBody className="px-5 py-6 sm:px-7">
+									<Form className="w-full modern-form">
 										<div className="w-full">
-											<h2 className="py-7 text-xl font-semibold">Client Information</h2>
+											<h2 className="border-b border-[#e7edf4] pb-4 text-xl font-semibold text-[#24323f]">Client Information</h2>
 
 											{/* Name & Company */}
-											<div className="flex gap-4">
-												<div className="w-1/2">
+											<div className="mt-6 grid gap-4 md:grid-cols-2">
+												<div className="w-full">
 													<Input
 														isRequired
 														name="name"
@@ -68,7 +74,7 @@ export default function ClientApp () {
 														value={data.name}
 													/>
 												</div>
-												<div className="w-1/2">
+												<div className="w-full">
 													<Input
 														name="company"
 														label="Company / organization (legal name)"
@@ -82,8 +88,8 @@ export default function ClientApp () {
 											</div>
 
 											{/* Email & Phone */}
-											<div className="flex gap-4 mt-4">
-												<div className="w-1/2">
+											<div className="mt-4 grid gap-4 md:grid-cols-2">
+												<div className="w-full">
 													<Input
 														isRequired
 														name="email"
@@ -95,7 +101,7 @@ export default function ClientApp () {
 														value={data.email}
 													/>
 												</div>
-												<div className="w-1/2">
+												<div className="w-full">
 													<Input
 														name="phone"
 														label="Phone number"
@@ -109,8 +115,8 @@ export default function ClientApp () {
 											</div>
 
 											{/* Tax ID & License */}
-											<div className="flex gap-4 mt-4">
-												<div className="w-1/2">
+											<div className="mt-4 grid gap-4 md:grid-cols-2">
+												<div className="w-full">
 													<Input
 														name="tax_id"
 														label="Tax ID"
@@ -121,7 +127,7 @@ export default function ClientApp () {
 														value={data.tax_id ?? ''}
 													/>
 												</div>
-												<div className="w-1/2">
+												<div className="w-full">
 													<Input
 														name="license_no"
 														label="Business / license number"
@@ -135,8 +141,8 @@ export default function ClientApp () {
 											</div>
 
 											{/* Address lines */}
-											<div className="flex gap-4 mt-4">
-												<div className="w-1/2">
+											<div className="mt-4 grid gap-4 md:grid-cols-2">
+												<div className="w-full">
 													<Input
 														name="address_line1"
 														label="Address line 1"
@@ -147,7 +153,7 @@ export default function ClientApp () {
 														value={data.address_line1 ?? ''}
 													/>
 												</div>
-												<div className="w-1/2">
+												<div className="w-full">
 													<Input
 														name="address_line2"
 														label="Address line 2"
@@ -161,8 +167,8 @@ export default function ClientApp () {
 											</div>
 
 											{/* City & State */}
-											<div className="flex gap-4 mt-4">
-												<div className="w-1/2">
+											<div className="mt-4 grid gap-4 md:grid-cols-2">
+												<div className="w-full">
 													<Input
 														name="city"
 														label="City"
@@ -172,7 +178,7 @@ export default function ClientApp () {
 														value={data.city ?? ''}
 													/>
 												</div>
-												<div className="w-1/2">
+												<div className="w-full">
 													<Input
 														name="state"
 														label="State / province / region"
@@ -185,8 +191,8 @@ export default function ClientApp () {
 											</div>
 
 											{/* Postal code & Country */}
-											<div className="flex gap-4 mt-4">
-												<div className="w-1/2">
+											<div className="mt-4 grid gap-4 md:grid-cols-2">
+												<div className="w-full">
 													<Input
 														name="postal_code"
 														label="Postal / ZIP code"
@@ -196,7 +202,7 @@ export default function ClientApp () {
 														value={data.postal_code ?? ''}
 													/>
 												</div>
-												<div className="w-1/2">
+												<div className="w-full">
 													<Input
 														name="country"
 														label="Country"
@@ -224,13 +230,13 @@ export default function ClientApp () {
 												)}
 											</div>
 
-											<div className="flex gap-4 py-4 justify-between">
-												<div>
-													<Button className="mr-2" as={Link} href="/app/invoice/client">{mode === 'new' ? 'Cancel' : 'Back'}</Button>
-													<Button className="mr-2" type="button" onPress={save} color="primary" variant="flat">{mode === 'new' ? 'Submit' : 'Save Changes'}</Button>
+											<div className="mt-8 flex flex-col gap-4 border-t border-[#e7edf4] pt-5 sm:flex-row sm:items-center sm:justify-between">
+												<div className="flex flex-col gap-3 sm:flex-row">
+													<Button className={formSecondaryButtonClass} as={Link} href="/app/invoice/client">{mode === 'new' ? 'Cancel' : 'Back'}</Button>
+													<Button className={formPrimaryButtonClass} type="button" onPress={save} variant="flat">{mode === 'new' ? 'Submit' : 'Save Changes'}</Button>
 												</div>
 												<div>
-													{mode === 'edit' && (<Button color="danger" onPress={confirmDeleteModalOnOpen}>
+													{mode === 'edit' && (<Button className="h-auto min-h-[52px] rounded-[8px] px-5 py-3 text-base font-semibold" color="danger" onPress={confirmDeleteModalOnOpen}>
 														<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
 															<path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
 														</svg>
