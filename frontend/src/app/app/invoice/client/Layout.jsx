@@ -46,7 +46,7 @@ export default function ClientApp () {
 		<RootLayout>
 			<ConfirmDeleteModal />
 			 <div className="app app-wrapper min-h-screen bg-white form-page">
-			 <div className="mx-auto w-full max-w-[980px] px-5 pb-12 pt-10 sm:px-8 sm:pt-12 lg:pt-16">
+			 <div className="mx-auto w-full max-w-[1440px] px-5 pb-12 pt-10 sm:px-8 sm:pt-12 lg:pt-16">
           <div className="w-full mb-5">
 						<div className="mx-auto max-w-[720px] text-center form-page-hero">
 							<p className="text-sm font-semibold uppercase tracking-normal text-[#4b9cdc]">Client Directory</p>

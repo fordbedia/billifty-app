@@ -3,6 +3,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import { Card, CardBody, Avatar, Button, Chip } from "@heroui/react";
 import { Camera } from "lucide-react";
+import { DEFAULT_PROFILE_AVATAR } from "@/app/constants/avatar";
 
 export type PlanStatus = "Free" | "Pro" | "Premium";
 
@@ -54,22 +55,22 @@ const PLAN_STYLES: Record<
   },
   Pro: {
     label: "Pro Plan",
-    chipClass: "bg-emerald-50 text-emerald-700 border border-emerald-200",
-    dotClass: "bg-emerald-500",
+    chipClass: "bg-[#eaf7ef] text-[#219653] border border-[#cdeed9]",
+    dotClass: "bg-[#219653]",
   },
   Premium: {
     label: "Premium Plan",
-    chipClass: "bg-violet-50 text-violet-700 border border-violet-200",
-    dotClass: "bg-violet-500",
+    chipClass: "bg-[#edf7ff] text-[#3d86bd] border border-[#cfe3f6]",
+    dotClass: "bg-[#3d86bd]",
   },
 };
 
 export default function UserProfileCard({
-  name = "Ed Bedia",
-  email = "ed.bedia@billifty.com",
+  name = "John Doe",
+  email = "john.doe@billifty.com",
   plan = "Pro",
   avatar = null,
-  avatarUrl = "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=256&q=80",
+  avatarUrl = DEFAULT_PROFILE_AVATAR,
   onPhotoSelected,
   onPhotoSelectError,
   accept = "image/png,image/jpeg,image/webp,image/gif",
@@ -139,9 +140,9 @@ export default function UserProfileCard({
   }, []);
 
   return (
-    <Card className="w-full rounded-2xl border-0 shadow-none">
+    <Card className="w-full rounded-[8px] border-0 bg-[#f8fbfe] shadow-none">
       <CardBody className="p-5">
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
           {/* Hidden file input */}
           <input
             ref={inputRef}
@@ -156,13 +157,16 @@ export default function UserProfileCard({
             <button
               type="button"
               onClick={openFilePicker}
-              className="rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="rounded-full focus:outline-none focus:ring-2 focus:ring-[#72bee9] focus:ring-offset-2"
               aria-label="Open photo upload"
             >
               <Avatar
                 src={effectiveAvatarUrl}
                 name={name}
-                className="w-30 h-30 rounded-full"
+                className="h-[96px] w-[96px] min-w-[96px] overflow-hidden rounded-full text-2xl"
+                classNames={{
+                  img: "h-full w-full rounded-full object-cover",
+                }}
                 isBordered={false}
               />
             </button>
@@ -173,18 +177,18 @@ export default function UserProfileCard({
               size="sm"
               aria-label="Change profile photo"
               onPress={openFilePicker}
-              className="absolute -right-1 -bottom-1 w-7 h-7 min-w-0 bg-white border border-slate-200 shadow-sm"
+              className="absolute -bottom-1 -right-1 h-8 w-8 min-w-0 border border-[#c9ddec] bg-white text-[#28516d] shadow-[0_10px_24px_-18px_rgba(34,74,104,0.65)]"
             >
-              <Camera className="w-4 h-4 text-slate-700" />
+              <Camera className="h-4 w-4" />
             </Button>
           </div>
 
           {/* Text content */}
           <div className="min-w-0 flex-1">
-            <div className="text-xl font-semibold text-slate-900 leading-tight truncate">
+            <div className="truncate text-2xl font-semibold leading-tight text-[#24323f]">
               {name}
             </div>
-            <div className="text-sm text-slate-500 truncate">{email}</div>
+            <div className="mt-1 truncate text-sm font-light text-[#526271]">{email}</div>
 
             <div className="pt-2">
               <Chip
@@ -199,7 +203,7 @@ export default function UserProfileCard({
             </div>
 
             {/* Optional helper text */}
-            <div className="pt-2 text-xs text-slate-400">
+            <div className="pt-3 text-xs font-light text-[#728296]">
               Click the photo to upload (max {maxSizeMb}MB).
             </div>
 

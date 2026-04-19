@@ -9,6 +9,7 @@ import {ComponentType} from "react";
 type MenuListProps = {
     title: string;
     link: string;
+    description: string;
     icon: ComponentType<{ className?: string }>;
 }
 export default function SettingsSidebar() {
@@ -17,18 +18,22 @@ export default function SettingsSidebar() {
     const menuList: MenuListProps[] = [{
         title: "My Profile",
         link: uri.profile,
+        description: "Update your personal details and profile photo.",
         icon: User
     }, {
         title: "Dashboard",
         link: uri.invoices,
+        description: "Review and manage your invoice activity.",
         icon: LayoutDashboard
     }, {
         title: "Business Profile",
         link: uri.business_profile.lists,
+        description: "Manage company details and payment setup.",
         icon: Building2
     }, {
         title: "Clients",
         link: uri.client.clients,
+        description: "Keep client contacts organized for billing.",
         icon: Users
     }]
 
@@ -36,8 +41,8 @@ export default function SettingsSidebar() {
         <Card radius="sm" className="sidebar-card">
             <CardBody>
                 <div className="sidebar-head">
-                    <h2>Menu</h2>
-                    <p>Navigate your account workspace.</p>
+                    <h2>Account Menu</h2>
+                    <p>Switch between your account and billing workspace.</p>
                 </div>
                 <ul className="sidebar-links">
                     {menuList.map((item) => {
@@ -55,6 +60,7 @@ export default function SettingsSidebar() {
                                     </span>
                                     <span>
                                         <strong>{item.title}</strong>
+                                        <small>{item.description}</small>
                                     </span>
                                 </Link>
                             </li>

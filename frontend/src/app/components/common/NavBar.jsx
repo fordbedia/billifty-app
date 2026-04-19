@@ -7,6 +7,8 @@ import {path} from "@/constants/routerPaths";
 import {uri} from "@/app/constants/routePaths";
 import {auth} from "@/app/helpers/auth";
 import {useAuth} from "@/app/providers/AuthContext";
+import {DEFAULT_PROFILE_AVATAR} from "@/app/constants/avatar";
+import { Avatar } from "@heroui/react";
 
 export const BilliftyLogo = () => {
   return (
@@ -29,7 +31,8 @@ export default function App() {
   const session = auth();
   const signedIn = Boolean(session);
   const user = session?.user;
-  const avatarUrl = user?.image_url || user?.avatar || `https://i.pravatar.cc/150?u=${user?.email || "billifty"}`;
+  const avatarUrl = user?.image_url || user?.avatar || DEFAULT_PROFILE_AVATAR;
+  const avatarName = user?.name || user?.email || "Billifty";
 
   const publicLinks = [
     { label: "Features", href: "#features" },
@@ -82,10 +85,15 @@ export default function App() {
                 aria-expanded={isAccountMenuOpen}
                 onClick={() => setIsAccountMenuOpen((open) => !open)}
               >
-                <span
-                  className="billifty-avatar-image"
-                  style={{ backgroundImage: `url("${avatarUrl}")` }}
-                ></span>
+                <Avatar
+                  src={avatarUrl}
+                  name={avatarName}
+                  className="h-[44px] w-[44px] min-w-[44px] overflow-hidden rounded-full text-base"
+                  classNames={{
+                    img: "h-full w-full rounded-full object-cover",
+                  }}
+                  isBordered={false}
+                />
               </button>
 
               {isAccountMenuOpen ? (

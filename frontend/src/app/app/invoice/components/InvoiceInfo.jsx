@@ -65,7 +65,7 @@ export default function InvoiceInfo() {
                         </Select>
                     </div>
                     <div className="md:w-1/2">
-                        Invoice Number<br />
+                        Invoice Number <i>(Eg: INV-00001 or MYCOMPANY-00001)</i> <br />
                         <Input
 							isDisabled={data.status === 'issued'}
                             isRequired
