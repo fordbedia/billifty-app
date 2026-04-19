@@ -49,7 +49,7 @@ export default function InvoiceInfo() {
             <CardBody>
                 <div className="flex flex-col md:flex-row gap-2 py-2 invoice-info-row">
                     <div className="md:w-1/2">
-                        Business Profile
+                        Business Profile <br />
                         <Select
                             className="max-w-xs"
                             label="Select a Business Profile"
@@ -65,7 +65,7 @@ export default function InvoiceInfo() {
                         </Select>
                     </div>
                     <div className="md:w-1/2">
-                        Invoice Number
+                        Invoice Number<br />
                         <Input
 							isDisabled={data.status === 'issued'}
                             isRequired
@@ -83,7 +83,7 @@ export default function InvoiceInfo() {
                 </div>
                 <div className="flex flex-col md:flex-row gap-2 py-2 invoice-info-row">
                      <div className="md:w-1/2">
-                        Issue Date
+                        Issue Date<br />
                         <DatePicker
 						  isDisabled={data.status === 'issued'}
 						  className="max-w-[284px]"
@@ -94,7 +94,7 @@ export default function InvoiceInfo() {
 						/>
                     </div>
                     <div className="md:w-1/2">
-                        Due Date
+                        Due Date<br />
                         <DatePicker
 													isDisabled={data.status === 'issued'}
 													className="max-w-[284px]"
@@ -107,7 +107,7 @@ export default function InvoiceInfo() {
                 </div>
                 <div className="flex flex-col md:flex-row gap-2 py-2 invoice-info-row">
                     <div className="md:w-1/2">
-                        Your Client/Bill To
+                        Your Client/Bill To<br />
                         <Select
 							isDisabled={data.status === 'issued'}
                             className="max-w-xs"
@@ -170,7 +170,7 @@ export default function InvoiceInfo() {
                                   {isTaxable && (
 									<>
 										<br />
-										Enter Shipping Tax Rate (%)
+										Enter Shipping Tax Rate (%)<br />
 										<Input
 										  isRequired={hasShipping && isTaxable}
 										  errorMessage="Enter a tax rate like 8.25 for 8.25%"
@@ -222,7 +222,7 @@ export default function InvoiceInfo() {
 							))}
 						</Select>
 					</div>
-					<div className="md:w-1/2">Note:
+					<div className="md:w-1/2">Note:<br />
 						<Textarea
 							labelPlacement="outside"
 							name="notes"
@@ -238,7 +238,7 @@ export default function InvoiceInfo() {
 
 				{/* 🔹 NEW: Discount Mode + Inputs */}
 				<div className="flex flex-col md:flex-row gap-2 py-2 invoice-info-row">
-					<div className="md:w-1/2">Discount Mode
+					<div className="md:w-1/2">Discount Mode<br />
 						<Select
 							className="max-w-xs"
 							label="Select discount mode"
@@ -260,7 +260,8 @@ export default function InvoiceInfo() {
 						{isAmount && (<div className="md:w-1/2 pl-2">Discount Amount ($)<Input type="number" variant="bordered" radius="sm" value={centsToDollarsStr(data.discount_cents ?? 0)} onValueChange={(val) => onDataChange('discount_cents', dollarsToCents(val))}/></div>)}
 						{isPercent && (<div className="md:w-1/2 pl-2">Discount Percent (%)<Input type="number" variant="bordered" radius="sm" value={String(data.discount_rate ?? 0)} onValueChange={(val) => onDataChange('discount_rate', parseFloat(val) || 0)}/></div>)}
 					</div>
-					<div className="md:w-1/2">Terms:
+					<div className="md:w-1/2">
+						Terms:<br />
 						<Textarea
 							labelPlacement="outside"
 							name="terms"

@@ -126,9 +126,9 @@ function Component() {
 		return (
     <RootLayout isProtected>
       <div className="app app-wrapper min-h-screen bg-white dashboard-page">
-        <div className="mx-auto w-full max-w-[1180px] px-5 pb-12 pt-10 sm:px-8 sm:pt-12 lg:pt-16">
-          <div className="flex flex-col gap-5 md:flex-row md:items-start">
-            <div className="w-full md:w-4/5">
+        <div className="mx-auto w-full max-w-[1440px] px-5 pb-12 pt-10 sm:px-8 lg:px-10 sm:pt-12 lg:pt-16">
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
+            <div className="w-full min-w-0">
               <Card className="mb-5 border border-[#dbe7f3] bg-white shadow-[0_28px_64px_-48px_rgba(22,54,88,0.46)]" fullWidth radius="sm">
                 <CardHeader className="px-5 py-5 sm:px-6">
 									<div className="flex w-full flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -182,7 +182,7 @@ function Component() {
               </Card>
             </div>
 
-						<div className="w-full md:w-1/5">
+						<div className="w-full min-w-0">
            		<DashboardSidebar />
 						</div>
 
