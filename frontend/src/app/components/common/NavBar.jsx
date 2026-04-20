@@ -41,10 +41,11 @@ export default function App() {
   ];
 
   const accountLinks = [
-    { label: "Profile", href: uri.profile },
-    { label: "Dashboard", href: uri.invoices },
-    { label: "New Invoice", href: uri.create_invoice },
-    { label: "Manage Subscription", href: uri.manage_subscriptions },
+		{ label: "Dashboard", href: uri.invoices },
+    // { label: "New Invoice", href: uri.create_invoice },
+		{ label: "Profile", href: uri.profile },
+		{ label: "Account Settings", href: uri.accountSettings },
+		{ label: "Manage Subscription", href: uri.manage_subscriptions },
   ];
 
   useEffect(() => {

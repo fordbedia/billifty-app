@@ -3,7 +3,7 @@
 import {Card, CardBody, Link} from "@heroui/react";
 import {uri} from "@/app/constants/routePaths";
 import {usePathname} from "next/navigation";
-import {Building2, LayoutDashboard, User, Users} from "lucide-react";
+import {Building2, LayoutDashboard, Shield, User, Users} from "lucide-react";
 import {ComponentType} from "react";
 
 type MenuListProps = {
@@ -20,6 +20,11 @@ export default function SettingsSidebar() {
         link: uri.profile,
         description: "Update your personal details and profile photo.",
         icon: User
+    }, {
+        title: "Account Settings",
+        link: "/app/account-settings",
+        description: "Manage security and sensitive account actions.",
+        icon: Shield
     }, {
         title: "Dashboard",
         link: uri.invoices,

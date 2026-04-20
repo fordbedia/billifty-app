@@ -29,6 +29,7 @@ return new class extends Migration
             $table->tinyInteger('is_test')->default(0);
 
             $table->rememberToken();
+            $table->softDeletes();
             $table->timestamps();
 
             $table->foreign('plan_id')->references('id')->on('plans')

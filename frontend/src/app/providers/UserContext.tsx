@@ -27,6 +27,7 @@ type UserInitialState = {
   name: string;
   email: string;
   email_verified_at: string;
+  email_verified_date: string;
   password: string;
   provider: string;
   provider_id: string;
@@ -85,6 +86,7 @@ export function UserProviderInner({ children }: { children: React.ReactNode }) {
     name: "",
     email: "",
     email_verified_at: "",
+    email_verified_date: "",
     password: "",
     provider: "",
     provider_id: "",
@@ -118,7 +120,7 @@ export function UserProviderInner({ children }: { children: React.ReactNode }) {
 		  if (!res?.data) return;
 		  return res.data
 	  },
-	  enabled: !!(pathname === uri.profile),
+	  enabled: pathname === uri.profile || pathname === uri.accountSettings,
   })
 
   const isBlobLike = (v: unknown): v is Blob =>
