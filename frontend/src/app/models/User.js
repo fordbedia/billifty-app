@@ -34,4 +34,12 @@ export default class User extends Model {
 		static async edit(payload) {
 			return await this.axios().post(`/${payload.get('id')}`, payload)
 		}
+
+		static async updatePassword(payload) {
+				return await this.axios().post('change-password', payload)
+		}
+
+		static async resendVerificationEmail() {
+				return await this.axios().post('/email/verification-notification')
+		}
 }

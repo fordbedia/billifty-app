@@ -10,10 +10,10 @@ import BSpinner from "@/app/components/Spinner";
 import {useApp} from "@/app/providers/AppContext";
 
 const formPrimaryButtonClass =
-	"group h-auto min-h-[52px] rounded-[8px] bg-[#1d84c6] px-5 py-3 text-base font-semibold tracking-normal text-white shadow-[0_16px_32px_-22px_rgba(29,132,198,0.9)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-[#166fa8] hover:shadow-[0_22px_38px_-24px_rgba(29,132,198,0.95)] focus-visible:ring-2 focus-visible:ring-[#72bee9] focus-visible:ring-offset-2";
+	"group h-auto min-h-[30px] rounded-[8px] bg-[#1d84c6] px-6 py-2 text-sm font-semibold tracking-normal text-white shadow-[0_16px_32px_-22px_rgba(29,132,198,0.9)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-[#166fa8] hover:shadow-[0_22px_38px_-24px_rgba(29,132,198,0.95)] focus-visible:ring-2 focus-visible:ring-[#72bee9] focus-visible:ring-offset-2";
 
 const formSecondaryButtonClass =
-	"h-auto min-h-[52px] rounded-[8px] border border-[#c9ddec] bg-white px-5 py-3 text-base font-semibold tracking-normal text-[#28516d] shadow-[0_10px_24px_-22px_rgba(34,74,104,0.65)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[#79b8e2] hover:bg-[#f2f9ff] hover:text-[#1f75ad]";
+	"h-auto min-h-[30px] rounded-[8px] border border-[#c9ddec] bg-white px-6 py-2 text-sm font-semibold tracking-normal text-[#28516d] shadow-[0_10px_24px_-22px_rgba(34,74,104,0.65)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[#79b8e2] hover:bg-[#f2f9ff] hover:text-[#1f75ad]";
 
 export default function BusinessProfileAppForm () {
 	const {
@@ -481,7 +481,7 @@ export default function BusinessProfileAppForm () {
 													<Button className={formPrimaryButtonClass} type="button" onPress={save} variant="flat">{mode === 'new' ? 'Submit' : 'Save Changes'}</Button>
 												</div>
 												<div>
-													{mode === 'edit' && businessProfileForm?.id && (<Button className="h-auto min-h-[52px] rounded-[8px] px-5 py-3 text-base font-semibold" color="danger" onPress={onOpenConfirmDeleteModal}>
+													{mode === 'edit' && businessProfileForm?.id && (<Button className="h-auto min-h-[30px] rounded-[8px] px-6 py-2 text-sm font-semibold" color="danger" onPress={onOpenConfirmDeleteModal}>
 														<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
 															<path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
 														</svg>

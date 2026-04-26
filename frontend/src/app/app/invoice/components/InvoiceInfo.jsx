@@ -6,6 +6,7 @@ import {Select, SelectItem, Checkbox} from "@heroui/react";
 import {useInvoice} from "@/app/providers/InvoiceContext";
 import {centsToDollarsStr, dollarsToCents} from "@/app/utils/computeInvoice";
 import {toDateValue, toISO} from "@/app/utils/date";
+import {uri} from "@/app/constants/routePaths";
 
 export default function InvoiceInfo() {
     const {
@@ -50,19 +51,18 @@ export default function InvoiceInfo() {
                 <div className="flex flex-col md:flex-row gap-2 py-2 invoice-info-row">
                     <div className="md:w-1/2">
                         Business Profile <br />
+											{(businessProfileData || []).length > 0 ? (
                         <Select
                             className="max-w-xs"
                             label="Select a Business Profile"
                             selectionMode="single"
-							selectedKeys={
-								data.business_profile_id ? new Set([String(data.business_profile_id)]) : new Set()
-						  	}
-                            onSelectionChange={(keys) => onDataChange('business_profile_id', Array.from(keys)[0] ?? null)}
-                        >
+														selectedKeys={data.business_profile_id ? new Set([String(data.business_profile_id)]) : new Set()}
+                            onSelectionChange={(keys) => onDataChange('business_profile_id', Array.from(keys)[0] ?? null)}>
                             {businessProfileData && Object.keys(businessProfileData).length > 0 && businessProfileData.map(b =>
                                 <SelectItem key={b.id}>{b.name}</SelectItem>
                             )}
                         </Select>
+												) : (<Link href={uri.business_profile.create}>Create Business Profile</Link>)}
                     </div>
                     <div className="md:w-1/2">
                         Invoice Number <i>(Eg: INV-00001 or MYCOMPANY-00001)</i> <br />
@@ -108,19 +108,21 @@ export default function InvoiceInfo() {
                 <div className="flex flex-col md:flex-row gap-2 py-2 invoice-info-row">
                     <div className="md:w-1/2">
                         Your Client/Bill To<br />
+												{(clientData || []).length > 0 ? (
                         <Select
-							isDisabled={data.status === 'issued'}
+														isDisabled={data.status === 'issued'}
                             className="max-w-xs"
                             label="Select a Client"
                             selectionMode="single"
-							selectedKeys={
-								data.client_id ? new Set([String(data.client_id)]) : new Set()
-						  	}
+														selectedKeys={
+															data.client_id ? new Set([String(data.client_id)]) : new Set()
+															}
                             onSelectionChange={( keys) => onDataChange('client_id', Array.from(keys)[0] ?? null)}>
                             {clientData && Object.keys(clientData).length > 0 && clientData.map(b =>
                                 <SelectItem key={b.id}>{b.name}</SelectItem>
                             )}
                         </Select>
+												) : (<Link href={uri.client.create_client}>Create Client Profile</Link>)}
                     </div>
                     <div className="md:w-1/2 content-center">
                         {!hasShipping

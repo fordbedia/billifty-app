@@ -8,7 +8,7 @@ import {useClient} from "@/app/providers/ClientProvider";
 import DashboardSidebar from "@/app/app/component/DashboardSidebar";
 
 const dashboardPrimaryButtonClass =
-	"group h-auto min-h-[54px] rounded-[8px] bg-[#1d84c6] px-5 py-3 text-base font-semibold tracking-normal text-white shadow-[0_16px_32px_-22px_rgba(29,132,198,0.9)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-[#166fa8] hover:shadow-[0_22px_38px_-24px_rgba(29,132,198,0.95)] focus-visible:ring-2 focus-visible:ring-[#72bee9] focus-visible:ring-offset-2";
+	"group h-auto min-h-[30px] rounded-[8px] bg-[#1d84c6] px-6 py-2 text-sm font-semibold tracking-normal text-white shadow-[0_16px_32px_-22px_rgba(29,132,198,0.9)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-[#166fa8] hover:shadow-[0_22px_38px_-24px_rgba(29,132,198,0.95)] focus-visible:ring-2 focus-visible:ring-[#72bee9] focus-visible:ring-offset-2";
 
 function Component() {
 	const {
@@ -49,7 +49,7 @@ function Component() {
 									<div className="flex w-full flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
 										<div className="workspace-title-wrap">
 											<p className="text-sm font-semibold uppercase tracking-normal text-[#4b9cdc]">Client Relationship Hub</p>
-											<h3 className="mt-3 text-[40px] font-light leading-tight tracking-normal text-[#202020] sm:text-[48px]">My Clients</h3>
+											<h3 className="mt-3 text-[30px] font-light leading-tight tracking-normal text-[#202020] sm:text-[38px]">My Clients</h3>
 											<h4 className="mt-3 text-lg font-light leading-7 text-[#4e4e4e]">Store client details and keep billing records organized.</h4>
 											{/*<div className="mt-4">*/}
 											{/*	<DateRangePicker className="max-w-xs" label="Stay duration" />*/}

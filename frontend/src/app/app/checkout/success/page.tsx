@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import {useUser} from "@/app/providers/UserContext";
+import Link from "next/link";
 
 type SuccessCheckout = {
   subscription?: {
@@ -85,7 +87,7 @@ const SETUP_CARDS: SetupCard[] = [
     iconWrapClass: "bg-[#A52CF6] text-white",
     accentClass: "from-[#F7ECFF] to-[#FFF5FD]",
     buttonClass: "bg-[#A52CF6] text-white shadow-[0_16px_32px_-18px_rgba(165,44,246,0.9)]",
-    href: uri.client.clients,
+    href: uri.client.create_client,
   },
   {
     title: "Add Business Profile",
@@ -164,6 +166,7 @@ function formatBillingDate(value?: string | null) {
 }
 
 function Inner() {
+  const {me, reSendVerification, reSendVerificationSuccess, reSendVerificationisPending} = useUser()
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
@@ -221,19 +224,21 @@ function Inner() {
   const subscription = session?.subscription ?? null;
 
   const summary = useMemo(() => {
-    const planCode = subscription?.plan_code ?? confirmation?.plan_code ?? session?.plan?.code ?? "";
-    const billingCycle = subscription?.billing_cycle ?? confirmation?.billing_cycle ?? "";
-    const amount = subscription?.unit_amount;
-    const renewsAt = subscription?.renews_at ?? confirmation?.renews_at ?? null;
+    const planCode = me?.subscription?.plan_code
+    const billingCycle = me?.subscription?.billing_cycle
+    const amount = me?.subscription?.unit_amount;
+    const renewsAt = me?.subscription?.renews_at ?? confirmation?.renews_at ?? null;
 
     return {
-      planLabel: formatPlanName(planCode, session?.plan?.name),
+      planLabel: formatPlanName(planCode),
       cycleLabel: formatCycleName(billingCycle),
       amountLabel: formatAmount(amount),
       amountSuffix: formatAmountSuffix(billingCycle),
       nextBillingDate: formatBillingDate(renewsAt),
     };
-  }, [confirmation, session?.plan?.code, session?.plan?.name, subscription]);
+  }, [confirmation, me?.subscription]);
+
+  const isPlanFree = me?.subscription?.plan_code === 'free';
 
   if (isLoading) {
     return (
@@ -286,7 +291,7 @@ function Inner() {
           Congratulations!
         </h1>
         <p className="mt-2 text-center text-sm font-medium text-slate-500">
-          Your subscription is now active
+            {isPlanFree ? '' : 'Your subscription is now active'}
         </p>
 
         <div className="mt-8 w-full rounded-[24px] border border-[#7C4DFF] bg-white px-4 py-4 shadow-[0_30px_80px_-44px_rgba(17,24,39,0.35)] md:px-5 md:py-5">
@@ -316,7 +321,7 @@ function Inner() {
                       Billing Cycle
                     </p>
                     <p className="text-3xl font-extrabold tracking-[-0.03em] text-slate-900">
-                      {summary.cycleLabel}
+                      {isPlanFree ? '-' : summary.cycleLabel}
                     </p>
                   </div>
                 </div>
@@ -332,9 +337,9 @@ function Inner() {
                       Amount
                     </p>
                     <p className="flex items-end gap-1 text-3xl font-extrabold tracking-[-0.03em] text-slate-900">
-                      <span>{summary.amountLabel}</span>
+                      <span>{isPlanFree ? '-' : summary.amountLabel}</span>
                       <span className="pb-[2px] text-sm font-semibold text-slate-400">
-                        {summary.amountSuffix}
+                        {isPlanFree ? '-' : summary.amountSuffix}
                       </span>
                     </p>
                   </div>
@@ -347,7 +352,7 @@ function Inner() {
                 <Info className="h-4 w-4 text-[#5C4DF6]" strokeWidth={2.5} />
                 <span>Next billing date:</span>
               </div>
-              <p className="text-sm font-bold text-slate-700">{summary.nextBillingDate}</p>
+              <p className="text-sm font-bold text-slate-700">{isPlanFree ? '-' : summary.nextBillingDate}</p>
             </div>
           </div>
         </div>
@@ -360,6 +365,27 @@ function Inner() {
             <p className="mt-2 text-sm font-medium text-slate-500">
               Complete these steps to unlock the full potential of your account
             </p>
+            {!me?.email_verified_at && (
+                <div className="mx-auto mt-4 w-full max-w-[620px] rounded-[18px] border border-[#dceaf6] bg-[#f5faff] px-5 py-4 text-left shadow-[0_14px_34px_-28px_rgba(29,132,198,0.45)]">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e4f1fb] text-[#1d84c6]">
+                      <Info className="h-5 w-5" strokeWidth={2.4} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[15px] font-semibold leading-6 text-[#28516d]">
+                        Verify your email address to start managing your subscription.
+                      </p>
+                      <p className="mt-1 text-sm font-medium leading-6 text-[#5d7890]">
+                        Need another verification link?
+                        <span onClick={() => reSendVerification()} className="ml-1 cursor-pointer font-semibold text-[#1d84c6] transition-colors duration-200 hover:text-[#166fa8]">
+                          {reSendVerificationisPending ? 'Verifying...' : (reSendVerificationSuccess ? 'Verification Sent.' : 'Click here to resend the verification email.')}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+            )}
+
           </div>
 
           <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -390,58 +416,60 @@ function Inner() {
                     {card.description}
                   </p>
 
-                  <Button
+                  <Link
+                      href={card.href}
+                      target="_blank"
+                  ><Button
                     className={cn(
                       "mt-4 h-11 rounded-xl px-5 text-sm font-bold",
                       card.buttonClass,
                     )}
                     endContent={<ArrowRight className="h-4 w-4" strokeWidth={2.5} />}
-                    onPress={() => router.push(card.href)}
                   >
                     {card.action}
-                  </Button>
+                  </Button></Link>
                 </div>
               );
             })}
           </div>
 
-          <div className="mt-4 rounded-[20px] bg-gradient-to-r from-[#5B43F4] via-[#8B3AF4] to-[#F0278E] px-5 py-6 text-center text-white shadow-[0_28px_60px_-32px_rgba(91,67,244,0.8)]">
-            <h3 className="text-[22px] font-extrabold tracking-[-0.03em]">
-              Need Help Getting Started?
-            </h3>
-            <p className="mt-2 text-sm font-medium text-white/85">
-              Our support team is here to assist you every step of the way
-            </p>
+          {/*<div className="mt-4 rounded-[20px] bg-gradient-to-r from-[#5B43F4] via-[#8B3AF4] to-[#F0278E] px-5 py-6 text-center text-white shadow-[0_28px_60px_-32px_rgba(91,67,244,0.8)]">*/}
+          {/*  <h3 className="text-[22px] font-extrabold tracking-[-0.03em]">*/}
+          {/*    Need Help Getting Started?*/}
+          {/*  </h3>*/}
+          {/*  <p className="mt-2 text-sm font-medium text-white/85">*/}
+          {/*    Our support team is here to assist you every step of the way*/}
+          {/*  </p>*/}
 
-            <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
-              <Button
-                className="h-11 rounded-xl bg-white px-5 font-bold text-[#5C4DF6]"
-                startContent={<LifeBuoy className="h-4 w-4" strokeWidth={2.4} />}
-                onPress={() => window.location.assign("mailto:support@billifty.com")}
-              >
-                Contact Support
-              </Button>
-              <Button
-                className="h-11 rounded-xl border border-white/70 bg-transparent px-5 font-bold text-white"
-                startContent={<BookOpen className="h-4 w-4" strokeWidth={2.4} />}
-                variant="bordered"
-                onPress={() => router.push(uri.intro)}
-              >
-                View Documentation
-              </Button>
-            </div>
-          </div>
+          {/*  <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">*/}
+          {/*    <Button*/}
+          {/*      className="h-11 rounded-xl bg-white px-5 font-bold text-[#5C4DF6]"*/}
+          {/*      startContent={<LifeBuoy className="h-4 w-4" strokeWidth={2.4} />}*/}
+          {/*      onPress={() => window.location.assign("mailto:support@billifty.com")}*/}
+          {/*    >*/}
+          {/*      Contact Support*/}
+          {/*    </Button>*/}
+          {/*    <Button*/}
+          {/*      className="h-11 rounded-xl border border-white/70 bg-transparent px-5 font-bold text-white"*/}
+          {/*      startContent={<BookOpen className="h-4 w-4" strokeWidth={2.4} />}*/}
+          {/*      variant="bordered"*/}
+          {/*      onPress={() => router.push(uri.intro)}*/}
+          {/*    >*/}
+          {/*      View Documentation*/}
+          {/*    </Button>*/}
+          {/*  </div>*/}
+          {/*</div>*/}
         </div>
 
-        {error ? (
-          <div className="mt-4 flex w-full items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            <Info className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={2.2} />
-            <p>
-              We showed the latest cached subscription details because the confirmation request returned an
-              error: {error}
-            </p>
-          </div>
-        ) : null}
+        {/*{error ? (*/}
+        {/*  <div className="mt-4 flex w-full items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">*/}
+        {/*    <Info className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={2.2} />*/}
+        {/*    <p>*/}
+        {/*      We showed the latest cached subscription details because the confirmation request returned an*/}
+        {/*      error: {error}*/}
+        {/*    </p>*/}
+        {/*  </div>*/}
+        {/*) : null}*/}
       </div>
     </section>
   );
@@ -449,7 +477,6 @@ function Inner() {
 
 export default function CheckoutSuccessPage() {
   return (
-    <RootLayout>
       <Suspense
         fallback={
           <div className="flex w-full justify-center py-16">
@@ -459,6 +486,5 @@ export default function CheckoutSuccessPage() {
       >
         <Inner />
       </Suspense>
-    </RootLayout>
   );
 }

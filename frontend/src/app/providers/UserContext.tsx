@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, Suspense, useEffect, useState } from "react";
-import {useMutation, UseMutationResult, useQuery, useQueryClient} from "@tanstack/react-query";
+import {useMutation, type UseMutateFunction, UseMutationResult, useQuery, useQueryClient} from "@tanstack/react-query";
 import User from "@/app/models/User";
 import { useRouter, useSearchParams } from "next/navigation";
 import { uri } from "@/app/constants/routePaths";
@@ -10,10 +10,10 @@ import {usePathname} from "next/navigation";
 import {addToast} from "@heroui/react";
 
 type UserProfile = {
-  id: number | null;
-  fname: string;
-  lname: string;
-  avatar?: string;
+  id?: number | null;
+  fname?: string | null;
+  lname?: string | null;
+  avatar?: string | null;
 };
 
 type Plan = {
@@ -22,6 +22,8 @@ type Plan = {
 }
 
 type UserInitialState = {
+  id: number | null;
+  subscription: Record<string, any>;
   fname: string;
   lname: string;
   name: string;
@@ -46,12 +48,15 @@ type UserContextValue = {
   handleChange: (attr: keyof UserInitialState, value: string) => void;
   saveUser: () => void;
   errors: string[] | null;
-  userProfile: UserProfile;
-  setUserProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
+  userProfile?: UserProfile | null;
+  setUserProfile: React.Dispatch<React.SetStateAction<UserProfile | null>>;
   updateUserProfile: UseMutationResult<UserProfile, Error, UpdateProfileInput>; // updateUserProfile returns an object
   me: UserInitialState | null;
   setAvatarFile: React.Dispatch<React.SetStateAction<File | null>>;
   avatarFile: File | null;
+  reSendVerification: UseMutateFunction<unknown, Error, void, unknown>;
+  reSendVerificationSuccess: boolean;
+  reSendVerificationisPending: boolean;
 };
 
 type ToastColor =
@@ -72,6 +77,12 @@ type ToastProps = {
   timeout?: number;
 }
 
+type updatePasswordProp = {
+    current_password: string;
+    password: string;
+    password_confirmation: string;
+}
+
 const UserContext = createContext<UserContextValue | undefined>(undefined);
 
 export function UserProviderInner({ children }: { children: React.ReactNode }) {
@@ -80,7 +91,9 @@ export function UserProviderInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const queryClient = useQueryClient()
 
-  const userInitialState: UserInitialState = {
+
+    const userInitialState: UserInitialState = {
+    id: null,
     fname: "",
     lname: "",
     name: "",
@@ -91,8 +104,15 @@ export function UserProviderInner({ children }: { children: React.ReactNode }) {
     provider: "",
     provider_id: "",
     avatar: "",
-    plan: {code: '', name: ''}
+    plan: {code: '', name: ''},
+    subscription: {},
   };
+
+  const updatePasswordInitialState = {
+      current_password: '',
+      password: '',
+      password_confirmation: '',
+  }
 
   const [hasToast, setHasToast] = useState<ToastProps>({
     title: '',
@@ -105,7 +125,7 @@ export function UserProviderInner({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserInitialState>(userInitialState);
   const [errors, setErrors] = useState<string[] | null>(null);
 
-  const [userProfile, setUserProfile] = useState<UserProfile>({
+  const [userProfile, setUserProfile] = useState<UserProfile | null>({
     id: null,
     fname: "",
     lname: "",
@@ -113,14 +133,19 @@ export function UserProviderInner({ children }: { children: React.ReactNode }) {
   });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
-  const {data: me} = useQuery({
+  const [updatePasswordForm, setUpdatePasswordForm] = useState<updatePasswordProp>({...updatePasswordInitialState})
+
+  const {data: me = null} = useQuery<UserInitialState | null>({
 	  queryKey: ['profile'],
 	  queryFn: async () => {
 		  const res = await User.me()
-		  if (!res?.data) return;
+		  if (!res?.data) return null;
 		  return res.data
 	  },
-	  enabled: pathname === uri.profile || pathname === uri.accountSettings,
+	  enabled:
+      pathname === uri.profile ||
+      pathname === uri.accountSettings ||
+      pathname === uri.checkout_success,
   })
 
   const isBlobLike = (v: unknown): v is Blob =>
@@ -162,10 +187,10 @@ export function UserProviderInner({ children }: { children: React.ReactNode }) {
   useEffect(() => {
 	  if (me) {
 		  setUserProfile({
-			  id: me.id,
-			  fname: me.fname,
-			  lname: me.lname,
-              avatar: me.image_url,
+			  id: me?.id,
+			  fname: me?.fname,
+			  lname: me?.lname,
+              avatar: me?.image_url,
 		  })
 	  }
   }, [me]);
@@ -185,6 +210,14 @@ export function UserProviderInner({ children }: { children: React.ReactNode }) {
       router.push(nextUrl ?? uri.invoices);
     },
   });
+
+  const {
+      mutate: reSendVerification,
+      isSuccess: reSendVerificationSuccess,
+      isPending: reSendVerificationisPending,
+  } = useMutation<unknown, Error, void>({
+      mutationFn: async () => (await User.resendVerificationEmail())?.data
+  })
 
   useEffect(() => {
     if (!userSaveError) return;
@@ -219,17 +252,22 @@ export function UserProviderInner({ children }: { children: React.ReactNode }) {
     }
   }, [hasToast]);
 
+  const {mutateAsync: updatePassword} = useMutation({
+
+  })
+
   const value: UserContextValue = {
-    user,
-    handleChange,
-    saveUser: () => saveUser(),
-    errors,
-    userProfile,
-    setUserProfile,
-    updateUserProfile,
-    me,
-    setAvatarFile,
-    avatarFile,
+      user,
+      handleChange,
+      saveUser: () => saveUser(),
+      errors,
+      userProfile,
+      setUserProfile,
+      updateUserProfile,
+      me,
+      setAvatarFile,
+      avatarFile,
+      reSendVerification, reSendVerificationSuccess, reSendVerificationisPending
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

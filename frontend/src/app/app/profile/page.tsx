@@ -55,7 +55,7 @@ export default function ProfilePage() {
                                     </div>
                                     <form onSubmit={(e) => {
                                         e.preventDefault()
-                                        updateUserProfile.mutate({ userProfile, avatarFile })
+                                        updateUserProfile.mutate({ userProfile: userProfile ?? {}, avatarFile })
                                     }}>
                                         <div className="mt-6 grid w-full gap-4 md:grid-cols-2">
                                             <div className="w-full">
@@ -65,7 +65,7 @@ export default function ProfilePage() {
                                                   labelPlacement="outside"
                                                   name="name"
                                                   placeholder="Enter your first name"
-                                                  value={userProfile?.fname}
+                                                  value={userProfile?.fname ?? ""}
                                                   onValueChange={(v) => setUserProfile((prev) => ({...prev, fname: v}))}
                                                   radius="sm"
                                                 />
@@ -77,7 +77,7 @@ export default function ProfilePage() {
                                                   labelPlacement="outside"
                                                   name="name"
                                                   placeholder="Enter your last name"
-                                                  value={userProfile?.lname}
+                                                  value={userProfile?.lname ?? ""}
                                                   onValueChange={(v) => setUserProfile((prev) => ({...prev, lname: v}))}
                                                   radius="sm"
                                                 />

@@ -597,7 +597,7 @@ export default function ManageSubscriptionPage() {
           {() => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                Confirm {isUpgradeOrDowngrade === "upgrade" ? "Upgrade" : "Downgrade"}
+                  <h2 className="px-5 py-3">Confirm {isUpgradeOrDowngrade === "upgrade" ? "Upgrade" : "Downgrade"}</h2>
               </ModalHeader>
               <ModalBody>
                 <div className="text-sm text-slate-700">
