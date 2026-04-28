@@ -1,6 +1,8 @@
 "use client";
 
-import { Button, Card, CardBody, Input, Switch } from "@heroui/react";
+import {useMemo} from "react";
+import {isAxiosError} from "axios";
+import {Alert, Button, Card, CardBody, Input, Switch} from "@heroui/react";
 import SettingsSidebar from "@/app/app/component/SettingsSidebar";
 import {useUser} from "@/app/providers/UserContext";
 
@@ -105,7 +107,29 @@ function DeviceIcon({ type }: { type: "app" | "sms" }) {
 }
 
 export default function AccountSettings() {
-    const {me, user} = useUser();
+    const {
+        me, user,
+        reSendVerification, reSendVerificationSuccess, reSendVerificationisPending,
+        updatePasswordForm, updatePassword, handlePasswordChangeInput, updatePasswordIsPending, updatePasswordError
+    } = useUser();
+    const isVerified = me?.email_verified_at
+
+    const updatePasswordErrors = useMemo(() => {
+      if (!isAxiosError(updatePasswordError)) {
+        return [];
+      }
+
+      const rawErrors = updatePasswordError.response?.data?.errors;
+
+      if (!rawErrors || typeof rawErrors !== "object") {
+        return [];
+      }
+
+      return Object.values(rawErrors).flat().filter(Boolean);
+    }, [updatePasswordError]);
+
+    console.log('updatePasswordErrors', updatePasswordErrors)
+
   return (
     <div className="app app-wrapper min-h-screen bg-white">
       <div className="mx-auto w-full max-w-[1440px] px-5 pb-12 pt-10 sm:px-8 sm:pt-12 lg:px-10 lg:pt-16">
@@ -132,17 +156,18 @@ export default function AccountSettings() {
                         <h2 className="text-lg font-semibold text-[#202020]">
                           Email Verification
                         </h2>
-                        <span className={(me?.email_verified_at ? " bg-[#eaf7ef] text-[#219653] " : " bg-[#f7eaea] text-[#962121] ") + " rounded-full px-2.5 py-1 text-xs font-semibold"}>
-                          {me?.email_verified_at ? 'Verified' : 'Not Verified'}
+                        <span className={(isVerified ? " bg-[#eaf7ef] text-[#219653] " : " bg-[#f7eaea] text-[#962121] ") + " rounded-full px-2.5 py-1 text-xs font-semibold"}>
+                          {isVerified ? 'Verified' : 'Not Verified'}
                         </span>
                       </div>
                       <p className="mt-1 text-sm font-light text-[#526271]">
-                        Your email address has been verified and is active.
+                          {isVerified ? 'Your email address has been verified and is active.' : 'Your email address has not yet verified.'}
+
                       </p>
                     </div>
-                    <Button className={secondaryButtonClass} disableRipple>
-                      Change Email
-                    </Button>
+                      {!me?.email_verified_at && (<Button onPress={() => reSendVerification()} className={secondaryButtonClass} disabled={reSendVerificationisPending} disableRipple>
+                        {reSendVerificationSuccess ? 'Notification Sent!' : (reSendVerificationisPending ? 'Sending Verification...' : 'Re-send Verification')}
+                    </Button>)}
                   </div>
 
                   <div className="mt-5 flex items-center gap-3 rounded-[8px] border border-[#e6eef6] bg-[#fbfdff] p-3">
@@ -152,7 +177,7 @@ export default function AccountSettings() {
                           {me?.email}
                       </p>
                       <p className="mt-0.5 text-xs font-light text-[#728296]">
-                        Verified {me?.email_verified_date}
+                          {isVerified && ( <>Verified {me?.email_verified_date}</>)}
                       </p>
                     </div>
                   </div>
@@ -170,6 +195,7 @@ export default function AccountSettings() {
                     </p>
                   </div>
 
+
                   <div className="mt-5 grid gap-4">
                     <Input
                       label="Current Password"
@@ -178,6 +204,9 @@ export default function AccountSettings() {
                       type="password"
                       radius="sm"
                       endContent={<EyeIcon />}
+                      name="current_password"
+                      value={updatePasswordForm.current_password}
+                      onChange={(e) => handlePasswordChangeInput(e.target.name, e.target.value)}
                     />
                     <Input
                       label="New Password"
@@ -186,6 +215,9 @@ export default function AccountSettings() {
                       type="password"
                       radius="sm"
                       endContent={<EyeIcon />}
+                      name="new_password"
+                      value={updatePasswordForm.new_password}
+                      onChange={(e) => handlePasswordChangeInput(e.target.name, e.target.value)}
                     />
                     <div className="rounded-[8px] bg-[#f8fbfe] px-4 py-3">
                       <p className="text-xs font-semibold text-[#526271]">
@@ -204,15 +236,28 @@ export default function AccountSettings() {
                       type="password"
                       radius="sm"
                       endContent={<EyeIcon />}
+                      name="password"
+                      value={updatePasswordForm.password}
+                      onChange={(e) => handlePasswordChangeInput(e.target.name, e.target.value)}
                     />
                   </div>
+
+                    {updatePasswordErrors.length > 0 && (
+                      <Alert color="danger" className="mt-7">
+                        <ul className="space-y-1">
+                          {updatePasswordErrors.map((error, index) => (
+                            <li key={`${error}-${index}`}>{error}</li>
+                          ))}
+                        </ul>
+                      </Alert>
+                    )}
 
                   <div className="mt-5 flex justify-end gap-3">
                     <Button className={secondaryButtonClass} disableRipple>
                       Cancel
                     </Button>
-                    <Button className={primaryButtonClass} disableRipple>
-                      Update Password
+                    <Button disabled={updatePasswordIsPending} onPress={() => me?.id != null && updatePassword(me.id)} className={primaryButtonClass} disableRipple>
+                        {updatePasswordIsPending ? 'Updating...' : 'Update Password'}
                     </Button>
                   </div>
                 </CardBody>

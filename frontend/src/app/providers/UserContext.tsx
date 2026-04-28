@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, Suspense, useEffect, useState } from "react";
 import {useMutation, type UseMutateFunction, UseMutationResult, useQuery, useQueryClient} from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 import User from "@/app/models/User";
 import { useRouter, useSearchParams } from "next/navigation";
 import { uri } from "@/app/constants/routePaths";
@@ -23,13 +24,13 @@ type Plan = {
 
 type UserInitialState = {
   id: number | null;
-  subscription: Record<string, any>;
+  subscription: Record<string, any | null>;
   fname: string;
   lname: string;
   name: string;
   email: string;
-  email_verified_at: string;
-  email_verified_date: string;
+  email_verified_at?: string | null;
+  email_verified_date?: string | null;
   password: string;
   provider: string;
   provider_id: string;
@@ -41,6 +42,11 @@ type UserInitialState = {
 type UpdateProfileInput = {
   userProfile: Partial<UserProfile>;
   avatarFile?: File | null;
+};
+
+type ValidationErrorResponse = {
+  message?: string;
+  errors?: Record<string, string[]>;
 };
 
 type UserContextValue = {
@@ -57,6 +63,16 @@ type UserContextValue = {
   reSendVerification: UseMutateFunction<unknown, Error, void, unknown>;
   reSendVerificationSuccess: boolean;
   reSendVerificationisPending: boolean;
+  updatePasswordForm: {
+      new_password: string;
+      current_password: string;
+      password: string;
+  };
+  setUpdatePasswordForm: React.Dispatch<React.SetStateAction<updatePasswordProp>>;
+  updatePassword: UseMutateFunction<unknown, AxiosError<ValidationErrorResponse>, number>;
+  handlePasswordChangeInput: (attr: any, value: string) => void;
+  updatePasswordIsPending: boolean;
+  updatePasswordError: AxiosError<ValidationErrorResponse> | null;
 };
 
 type ToastColor =
@@ -79,8 +95,8 @@ type ToastProps = {
 
 type updatePasswordProp = {
     current_password: string;
+    new_password: string;
     password: string;
-    password_confirmation: string;
 }
 
 const UserContext = createContext<UserContextValue | undefined>(undefined);
@@ -90,6 +106,7 @@ export function UserProviderInner({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const queryClient = useQueryClient()
+  const checkoutSessionId = searchParams.get("session_id");
 
 
     const userInitialState: UserInitialState = {
@@ -109,9 +126,9 @@ export function UserProviderInner({ children }: { children: React.ReactNode }) {
   };
 
   const updatePasswordInitialState = {
+      new_password: '',
       current_password: '',
       password: '',
-      password_confirmation: '',
   }
 
   const [hasToast, setHasToast] = useState<ToastProps>({
@@ -135,18 +152,32 @@ export function UserProviderInner({ children }: { children: React.ReactNode }) {
 
   const [updatePasswordForm, setUpdatePasswordForm] = useState<updatePasswordProp>({...updatePasswordInitialState})
 
-  const {data: me = null} = useQuery<UserInitialState | null>({
-	  queryKey: ['profile'],
-	  queryFn: async () => {
-		  const res = await User.me()
-		  if (!res?.data) return null;
-		  return res.data
-	  },
-	  enabled:
+  const shouldFetchProfile =
       pathname === uri.profile ||
       pathname === uri.accountSettings ||
-      pathname === uri.checkout_success,
-  })
+      pathname === uri.checkout_success
+
+    const {
+      data: me = null,
+      refetch,
+    } = useQuery<UserInitialState | null>({
+      queryKey: ['profile'],
+      queryFn: async () => {
+        const res = await User.me()
+        return res?.data ?? null
+      },
+      enabled: shouldFetchProfile,
+      staleTime: 0,
+      refetchOnMount: 'always',
+      refetchOnWindowFocus: true,
+    })
+
+    useEffect(() => {
+      if (shouldFetchProfile) {
+        queryClient.invalidateQueries({ queryKey: ['profile'] })
+        refetch()
+      }
+    }, [pathname, checkoutSessionId, shouldFetchProfile, queryClient, refetch])
 
   const isBlobLike = (v: unknown): v is Blob =>
     typeof v === "object" && v !== null && v instanceof Blob;
@@ -252,9 +283,26 @@ export function UserProviderInner({ children }: { children: React.ReactNode }) {
     }
   }, [hasToast]);
 
-  const {mutateAsync: updatePassword} = useMutation({
-
+  const {
+      mutateAsync: updatePassword,
+      isPending: updatePasswordIsPending,
+      error: updatePasswordError,
+  } = useMutation<unknown, AxiosError<ValidationErrorResponse>, number>({
+      mutationFn: async (userId) => (await User.updatePassword(userId, updatePasswordForm))?.data,
+      onSuccess: () => {
+          addToast({
+              title: 'Password Updated',
+              description:'Your password has been updated successfully.',
+              color: 'success'
+          });
+          setUpdatePasswordForm({...updatePasswordInitialState})
+      },
   })
+
+  const handlePasswordChangeInput = (attr: any, value: string) => setUpdatePasswordForm((prev) => ({
+        ...prev,
+        [attr]: value
+    }))
 
   const value: UserContextValue = {
       user,
@@ -267,7 +315,8 @@ export function UserProviderInner({ children }: { children: React.ReactNode }) {
       me,
       setAvatarFile,
       avatarFile,
-      reSendVerification, reSendVerificationSuccess, reSendVerificationisPending
+      reSendVerification, reSendVerificationSuccess, reSendVerificationisPending,
+      updatePasswordForm, setUpdatePasswordForm, updatePassword, handlePasswordChangeInput, updatePasswordIsPending, updatePasswordError
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

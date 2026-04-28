@@ -35,8 +35,8 @@ export default class User extends Model {
 			return await this.axios().post(`/${payload.get('id')}`, payload)
 		}
 
-		static async updatePassword(payload) {
-				return await this.axios().post('change-password', payload)
+		static async updatePassword(userId, payload) {
+				return await this.axios().post(`change-password`, payload)
 		}
 
 		static async resendVerificationEmail() {

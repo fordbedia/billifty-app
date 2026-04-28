@@ -25,6 +25,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {useUser} from "@/app/providers/UserContext";
 import Link from "next/link";
+import { useQueryClient } from "@tanstack/react-query";
 
 type SuccessCheckout = {
   subscription?: {
@@ -60,9 +61,9 @@ type SetupCard = {
   href: string;
 };
 
-const DEFAULT_PLAN_NAME = "Professional Plan";
-const DEFAULT_PRICE = "$49.99";
-const DEFAULT_BILLING_DATE = "January 28, 2026";
+const DEFAULT_PLAN_NAME = "-";
+const DEFAULT_PRICE = "-";
+const DEFAULT_BILLING_DATE = "-";
 
 const SETUP_CARDS: SetupCard[] = [
   {
@@ -169,6 +170,7 @@ function Inner() {
   const {me, reSendVerification, reSendVerificationSuccess, reSendVerificationisPending} = useUser()
   const router = useRouter();
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
   const sessionId = searchParams.get("session_id");
 
   const [session, setSession] = useState<SuccessCheckout>(null);
@@ -192,6 +194,10 @@ function Inner() {
 
         setConfirmation(res);
         setSession(user);
+
+        if (user) {
+          queryClient.setQueryData(["profile"], user);
+        }
 
         if (user) {
           window.sessionStorage.setItem("success_checkout", JSON.stringify(user));
@@ -219,15 +225,15 @@ function Inner() {
     };
 
     run();
-  }, [sessionId]);
-
-  const subscription = session?.subscription ?? null;
+  }, [queryClient, sessionId]);
+  const effectiveUser = session ?? me ?? null;
+  const subscription = effectiveUser?.subscription ?? null;
 
   const summary = useMemo(() => {
-    const planCode = me?.subscription?.plan_code
-    const billingCycle = me?.subscription?.billing_cycle
-    const amount = me?.subscription?.unit_amount;
-    const renewsAt = me?.subscription?.renews_at ?? confirmation?.renews_at ?? null;
+    const planCode = effectiveUser?.subscription?.plan_code
+    const billingCycle = effectiveUser?.subscription?.billing_cycle
+    const amount = effectiveUser?.subscription?.unit_amount;
+    const renewsAt = effectiveUser?.subscription?.renews_at ?? confirmation?.renews_at ?? null;
 
     return {
       planLabel: formatPlanName(planCode),
@@ -236,9 +242,9 @@ function Inner() {
       amountSuffix: formatAmountSuffix(billingCycle),
       nextBillingDate: formatBillingDate(renewsAt),
     };
-  }, [confirmation, me?.subscription]);
+  }, [confirmation, effectiveUser?.subscription]);
 
-  const isPlanFree = me?.subscription?.plan_code === 'free';
+  const isPlanFree = effectiveUser?.subscription?.plan_code === 'free';
 
   if (isLoading) {
     return (
@@ -347,13 +353,13 @@ function Inner() {
               </div>
             </div>
 
-            <div className="mt-4 flex items-center justify-between gap-3 rounded-[18px] bg-[#FBFDFF] px-4 py-3 ring-1 ring-slate-100">
-              <div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
-                <Info className="h-4 w-4 text-[#5C4DF6]" strokeWidth={2.5} />
-                <span>Next billing date:</span>
-              </div>
-              <p className="text-sm font-bold text-slate-700">{isPlanFree ? '-' : summary.nextBillingDate}</p>
-            </div>
+            {/*<div className="mt-4 flex items-center justify-between gap-3 rounded-[18px] bg-[#FBFDFF] px-4 py-3 ring-1 ring-slate-100">*/}
+            {/*  <div className="flex items-center gap-2 text-sm font-semibold text-slate-500">*/}
+            {/*    <Info className="h-4 w-4 text-[#5C4DF6]" strokeWidth={2.5} />*/}
+            {/*    <span>Next billing date:</span>*/}
+            {/*  </div>*/}
+            {/*  <p className="text-sm font-bold text-slate-700">{isPlanFree ? '-' : summary.nextBillingDate}</p>*/}
+            {/*</div>*/}
           </div>
         </div>
 

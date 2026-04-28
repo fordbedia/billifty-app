@@ -37,8 +37,12 @@ export default function Layout({ showAiAssistant = false }) {
 		invoiceId,
   } = useInvoice();
   const { planCapabilities } = useApp();
-  const canUseAiAssistant =
-    Boolean(showAiAssistant) && Boolean(planCapabilities?.allowed?.ai_invoice_assistant);
+  const aiAssistantCapability =
+    planCapabilities?.allowed?.ai_invoice_assistant ??
+    planCapabilities?.features?.ai_invoice_assistant ??
+    planCapabilities?.ai_invoice_assistant ??
+    false;
+  const canUseAiAssistant = Boolean(showAiAssistant) && Boolean(aiAssistantCapability);
 
   const currencySymbol = selectedCurrency?.symbol ?? "";
 

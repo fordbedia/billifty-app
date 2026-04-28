@@ -10,7 +10,6 @@ export const PUBLIC_ROUTES: string[] = [
   uri.intro,          // your intro page
   uri.auth,          // login/register
   uri.pricing,       // pricing page
-  uri.checkout_success,
 ];
 
 export const UNSUBSCRIBE_ROUTES_TO_PRICING: string[] = [
@@ -21,7 +20,6 @@ export const UNSUBSCRIBE_ROUTES_TO_PRICING: string[] = [
   uri.manage_subscriptions,
   uri.client.create_client,
   uri.client.clients
-
 ]
 
 /**
@@ -32,6 +30,7 @@ export const UNSUBSCRIBE_ROUTES_TO_PRICING: string[] = [
  */
 export const PROTECTED_ROUTE_PREFIXES: string[] = [
   "/app",            // everything under /app is protected
+  uri.checkout_success,
   // add more if needed: "/dashboard", "/account", ...
 ];
 
