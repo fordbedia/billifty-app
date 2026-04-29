@@ -22,7 +22,9 @@ export default function ConfirmDeleteModal() {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">Archiving Client Data</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">
+								<h2 className="px-6 py-3">Archiving Client Data</h2>
+							</ModalHeader>
               <ModalBody>
                 <p>Are you sure you want to delete?</p>
               </ModalBody>

@@ -21,7 +21,9 @@ export default function ConfirmDelete() {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">Delete Business Profile</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">
+								<h2 className="px-5 py-3">Delete Business Profile</h2>
+							</ModalHeader>
               <ModalBody>
                 Are you sure you want to delete?
               </ModalBody>

@@ -61,7 +61,9 @@ export function AppProvider({ children } : AppProviderProps) {
     queryKey: ['me'],
     queryFn: async () => (await User.me())?.data,
     retry: true,
-    enabled: !!session || pathname === uri.business_profile.lists
+    enabled: !!session || pathname === uri.business_profile.lists,
+    staleTime: 0,
+    refetchOnMount: 'always',
   })
 
   useEffect(() => {

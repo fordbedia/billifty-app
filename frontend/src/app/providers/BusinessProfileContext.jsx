@@ -14,6 +14,7 @@ export const BusinessProfileContext = createContext()
 export function BusinessProfileProvider({ children, id, mode }) {
 	const router = useRouter()
 	const pathname = usePathname()
+	const searchParams = useSearchParams()
 
 	const paymentInfoInitialState = {
 		user_id: '',
@@ -64,6 +65,7 @@ export function BusinessProfileProvider({ children, id, mode }) {
 	const [search, setSearch] = useState(null)
 	const [appliedSearch, setAppliedSearch] = useState("");
 	const [errors, setErrors] = useState(null)
+	const [isRedirectingAfterCreateOrSave, setIsRedirectingAfterCreateOrSave] = useState(false)
 	const {
 		isOpen: isOpenConfirmDeleteModal,
 		onOpen: onOpenConfirmDeleteModal,
@@ -166,10 +168,17 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		},
 		onSuccess: () => {
 			setHasToast({title: 'New business profile has been successfully created!', color: 'success'})
-			queryClient.invalidateQueries({ queryKey: ['me'] })
-			router.replace(uri.business_profile.lists)
+			router.replace(`${uri.business_profile.lists}?refreshMe=1`)
 		}
 	})
+
+	useEffect(() => {
+    if (searchParams.get("refreshMe") === "1") {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+
+      router.replace(uri.business_profile.lists);
+    }
+  }, [searchParams, queryClient, router]);
 
 	useEffect(() => {
 		if (data && Object.keys(data).length > 0) {
@@ -207,6 +216,7 @@ export function BusinessProfileProvider({ children, id, mode }) {
 			return await BusinessProfile.update(id, formData)
 		},
 		onSuccess: () => {
+			setIsRedirectingAfterCreateOrSave(true)
 			setHasToast({title: 'Business profile has been successfully modified!', color: 'success'})
 			router.replace(uri.business_profile.lists)
 		}
@@ -228,6 +238,10 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		onSuccess: () => {
 			setHasToast({title: 'Business profile has been successfully deleted!', color: 'danger'})
 			router.replace(uri.business_profile.lists)
+
+			setTimeout(() => {
+				queryClient.invalidateQueries({ queryKey: ['me'] });
+			}, 0);
 		}
 	})
 
@@ -299,6 +313,7 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		deleteBusinessProfile,
 		isError,
 		isLoading,
+		isRedirectingAfterCreateOrSave,
 	}
 	return <BusinessProfileContext.Provider value={value}>
 		{children}
@@ -308,7 +323,7 @@ export function BusinessProfileProvider({ children, id, mode }) {
 export const useBusinessProfile = () => {
 	const ctx = useContext(BusinessProfileContext)
 	if (!ctx) {
-		throw new Exception('Cannot load BusinessProfileContext')
+		throw new Error('Cannot load BusinessProfileContext')
 	}
 	return ctx
 }

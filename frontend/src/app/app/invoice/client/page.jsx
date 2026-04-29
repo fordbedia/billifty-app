@@ -5,6 +5,7 @@ import {Button, Card, CardBody, CardHeader, Input, Link} from "@heroui/react";
 import RootLayout from "@/app/components/common/RootLayout";
 import TableData from "@/app/components/Table";
 import {useClient} from "@/app/providers/ClientProvider";
+import {useApp} from "@/app/providers/AppContext";
 import DashboardSidebar from "@/app/app/component/DashboardSidebar";
 
 const dashboardPrimaryButtonClass =
@@ -19,6 +20,7 @@ function Component() {
 		handleSearchKeyDown,
 		setSearch
 	} = useClient()
+	const {userData: me} = useApp()
 
 	const column = [
 		{key: 'name', label: 'Business Name'},
@@ -56,11 +58,13 @@ function Component() {
 											{/*</div>*/}
 										</div>
 										<div className="w-full self-start lg:w-auto workspace-actions">
-											<Button as={Link} href={uri.client.create_client} className={dashboardPrimaryButtonClass}>
-												<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 transition-transform duration-300 group-hover:rotate-90">
-													<path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-												</svg>
-												Create New Client</Button>
+											{me?.plan_capabilities?.limits?.max_clients > me?.plan_capabilities?.limits?.['current:clients'] && (
+												<Button as={Link} href={uri.client.create_client} className={dashboardPrimaryButtonClass}>
+													<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 transition-transform duration-300 group-hover:rotate-90">
+														<path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+													</svg>
+													Create New Client</Button>
+												)}
 
 												<div className="mt-4 w-full lg:w-72">
 													<Input

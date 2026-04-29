@@ -76,7 +76,7 @@ export default function ProtectedLayout({ children, isProtected = false }) {
     if (rule) {
       const res = checkLimit(planCapabilities, rule);
       if (res.blocked) {
-        setAllowed(true);
+        setAllowed(false);
         setForbiddenInfo({
           ...res,
           limitKey: rule.limitKey,
@@ -90,20 +90,20 @@ export default function ProtectedLayout({ children, isProtected = false }) {
     setAllowed(true);
   }, [router, pathname, userData, isUserDataLoading, planCapabilities]);
 
-  if (!allowed) {
-    return (
-      <div className="w-full h-screen flex items-center justify-center">
-        <BSpinner />
-      </div>
-    );
-  }
-
   if (forbiddenInfo) {
     return (
       <Forbidden
         message="You have reached the limit for your current plan."
         details={forbiddenInfo}
       />
+    );
+  }
+
+	if (!allowed) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <BSpinner />
+      </div>
     );
   }
 

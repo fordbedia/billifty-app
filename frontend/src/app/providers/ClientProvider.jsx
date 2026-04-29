@@ -2,9 +2,9 @@
 
 import {createContext, useContext, useEffect, useState} from "react";
 import {Exception} from "sass";
-import {useMutation, useQuery} from "@tanstack/react-query";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import Clients from "@/app/models/Clients";
-import {usePathname, useRouter} from "next/navigation";
+import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {uri} from "@/app/constants/routePaths";
 import {addToast, useDisclosure} from "@heroui/react";
 
@@ -12,6 +12,8 @@ export const ClientContext = createContext(null)
 
 export function ClientProvider({ children, mode, id }) {
 	const router = useRouter()
+	const searchParams = useSearchParams()
+	const queryClient = useQueryClient()
 	const initialState = {
 		name: '',
 		company: '',
@@ -76,7 +78,7 @@ export function ClientProvider({ children, mode, id }) {
 		mutationFn: async () => (await Clients.create(data))?.data,
 		onSuccess: () => {
 			setHasToast({title: 'New client has been successfully created!', color: 'success'})
-			router.replace(uri.client.clients)
+			router.replace(`${uri.client.clients}?refreshMe=1`)
 		}
 	})
 
@@ -93,6 +95,8 @@ export function ClientProvider({ children, mode, id }) {
 		onSuccess: () => {
 			setHasToast({title: 'You successfully deleted a client!', color: 'danger'})
 			router.replace(uri.client.clients)
+
+			queryClient.invalidateQueries({ queryKey: ["me"] });
 		}
 	})
 
@@ -106,6 +110,14 @@ export function ClientProvider({ children, mode, id }) {
 				break;
 		}
 	}
+
+	useEffect(() => {
+    if (searchParams.get("refreshMe") === "1") {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+
+      router.replace(uri.client.clients);
+    }
+  }, [searchParams, queryClient, router]);
 
 	useEffect(() => {
 		let e = [];
