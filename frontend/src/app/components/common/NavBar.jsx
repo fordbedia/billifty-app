@@ -7,15 +7,14 @@ import {path} from "@/constants/routerPaths";
 import {uri} from "@/app/constants/routePaths";
 import {auth} from "@/app/helpers/auth";
 import {useAuth} from "@/app/providers/AuthContext";
-import {DEFAULT_PROFILE_AVATAR} from "@/app/constants/avatar";
-import { Avatar } from "@heroui/react";
+import Avatar from '@/app/components/common/includes/Avatar'
 
 export const BilliftyLogo = () => {
   return (
     <Link href={path.lp} className="billifty-logo-link"><Image
         alt="Billifty Logo"
-        width={80}
-        height={80}
+        width={100}
+        height={100}
         priority
         quality={100}
         className="billifty-logo-img"
@@ -31,7 +30,7 @@ export default function App() {
   const session = auth();
   const signedIn = Boolean(session);
   const user = session?.user;
-  const avatarUrl = user?.image_url || user?.avatar || DEFAULT_PROFILE_AVATAR;
+  const avatarUrl = user?.image_url || user?.avatar || null;
   const avatarName = user?.name || user?.email || "Billifty";
 
   const publicLinks = [
@@ -93,7 +92,7 @@ export default function App() {
                   classNames={{
                     img: "h-full w-full rounded-full object-cover",
                   }}
-                  isBordered={false}
+                  isBordered
                 />
               </button>
 

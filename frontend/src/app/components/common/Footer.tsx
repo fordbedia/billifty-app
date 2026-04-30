@@ -10,8 +10,8 @@ export default function Footer() {
                     <Link href="/" className="footer-logo-wrap">
                         <Image
                             alt="Billifty Logo"
-                            width={86}
-                            height={33}
+                            width={100}
+                            height={40}
                             quality={100}
                             src="/images/Billifty-logo-light.png"
                         />
