@@ -1,6 +1,6 @@
 [*.{js,jsx}]
 indent_style = tab
-indent_size = 2
+indent_size = 4
 [.php]
 indent_style = tab
 indent_size = 4

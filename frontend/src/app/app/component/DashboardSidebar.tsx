@@ -31,7 +31,7 @@ export default function DashboardSidebar() {
         <Card radius="sm" className="sidebar-card">
             <CardBody>
                 <div className="sidebar-head">
-                    <h2>Workspace Menu</h2>
+                    <h2>Quick Actions</h2>
                     <p>Switch between your setup pages quickly.</p>
                 </div>
                 <ul className="sidebar-links">

@@ -2,6 +2,7 @@ export const uri = Object.freeze({
 	h: '/',
 	auth: '/auth',
 	intro: '/intro',
+	onboarding: '/app/onboarding',
 	pricing: '/app/invoice/pricing',
 	checkout: '/app/checkout',
 	checkout_success: '/app/checkout/success',
@@ -25,5 +26,5 @@ export const uri = Object.freeze({
 		downloadPdf: (invoiceId) => `/api/v1/invoice/${invoiceId}/pdf/download`
 	},
 	profile: '/app/profile',
-	accountSettings: '/app/account-settings'
+	accountSettings: '/app/account-settings',
 })

@@ -32,6 +32,7 @@ export function Component() {
 		handleChange,
         saveUser,
         errors,
+        saveUserIsPending,
     } = useUser()
 
     return (
@@ -64,6 +65,7 @@ export function Component() {
                                          user={user}
                                          handleChange={handleChange}
                                          save={saveUser}
+                                         saveUserIsPending={saveUserIsPending}
                                      />
                                 </CardBody>
                             </Card>

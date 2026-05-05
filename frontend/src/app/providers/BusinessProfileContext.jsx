@@ -168,7 +168,11 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		},
 		onSuccess: () => {
 			setHasToast({title: 'New business profile has been successfully created!', color: 'success'})
-			router.replace(`${uri.business_profile.lists}?refreshMe=1`)
+			if (searchParams.get('from') === 'onboarding') {
+				router.replace(uri.onboarding)
+			} else {
+				router.replace(`${uri.business_profile.lists}?refreshMe=1`)
+			}
 		}
 	})
 

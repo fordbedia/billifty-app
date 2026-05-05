@@ -1,116 +1,137 @@
 'use client';
 import React, {
-  createContext,
-  type ReactNode,
-  useContext,
-  useMemo,
-  useState,
-  type Dispatch,
-  type SetStateAction,
-  useEffect
+    createContext,
+    type ReactNode,
+    useContext,
+    useMemo,
+    useState,
+    type Dispatch,
+    type SetStateAction,
+    useEffect
 } from 'react';
 import {types} from "sass";
 import Boolean = types.Boolean;
-import {useQuery} from "@tanstack/react-query";
+import {useQuery, useQueryClient} from "@tanstack/react-query";
 import User from "@/app/models/User";
-import { auth } from "@/app/helpers/auth";
+import {auth} from "@/app/helpers/auth";
 import {usePathname} from "next/navigation";
 import {uri} from "@/app/constants/routePaths";
 
 type AppProviderProps = {
-  children: ReactNode
+    children: ReactNode
 }
 
 type Theme = "light" | "dark" | "system";
 
 export interface UserInterface {
-  id: string;
-  name: string;
-  email?: string;
+    id: string;
+    name: string;
+    email?: string;
 }
 
 interface AppContextValue {
-  theme: Theme;
-  setTheme: Dispatch<SetStateAction<Theme>>;
-  user: UserInterface | null;
-  setUser: Dispatch<SetStateAction<UserInterface | null>>;
-  isDarkMode: boolean;
-  selectedTab: string;
-  setSelectedTab: Dispatch<SetStateAction<string>>;
-  userData: Record<string, any>;
-  isUserDataLoading: boolean
-  isErrorUserData: boolean
-  planCapabilities: Record<string, any>
+    theme: Theme;
+    setTheme: Dispatch<SetStateAction<Theme>>;
+    user: UserInterface | null;
+    setUser: Dispatch<SetStateAction<UserInterface | null>>;
+    isDarkMode: boolean;
+    selectedTab: string;
+    setSelectedTab: Dispatch<SetStateAction<string>>;
+    userData: Record<string, any>;
+    isUserDataLoading: boolean
+    isErrorUserData: boolean
+    planCapabilities: Record<string, any>
+}
+
+export type PlanCapabilities = {
+    allowed: Record<string, boolean>;
+    flags: Record<string, boolean | string>;
+    limits: Record<string, number>;
+    not_allowed: Record<string, boolean>;
+    plan: Record<string, number | string>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
 
-export function AppProvider({ children } : AppProviderProps) {
-  const [theme, setTheme] = useState<Theme>('light');
-  const [user, setUser]   = useState<UserInterface | null>(null);
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
-  const [selectedTab, setSelectedTab] = useState<string>('signin')
-  const session = auth()
-  const pathname = usePathname()
-  // SignUp
-  const [password, setPassword] = useState("");
-  const [submitted, setSubmitted] = useState(null);
-  const [errors, setErrors] = useState({});
+export function AppProvider({children}: AppProviderProps) {
+    const [theme, setTheme] = useState<Theme>('light');
+    const [user, setUser] = useState<UserInterface | null>(null);
+    const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+    const [selectedTab, setSelectedTab] = useState<string>('signin')
+    const session = auth()
+    const pathname = usePathname()
+    const queryClient = useQueryClient()
+    // SignUp
+    const [password, setPassword] = useState("");
+    const [submitted, setSubmitted] = useState(null);
+    const [errors, setErrors] = useState({});
 
-  const {data: userData, isLoading: isUserDataLoading, isError: isErrorUserData} = useQuery({
-    queryKey: ['me'],
-    queryFn: async () => (await User.me())?.data,
-    retry: true,
-    enabled: !!session || pathname === uri.business_profile.lists,
-    staleTime: 0,
-    refetchOnMount: 'always',
-  })
+    const {
+        data: userData,
+        isLoading: isUserDataLoading,
+        isError: isErrorUserData,
+        refetch: refetchUserData,
+    } = useQuery({
+        queryKey: ['me'],
+        queryFn: async () => (await User.me())?.data,
+        retry: true,
+        enabled: !!session || pathname === uri.business_profile.lists || pathname === uri.onboarding,
+        staleTime: 0,
+        refetchOnMount: 'always',
+    })
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+    useEffect(() => {
+        if (pathname !== uri.onboarding || !session) return;
 
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+        queryClient.invalidateQueries({queryKey: ['me']});
+        void refetchUserData();
+    }, [pathname, session, queryClient, refetchUserData]);
 
-    // initial
-    // @ts-ignore
-    setIsDarkMode(mq.matches);
+    useEffect(() => {
+        if (typeof window === "undefined") return;
 
-    // we don't use the event; we re-read mq.matches
-    // @ts-ignore
-    const onChange = () => setIsDarkMode(mq.matches);
+        const mq = window.matchMedia("(prefers-color-scheme: dark)");
 
-    // modern API
-    if (typeof mq.addEventListener === "function") {
-      mq.addEventListener("change", onChange);
-      return () => mq.removeEventListener("change", onChange);
-    }
+        // initial
+        // @ts-ignore
+        setIsDarkMode(mq.matches);
 
-    // legacy API (Safari)
-    if (typeof (mq as any).addListener === "function") {
-      (mq as any).addListener(onChange);
-      return () => (mq as any).removeListener(onChange);
-    }
-  }, []);
+        // we don't use the event; we re-read mq.matches
+        // @ts-ignore
+        const onChange = () => setIsDarkMode(mq.matches);
 
-  const planCapabilities = useMemo(() => userData?.plan_capabilities ?? {}, [userData])
+        // modern API
+        if (typeof mq.addEventListener === "function") {
+            mq.addEventListener("change", onChange);
+            return () => mq.removeEventListener("change", onChange);
+        }
 
-  const value = useMemo<AppContextValue>(() => ({
-    theme,
-    setTheme,
-    user,
-    setUser,
-    isDarkMode,
-    selectedTab,
-    setSelectedTab,
-    userData, isUserDataLoading, isErrorUserData, planCapabilities
-  }), [theme, user,isDarkMode, selectedTab, userData, isUserDataLoading, isErrorUserData, planCapabilities]);
-  return <AppContext.Provider value={value}>
-    {children}
-  </AppContext.Provider>;
+        // legacy API (Safari)
+        if (typeof (mq as any).addListener === "function") {
+            (mq as any).addListener(onChange);
+            return () => (mq as any).removeListener(onChange);
+        }
+    }, []);
+
+    const planCapabilities = useMemo(() => userData?.plan_capabilities ?? {}, [userData])
+
+    const value = useMemo<AppContextValue>(() => ({
+        theme,
+        setTheme,
+        user,
+        setUser,
+        isDarkMode,
+        selectedTab,
+        setSelectedTab,
+        userData, isUserDataLoading, isErrorUserData, planCapabilities
+    }), [theme, user, isDarkMode, selectedTab, userData, isUserDataLoading, isErrorUserData, planCapabilities]);
+    return <AppContext.Provider value={value}>
+        {children}
+    </AppContext.Provider>;
 }
 
 export function useApp() {
-  const ctx = useContext(AppContext);
-  if (!ctx) throw new Error('useApp must be used inside <AppProvider>');
-  return ctx;
+    const ctx = useContext(AppContext);
+    if (!ctx) throw new Error('useApp must be used inside <AppProvider>');
+    return ctx;
 }

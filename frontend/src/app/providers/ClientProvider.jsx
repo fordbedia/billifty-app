@@ -78,7 +78,11 @@ export function ClientProvider({ children, mode, id }) {
 		mutationFn: async () => (await Clients.create(data))?.data,
 		onSuccess: () => {
 			setHasToast({title: 'New client has been successfully created!', color: 'success'})
-			router.replace(`${uri.client.clients}?refreshMe=1`)
+			if (searchParams.get('from') === 'onboarding') {
+				router.replace(uri.onboarding)
+			} else {
+				router.replace(`${uri.client.clients}?refreshMe=1`)
+			}
 		}
 	})
 

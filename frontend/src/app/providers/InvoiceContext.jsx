@@ -10,14 +10,14 @@ import React, {
 	useMemo, use
 } from 'react'
 import {
-  useDisclosure
+	useDisclosure
 } from "@heroui/react";
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { useRouter, useSearchParams, useParams, usePathname } from "next/navigation";
+import {useQuery, useQueryClient, useMutation} from '@tanstack/react-query';
+import {useRouter, useSearchParams, useParams, usePathname} from "next/navigation";
 import BusinessProfile from "@/app/models/BusinessProfile";
 import Clients from "@/app/models/Clients";
 import Invoices from "@/app/models/Invoices";
-import { today, getLocalTimeZone } from "@internationalized/date";
+import {today, getLocalTimeZone} from "@internationalized/date";
 import {computeInvoice} from "@/app/utils/computeInvoice";
 import Invoice from "@/app/models/Invoices";
 import Currency from "@/app/models/Currency";
@@ -30,33 +30,33 @@ import {uri} from "@/app/constants/routePaths";
 
 const InvoiceContext = createContext(null)
 
-function InvoiceProviderInner({ children, mode, initialId = null }) {
+function InvoiceProviderInner({children, mode, initialId = null}) {
 	const queryClient = useQueryClient()
 	const router = useRouter();
 	const searchParams = useSearchParams();
-  	const clear = searchParams.get("clear");
+	const clear = searchParams.get("clear");
 	const params = useParams()
 	const pathname = usePathname()
 
-    const tz = getLocalTimeZone();
+	const tz = getLocalTimeZone();
 
-    const issueDateISO = toISO(today(tz));
-		const dueDateISO = null;
+	const issueDateISO = toISO(today(tz));
+	const dueDateISO = null;
 
-    const invoiceItemsInitialState = {
-        position: 1,
-        name: '',
-        description: '',
-        quantity: 1,
-        unit: '',
-        unit_price_cents: 0,
-        line_discount_cents: 0,
-        line_discount_rate: 0,
-        tax_rate: 0,
-        tax_cents: 0,
-        line_total_cents: 0,
-        meta: ''
-    }
+	const invoiceItemsInitialState = {
+		position: 1,
+		name: '',
+		description: '',
+		quantity: 1,
+		unit: '',
+		unit_price_cents: 0,
+		line_discount_cents: 0,
+		line_discount_rate: 0,
+		tax_rate: 0,
+		tax_cents: 0,
+		line_total_cents: 0,
+		meta: ''
+	}
 
 	const makeSortableId = () => {
 		if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -102,7 +102,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		render_snapshot_html: '',
 		meta: '',
 		invoice_items: [],
-    };
+	};
 	const toastInitialState = {
 		title: '',
 		message: '',
@@ -126,7 +126,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	const [exportMessage, setExportMessage] = useState(exportOptionInitialState.payload.message);
 
 	const [toGenerateANdDownload, setToGenerateANdDownload] = useState(false);
-  const [pollCount, setPollCount] = useState(0);
+	const [pollCount, setPollCount] = useState(0);
 	const MAX_PDF_POLL_COUNT = 80; // ~2 minutes at 1.5s interval
 
 	const [selectedCurrency, setSelectedCurrency] = useState({})
@@ -158,14 +158,14 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		}
 	}
 	const [invoicePage, setInvoicePage] = useState(1);
-	const {data: userInvoices } = useQuery({
+	const {data: userInvoices} = useQuery({
 		queryKey: ['user-invoice', invoicePage,
 			hasRange
-        ? {
-            start: dateRange.start.toString(), // e.g. "2025-11-16"
-            end: dateRange.end.toString(),
-          }
-        : null,
+				? {
+					start: dateRange.start.toString(), // e.g. "2025-11-16"
+					end: dateRange.end.toString(),
+				}
+				: null,
 			hasSearch
 				? appliedSearch.trim()
 				: null,
@@ -173,7 +173,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		enabled: pathname === '/app/invoices',
 		queryFn: async () => {
 			const params = {
-					page: invoicePage
+				page: invoicePage
 			}
 			if (hasRange) {
 				params.start_date = dateRange.start?.toString();
@@ -188,19 +188,19 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	})
 
 	const PERSIST_KEYS = new Set([
-	  "business_profile_id","client_id","invoice_template_id","color_scheme_id",
-	  "invoice_number","reference","shipping_address","currency_id",
-	  "issued_on","due_on","paid_at","status","template_slug","template_version",
-	  "theme_json","discount_mode","discount_cents","discount_rate",
-	  "shipping_cents","shipping_tax_rate","notes","terms","meta",
-	  "invoice_items"
+		"business_profile_id", "client_id", "invoice_template_id", "color_scheme_id",
+		"invoice_number", "reference", "shipping_address", "currency_id",
+		"issued_on", "due_on", "paid_at", "status", "template_slug", "template_version",
+		"theme_json", "discount_mode", "discount_cents", "discount_rate",
+		"shipping_cents", "shipping_tax_rate", "notes", "terms", "meta",
+		"invoice_items"
 	]);
 	// totals like subtotal_cents, tax_cents, total_cents, amount_due_cents, shipping_tax_cents are recomputed
 	const pickPersistable = (src) =>
-	  Object.fromEntries(Object.entries(src).filter(([k]) => PERSIST_KEYS.has(k)));
+		Object.fromEntries(Object.entries(src).filter(([k]) => PERSIST_KEYS.has(k)));
 
 	const invoiceId = initialId ?? params.id ?? null;
-	const { isFetchingdata, data: fetchedInvoice, isError: isInvoiceError, isLoading: isLoadingInvoice } = useQuery({
+	const {isFetchingdata, data: fetchedInvoice, isError: isInvoiceError, isLoading: isLoadingInvoice} = useQuery({
 		queryKey: ['invoice', invoiceId],
 		enabled: !!invoiceId && mode !== 'new',
 		queryFn: async () => {
@@ -209,14 +209,26 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		},
 		retry: false,
 		refetchInterval: toGenerateANdDownload ? 1500 : false,
-  	refetchIntervalInBackground: true,
+		refetchIntervalInBackground: true,
 	})
 
 	const {isOpen: isOpenTemplate, onOpen: onOpenTemplate, onOpenChange: onOpenChangeTemplate} = useDisclosure();
 	const {isOpen: isOpenColorScheme, onOpen: onOpenColorScheme, onOpenChange: onOpenChangeColorScheme} = useDisclosure();
-	const {isOpen: isOpenConfirmIssueInvoice, onOpen: onOpenConfirmIssueInvoice, onOpenChange: onOpenChangeConfirmIssueInvoice} = useDisclosure();
-	const {isOpen: isOpenConfirmDeleteModal, onOpen: onOpenConfirmDeleteModal, onOpenChange: onOpenChangeConfirmDeleteModal} = useDisclosure();
-	const { isOpen: isOpenPreviewInvoiceModal, onOpen: onOpenPreviewInvoiceModal, onOpenChange: onOpenChangePreviewInvoiceModal } = useDisclosure();
+	const {
+		isOpen: isOpenConfirmIssueInvoice,
+		onOpen: onOpenConfirmIssueInvoice,
+		onOpenChange: onOpenChangeConfirmIssueInvoice
+	} = useDisclosure();
+	const {
+		isOpen: isOpenConfirmDeleteModal,
+		onOpen: onOpenConfirmDeleteModal,
+		onOpenChange: onOpenChangeConfirmDeleteModal
+	} = useDisclosure();
+	const {
+		isOpen: isOpenPreviewInvoiceModal,
+		onOpen: onOpenPreviewInvoiceModal,
+		onOpenChange: onOpenChangePreviewInvoiceModal
+	} = useDisclosure();
 
 	const shallowEqualNumbers = (a, b, keys) => {
 		return keys.every(k => (a?.[k] ?? null) === (b?.[k] ?? null));
@@ -237,65 +249,68 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		enabled: !!invoiceId || !!(mode === 'edit' || mode === 'new')
 	})
 
-    const {data: clientData} = useQuery({
-        queryKey: ['client'],
-        queryFn: async () => {
-            const c = await Clients.all()
-            if (c.data) {
-                return c.data
-            }
-            return null
-        },
-			retry: false,
-			enabled: !!invoiceId || !!(mode === 'edit' || mode === 'new')
-    })
+	const {data: clientData} = useQuery({
+		queryKey: ['client'],
+		queryFn: async () => {
+			const c = await Clients.all()
+			if (c.data) {
+				return c.data
+			}
+			return null
+		},
+		retry: false,
+		enabled: !!invoiceId || !!(mode === 'edit' || mode === 'new')
+	})
 
-    const {data: generatedInvoiceNum} = useQuery({
-        queryKey: ['auto-invoice-number'],
-        queryFn: async () => (await Invoices.getAutoGeneratedInvoiceNumber())?.data,
-				retry: false,
-				enabled: !!invoiceId || !!(mode === 'edit' || mode === 'new')
-    })
+	const {data: generatedInvoiceNum} = useQuery({
+		queryKey: ['auto-invoice-number'],
+		queryFn: async () => (await Invoices.getAutoGeneratedInvoiceNumber())?.data,
+		retry: false,
+		enabled: !!invoiceId || !!(mode === 'edit' || mode === 'new')
+	})
 
-	const { data: currencies } = useQuery({
+	const {data: currencies} = useQuery({
 		queryKey: ['currencies'],
 		queryFn: async () => (await Currency.getAll())?.data,
 		retry: false,
 		enabled: !!invoiceId || !!(mode === 'edit' || mode === 'new')
 	})
 
-    useEffect(() => {
-        if (generatedInvoiceNum && !data.invoice_number) {
+	useEffect(() => {
+		if (generatedInvoiceNum && !data.invoice_number) {
 			setData((prevState) => ({
 				...prevState,
 				invoice_number: generatedInvoiceNum,
 			}));
 		}
-			// Only set if the fetch invoice is not available
-			if (currencies && Object.keys(currencies).length > 0 && !fetchedInvoice?.currency) {
-				setSelectedCurrency((currencies.filter(f => f.code === 'USD')[0] || currencies[0]))
-			}
-    }, [generatedInvoiceNum, currencies])
+		// Only set if the fetch invoice is not available
+		if (currencies && Object.keys(currencies).length > 0 && !fetchedInvoice?.currency) {
+			setSelectedCurrency((currencies.filter(f => f.code === 'USD')[0] || currencies[0]))
+		}
+	}, [generatedInvoiceNum, currencies])
 
-    const onDataChange = (attr, val) => setData(prev => ({...prev, [attr]: val}))
-    const onInvoiceItemChange = (attr, val) => setData(prev => ({
-        ...prev,
-        invoice_items: [...prev.invoice_items, ]
-    }))
+	const onDataChange = (attr, val) => setData(prev => ({...prev, [attr]: val}))
+	const onInvoiceItemChange = (attr, val) => setData(prev => ({
+		...prev,
+		invoice_items: [...prev.invoice_items,]
+	}))
 
-    const withItemPositions = (items) =>
-        withSortableIds(items).map((item, index) => ({...item, position: index + 1}))
+	const withItemPositions = (items) =>
+		withSortableIds(items).map((item, index) => ({...item, position: index + 1}))
 
-    const addItems = () => setData((prev) => ({
-        ...prev,
-        invoice_items: withItemPositions([...prev.invoice_items, {...invoiceItemsInitialState, _sortable_id: makeSortableId()}])
-    }))
+	const addItems = () => setData((prev) => ({
+		...prev,
+		invoice_items: withItemPositions([...prev.invoice_items, {
+			...invoiceItemsInitialState,
+			_sortable_id: makeSortableId()
+		}])
+	}))
 
-    const updateItems = (index, field, value) => setData((prev) => {
-        const updated = [...prev.invoice_items]
-        updated[index] = {...updated[index], [field]: value}
-        return {...prev, invoice_items: updated}
-    })
+	const updateItems = (index, field, value) => setData((prev) => {
+		const updated = [...prev.invoice_items]
+		updated[index] = {...updated[index], [field]: value}
+		return {...prev, invoice_items: updated}
+	})
 
 	const removeItem = (index) => setData(prev => {
 		const items = [...prev.invoice_items]
@@ -365,7 +380,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	// Start: Send Invoice Logic: PDF Export
 	// ----------------------------------------------------------------------------
 	// Download PDF
-	const { mutate: generatePdf } = useMutation({
+	const {mutate: generatePdf} = useMutation({
 		mutationFn: async () => {
 			setExportOption(prev => ({...prev, status: 'processing'}))
 			return (await Invoices.generate(invoiceId))?.data
@@ -401,7 +416,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			}
 		}
 
-		const blob = new Blob([res.data], { type: "application/pdf" });
+		const blob = new Blob([res.data], {type: "application/pdf"});
 		const url = window.URL.createObjectURL(blob);
 
 		const a = document.createElement("a");
@@ -448,7 +463,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		}
 	}, [fetchedInvoice, toGenerateANdDownload, invoiceId, MAX_PDF_POLL_COUNT]);
 	// Send Copy to my email
-	const { mutate: sendCopyToMyEmail } = useMutation({
+	const {mutate: sendCopyToMyEmail} = useMutation({
 		mutationFn: async () => {
 			setExportOption(prev => ({...prev, status: 'processing'}))
 			return (await Invoice.sendCopyToBusinessProfile(invoiceId, hasCsvReport))?.data
@@ -489,16 +504,16 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	}
 
 	const invoiceComputed = useMemo(
-	  () => computeInvoice(data),
-	  [
-		data.invoice_items,
-		data.discount_mode,
-		data.discount_cents,
-		data.discount_rate,
-		data.tax_rate_bps,
-		data.shipping_cents,
-		data.shipping_tax_rate,
-	  ]
+		() => computeInvoice(data),
+		[
+			data.invoice_items,
+			data.discount_mode,
+			data.discount_cents,
+			data.discount_rate,
+			data.tax_rate_bps,
+			data.shipping_cents,
+			data.shipping_tax_rate,
+		]
 	);
 
 	// ----------------------------------------------------------------------------
@@ -542,7 +557,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 				// ignore corrupted LS
 			}
 		}
-	  // eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 	// Syncs data when fields are updated
 	useEffect(() => {
@@ -557,33 +572,33 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 			return () => clearTimeout(t);
 		}
 	}, [
-	  // Only track fields you actually persist:
-	  data.business_profile_id, data.client_id, data.invoice_template_id, data.color_scheme_id,
-	  data.invoice_number, data.reference, data.shipping_address, data.currency_id,
-	  data.issued_on, data.due_on, data.paid_at, data.status, data.template_slug, data.template_version,
-	  data.theme_json, data.discount_mode, data.discount_cents, data.discount_rate,
-	  data.shipping_cents, data.shipping_tax_rate, data.notes, data.terms, data.meta,
-	  data.invoice_items,
+		// Only track fields you actually persist:
+		data.business_profile_id, data.client_id, data.invoice_template_id, data.color_scheme_id,
+		data.invoice_number, data.reference, data.shipping_address, data.currency_id,
+		data.issued_on, data.due_on, data.paid_at, data.status, data.template_slug, data.template_version,
+		data.theme_json, data.discount_mode, data.discount_cents, data.discount_rate,
+		data.shipping_cents, data.shipping_tax_rate, data.notes, data.terms, data.meta,
+		data.invoice_items,
 	]);
 
 	useEffect(() => {
-	  if (!fetchedInvoice) return;
+		if (!fetchedInvoice) return;
 
-	  // Merge server invoice into local form state
-	  setData((prev) => ({
-		...prev,
-		...fetchedInvoice,
-		invoice_items: withItemPositions([...(fetchedInvoice.items ?? [])]),
-	  }));
+		// Merge server invoice into local form state
+		setData((prev) => ({
+			...prev,
+			...fetchedInvoice,
+			invoice_items: withItemPositions([...(fetchedInvoice.items ?? [])]),
+		}));
 
-	  // Optional: derive flags from fetched invoice once
-	  if (fetchedInvoice.shipping_address || fetchedInvoice.shipping_cents) {
-		setHasShipping(true);
-	  }
+		// Optional: derive flags from fetched invoice once
+		if (fetchedInvoice.shipping_address || fetchedInvoice.shipping_cents) {
+			setHasShipping(true);
+		}
 		const shippingIsTaxable = Boolean(parseInt(fetchedInvoice.shipping_tax_rate))
-	  if (shippingIsTaxable) {
-		setIsTaxable(true);
-	  }
+		if (shippingIsTaxable) {
+			setIsTaxable(true);
+		}
 		if (fetchedInvoice?.currency) {
 			setSelectedCurrency(fetchedInvoice?.currency)
 		}
@@ -624,7 +639,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 					title: 'Invoice was successfully created!',
 					color: 'success'
 				})
-				queryClient.invalidateQueries({ queryKey: ['me'] })
+				queryClient.invalidateQueries({queryKey: ['me']})
 				router.replace(`/app/invoice/${r.data?.id}`)
 			}
 		}
@@ -640,7 +655,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 				setData(prev => ({...prev, status: r?.data?.status}))
 				setHasToast({
 					title: `Invoice was successfully ${r?.data?.action}!`,
-					color: r?.data?.action === 'issued' ? 'secondary' :'success'
+					color: r?.data?.action === 'issued' ? 'secondary' : 'success'
 				})
 			}
 		}
@@ -658,7 +673,7 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	})
 
 	const save = (type, callback = null) => {
-		switch(type) {
+		switch (type) {
 			case 'save_draft':
 				saveDraft(type)
 				break;
@@ -678,8 +693,10 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 	// ----------------------------------------------------------------------------
 	useEffect(() => {
 		if (clear === "true") {
+			setData({...initialState, invoice_number: generatedInvoiceNum})
+			setSelectedTemplate({})
+			setSelectedColorScheme({})
 			window.localStorage.removeItem(STORAGE_KEY)
-
 			setTimeout(() => {
 				window.location.href = '/app/invoice/new';
 			}, 500)
@@ -698,67 +715,67 @@ function InvoiceProviderInner({ children, mode, initialId = null }) {
 		}
 	}, [hasToast])
 
-    const value = {
-			businessProfileData,
-			clientData,
-			generatedInvoiceNum,
-			data,
-			onDataChange,
-			addItems,
-			updateItems,
-			reorderItems,
-			setHasShipping,
-			hasShipping,
-			isTaxable,
-			setIsTaxable,
-			removeItem,
-			save,
-			currencies,
-			setSelectedCurrency,
-			selectedCurrency,
-			isOpenTemplate,
-			loadTemplates,
-			loadThemeSelector,
-			onOpenChangeTemplate,
-			templateCategoryData,
-			templates,
-			setSelectedTemplate,
-			selectedTemplate,
-			colorSchemeData,
-			isOpenColorScheme,
-			onOpenColorScheme,
-			setSelectedColorScheme,
-			selectedColorScheme,
-			onOpenChangeColorScheme,
-			clearSticky,
-			isEmpty,
-			onOpenConfirmIssueInvoice,
-			onOpenChangeConfirmIssueInvoice,
-			isOpenConfirmIssueInvoice,
-			invoiceComputed,
-			invoiceId,
-			router,
-			isInvoiceError,
-			createInvoiceError,
-			userInvoices,
-			updateError,
-			invoicePage,
-			setInvoicePage,
-			handleDateRangeChange,
-			handleSearchKeyDown,
-			setSearch,
-			isLoadingInvoice,
-			isOpenConfirmDeleteModal, onOpenConfirmDeleteModal, onOpenChangeConfirmDeleteModal,
-			deleteInvoice,
-			isOpenPreviewInvoiceModal, onOpenPreviewInvoiceModal, onOpenChangePreviewInvoiceModal,
-			generatePdf,
-			exportOption, setExportOption,
-			sendCopyToMyEmail, exportMessage, setExportMessage, sendToClient, hasCsvReport, setHasCsvReport
-		}
+	const value = {
+		businessProfileData,
+		clientData,
+		generatedInvoiceNum,
+		data,
+		onDataChange,
+		addItems,
+		updateItems,
+		reorderItems,
+		setHasShipping,
+		hasShipping,
+		isTaxable,
+		setIsTaxable,
+		removeItem,
+		save,
+		currencies,
+		setSelectedCurrency,
+		selectedCurrency,
+		isOpenTemplate,
+		loadTemplates,
+		loadThemeSelector,
+		onOpenChangeTemplate,
+		templateCategoryData,
+		templates,
+		setSelectedTemplate,
+		selectedTemplate,
+		colorSchemeData,
+		isOpenColorScheme,
+		onOpenColorScheme,
+		setSelectedColorScheme,
+		selectedColorScheme,
+		onOpenChangeColorScheme,
+		clearSticky,
+		isEmpty,
+		onOpenConfirmIssueInvoice,
+		onOpenChangeConfirmIssueInvoice,
+		isOpenConfirmIssueInvoice,
+		invoiceComputed,
+		invoiceId,
+		router,
+		isInvoiceError,
+		createInvoiceError,
+		userInvoices,
+		updateError,
+		invoicePage,
+		setInvoicePage,
+		handleDateRangeChange,
+		handleSearchKeyDown,
+		setSearch,
+		isLoadingInvoice,
+		isOpenConfirmDeleteModal, onOpenConfirmDeleteModal, onOpenChangeConfirmDeleteModal,
+		deleteInvoice,
+		isOpenPreviewInvoiceModal, onOpenPreviewInvoiceModal, onOpenChangePreviewInvoiceModal,
+		generatePdf,
+		exportOption, setExportOption,
+		sendCopyToMyEmail, exportMessage, setExportMessage, sendToClient, hasCsvReport, setHasCsvReport
+	}
 
-    return <InvoiceContext.Provider value={value}>
-        {children}
-    </InvoiceContext.Provider>
+	return <InvoiceContext.Provider value={value}>
+		{children}
+	</InvoiceContext.Provider>
 }
 
 export function InvoiceProvider({children, initialId, mode}) {
@@ -770,7 +787,7 @@ export function InvoiceProvider({children, initialId, mode}) {
 }
 
 export const useInvoice = () => {
-  const ctx = useContext(InvoiceContext);
-  if (!ctx) throw new Error("useInvoice must be used within InvoiceProvider");
-  return ctx;
+	const ctx = useContext(InvoiceContext);
+	if (!ctx) throw new Error("useInvoice must be used within InvoiceProvider");
+	return ctx;
 };

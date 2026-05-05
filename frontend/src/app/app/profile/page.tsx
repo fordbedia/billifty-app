@@ -245,18 +245,20 @@ export default function ProfilePage() {
                                 </p>
                             </div>
 
-                            <Card className="border border-[#dbe7f3] bg-white shadow-[0_28px_64px_-48px_rgba(22,54,88,0.46)]">
-                                <CardBody className="px-5 py-6 sm:px-6">
-                                    <UserProfileCard
-                                        key={activeAvatar ?? "profile-avatar"}
-                                        name={me?.name}
-                                        email={me?.email}
-                                        plan={me?.plan?.name as PlanStatus}
-                                        avatar={activeAvatar}
-                                        onPhotoSelected={handlePhotoSelected}
-                                    />
-                                </CardBody>
-                            </Card>
+                            {!me?.provider || me?.provider !== 'google' && (
+                                <Card className="border border-[#dbe7f3] bg-white shadow-[0_28px_64px_-48px_rgba(22,54,88,0.46)]">
+                                    <CardBody className="px-5 py-6 sm:px-6">
+                                        <UserProfileCard
+                                            key={activeAvatar ?? "profile-avatar"}
+                                            name={me?.name}
+                                            email={me?.email}
+                                            plan={me?.plan?.name as PlanStatus}
+                                            avatar={activeAvatar}
+                                            onPhotoSelected={handlePhotoSelected}
+                                        />
+                                    </CardBody>
+                                </Card>
+                            )}
 
                             <Card className="mt-5 border border-[#dbe7f3] bg-white shadow-[0_28px_64px_-48px_rgba(22,54,88,0.46)]">
                                 <CardBody className="px-5 py-6 sm:px-7">
