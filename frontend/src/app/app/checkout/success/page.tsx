@@ -1,24 +1,18 @@
 "use client";
 
-import RootLayout from "@/app/components/common/RootLayout";
 import BSpinner from "@/app/components/Spinner";
 import Billing from "@/app/models/Billing";
 import { uri } from "@/app/constants/routePaths";
-import { formattedDate } from "@/app/utils/date";
 import { Button } from "@heroui/react";
 import {
   ArrowRight,
-  BookOpen,
   BriefcaseBusiness,
   CalendarDays,
   Check,
   CircleDollarSign,
   Crown,
   Info,
-  LifeBuoy,
-  type LucideIcon,
   ReceiptText,
-  Settings2,
   Users,
 } from "lucide-react";
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -41,84 +35,8 @@ type SuccessCheckout = {
   } | null;
 } | null;
 
-type CheckoutConfirmation = {
-  plan_code?: string;
-  billing_cycle?: string;
-  renews_at?: string | null;
-  starts_at?: string | null;
-  user?: SuccessCheckout;
-} | null;
-
-type SetupCard = {
-  title: string;
-  description: string;
-  action: string;
-  stepLabel: string;
-  icon: LucideIcon;
-  iconWrapClass: string;
-  accentClass: string;
-  buttonClass: string;
-  href: string;
-};
-
 const DEFAULT_PLAN_NAME = "-";
 const DEFAULT_PRICE = "-";
-const DEFAULT_BILLING_DATE = "-";
-
-const SETUP_CARDS: SetupCard[] = [
-  {
-    title: "Set Up Your Profile",
-    description:
-      "Complete your profile with your business information, contact details, and preferences to personalize your experience.",
-    action: "Start Now",
-    stepLabel: "Step 1",
-    icon: Settings2,
-    iconWrapClass: "bg-[#5C4DF6] text-white",
-    accentClass: "from-[#E9EEFF] to-[#F5F7FF]",
-    buttonClass: "bg-[#5C4DF6] text-white shadow-[0_16px_32px_-18px_rgba(92,77,246,0.9)]",
-    href: uri.profile,
-  },
-  {
-    title: "Add Clients",
-    description:
-      "Import or manually add your client list to start managing relationships and tracking interactions efficiently.",
-    action: "Add Clients",
-    stepLabel: "Step 2",
-    icon: Users,
-    iconWrapClass: "bg-[#A52CF6] text-white",
-    accentClass: "from-[#F7ECFF] to-[#FFF5FD]",
-    buttonClass: "bg-[#A52CF6] text-white shadow-[0_16px_32px_-18px_rgba(165,44,246,0.9)]",
-    href: uri.client.create_client,
-  },
-  {
-    title: "Add Business Profile",
-    description:
-      "Set up your business profile with logo, company details, and payment information for professional invoicing.",
-    action: "Set Up",
-    stepLabel: "Step 3",
-    icon: BriefcaseBusiness,
-    iconWrapClass: "bg-[#F6339A] text-white",
-    accentClass: "from-[#FFEAF5] to-[#FFF4F9]",
-    buttonClass: "bg-[#F6339A] text-white shadow-[0_16px_32px_-18px_rgba(246,51,154,0.85)]",
-    href: uri.business_profile.create,
-  },
-  {
-    title: "Create Your First Invoice",
-    description:
-      "Generate your first professional invoice in minutes and send it to your clients with automated reminders.",
-    action: "Create Invoice",
-    stepLabel: "Step 4",
-    icon: ReceiptText,
-    iconWrapClass: "bg-[#0EA96B] text-white",
-    accentClass: "from-[#E8FFF4] to-[#F2FFFA]",
-    buttonClass: "bg-[#0EA96B] text-white shadow-[0_16px_32px_-18px_rgba(14,169,107,0.85)]",
-    href: uri.create_invoice,
-  },
-];
-
-function cn(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
 
 function normalizeWord(value?: string) {
   if (!value) return "";
@@ -156,16 +74,6 @@ function formatAmountSuffix(billingCycle?: string) {
   return (billingCycle ?? "").trim().toLowerCase() === "yearly" ? "/year" : "/month";
 }
 
-function formatBillingDate(value?: string | null) {
-  if (!value) return DEFAULT_BILLING_DATE;
-
-  try {
-    return formattedDate(value);
-  } catch {
-    return DEFAULT_BILLING_DATE;
-  }
-}
-
 function Inner() {
   const {me, reSendVerification, reSendVerificationSuccess, reSendVerificationisPending} = useUser()
   const router = useRouter();
@@ -174,7 +82,6 @@ function Inner() {
   const sessionId = searchParams.get("session_id");
 
   const [session, setSession] = useState<SuccessCheckout>(null);
-  const [confirmation, setConfirmation] = useState<CheckoutConfirmation>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -192,7 +99,6 @@ function Inner() {
         const res = await Billing.confirmCheckout({ session_id: sessionId });
         const user = res?.user ?? null;
 
-        setConfirmation(res);
         setSession(user);
 
         if (user) {
@@ -233,16 +139,13 @@ function Inner() {
     const planCode = effectiveUser?.subscription?.plan_code
     const billingCycle = effectiveUser?.subscription?.billing_cycle
     const amount = effectiveUser?.subscription?.unit_amount;
-    const renewsAt = effectiveUser?.subscription?.renews_at ?? confirmation?.renews_at ?? null;
-
     return {
       planLabel: formatPlanName(planCode),
       cycleLabel: formatCycleName(billingCycle),
       amountLabel: formatAmount(amount),
       amountSuffix: formatAmountSuffix(billingCycle),
-      nextBillingDate: formatBillingDate(renewsAt),
     };
-  }, [confirmation, effectiveUser?.subscription]);
+  }, [effectiveUser?.subscription]);
 
   const isPlanFree = effectiveUser?.subscription?.plan_code === 'free';
 
@@ -366,10 +269,10 @@ function Inner() {
         <div className="mt-5 w-full rounded-[24px] bg-white p-4 shadow-[0_30px_80px_-44px_rgba(17,24,39,0.28)] ring-1 ring-black/5 md:p-5">
           <div className="px-2 pt-2 text-center">
             <h2 className="text-[22px] font-extrabold tracking-[-0.03em] text-slate-900 sm:text-[40px] md:text-[42px]">
-              Get Started in 4 Easy Steps
+              Continue With Onboarding
             </h2>
             <p className="mt-2 text-sm font-medium text-slate-500">
-              Complete these steps to unlock the full potential of your account
+              Your subscription is active. Finish onboarding to set up your workspace and start invoicing without gaps.
             </p>
             {!me?.email_verified_at && (
                 <div className="mx-auto mt-4 w-full max-w-[620px] rounded-[18px] border border-[#dceaf6] bg-[#f5faff] px-5 py-4 text-left shadow-[0_14px_34px_-28px_rgba(29,132,198,0.45)]">
@@ -394,49 +297,85 @@ function Inner() {
 
           </div>
 
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            {SETUP_CARDS.map((card) => {
-              const Icon = card.icon;
+          <div className="relative mt-6 overflow-hidden rounded-[24px] border border-[#ddd6fe] bg-[linear-gradient(135deg,#f8f5ff_0%,#ffffff_45%,#eef7ff_100%)] p-5 shadow-[0_34px_80px_-48px_rgba(76,29,149,0.35)] md:p-7">
+            <div className="pointer-events-none absolute inset-0">
+              <div className="absolute -right-12 top-0 h-32 w-32 rounded-full bg-[#8b5cf6]/15 blur-3xl" />
+              <div className="absolute bottom-0 left-0 h-28 w-28 rounded-full bg-[#38bdf8]/15 blur-3xl" />
+            </div>
 
-              return (
-                <div
-                  key={card.title}
-                  className={cn(
-                    "rounded-[18px] border border-black/5 bg-gradient-to-br p-4 shadow-[0_22px_44px_-34px_rgba(15,23,42,0.45)]",
-                    card.accentClass,
-                  )}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className={cn("inline-flex h-11 w-11 items-center justify-center rounded-2xl shadow-sm", card.iconWrapClass)}>
-                      <Icon className="h-5 w-5" strokeWidth={2.4} />
+            <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)] lg:items-center">
+              <div>
+                <span className="inline-flex items-center rounded-full border border-white/80 bg-white/80 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#6d28d9] shadow-[0_14px_28px_-22px_rgba(109,40,217,0.55)] backdrop-blur">
+                  Next Step
+                </span>
+                <h3 className="mt-4 text-[28px] font-extrabold leading-tight tracking-[-0.03em] text-slate-900 sm:text-[34px]">
+                  Go to onboarding and complete your setup flow
+                </h3>
+                <p className="mt-3 max-w-[620px] text-sm font-medium leading-7 text-slate-600 sm:text-[15px]">
+                  We recommend continuing straight into onboarding now. It will guide you through the required setup so your business profile, clients, and first invoice are all configured in the right order.
+                </p>
+
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                  <Link href={uri.onboarding}>
+                    <Button
+                      className="h-12 rounded-xl bg-[linear-gradient(135deg,#5C4DF6_0%,#8B3AF4_55%,#F0278E_100%)] px-6 text-sm font-bold text-white shadow-[0_20px_42px_-24px_rgba(92,77,246,0.9)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_28px_54px_-24px_rgba(92,77,246,0.95)]"
+                      endContent={<ArrowRight className="h-4 w-4" strokeWidth={2.5} />}
+                    >
+                      Start Onboarding
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="bordered"
+                    className="h-12 rounded-xl border-[#d7def0] bg-white/80 px-6 text-sm font-semibold text-slate-700 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#bfd4ec] hover:bg-[#f8fbff]"
+                    onPress={() => router.push(uri.invoices)}
+                  >
+                    Go to Dashboard
+                  </Button>
+                </div>
+              </div>
+
+              <div className="relative rounded-[22px] border border-white/80 bg-white/75 p-4 shadow-[0_20px_50px_-34px_rgba(15,23,42,0.35)] backdrop-blur">
+                <div className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#ede9fe] text-[#6d28d9] shadow-[0_12px_28px_-18px_rgba(109,40,217,0.7)]">
+                  <ArrowRight className="h-5 w-5 animate-pulse" strokeWidth={2.6} />
+                </div>
+
+                <p className="text-[12px] font-extrabold uppercase tracking-[0.18em] text-slate-400">
+                  Onboarding Includes
+                </p>
+
+                <div className="mt-4 space-y-3">
+                  <div className="flex items-start gap-3 rounded-[16px] border border-[#ede9fe] bg-[#faf7ff] p-3 transition-transform duration-300 hover:-translate-y-0.5">
+                    <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#5C4DF6] text-white shadow-[0_16px_32px_-20px_rgba(92,77,246,0.95)]">
+                      <BriefcaseBusiness className="h-5 w-5" strokeWidth={2.4} />
                     </div>
-                    <span className="rounded-full bg-white/75 px-2.5 py-1 text-[11px] font-bold text-[#7C3AED] ring-1 ring-white/80">
-                      {card.stepLabel}
-                    </span>
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">Business profile setup</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-600">Add company details and payment information.</p>
+                    </div>
                   </div>
 
-                  <h3 className="mt-3 text-[22px] font-extrabold leading-tight tracking-[-0.03em] text-slate-900">
-                    {card.title}
-                  </h3>
-                  <p className="mt-2 min-h-24 text-sm font-medium leading-6 text-slate-600">
-                    {card.description}
-                  </p>
+                  <div className="flex items-start gap-3 rounded-[16px] border border-[#f3e8ff] bg-[#fcf8ff] p-3 transition-transform duration-300 hover:-translate-y-0.5">
+                    <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#A52CF6] text-white shadow-[0_16px_32px_-20px_rgba(165,44,246,0.95)]">
+                      <Users className="h-5 w-5" strokeWidth={2.4} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">Client onboarding</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-600">Create your client list before sending invoices.</p>
+                    </div>
+                  </div>
 
-                  <Link
-                      href={card.href}
-                      target="_blank"
-                  ><Button
-                    className={cn(
-                      "mt-4 h-11 rounded-xl px-5 text-sm font-bold",
-                      card.buttonClass,
-                    )}
-                    endContent={<ArrowRight className="h-4 w-4" strokeWidth={2.5} />}
-                  >
-                    {card.action}
-                  </Button></Link>
+                  <div className="flex items-start gap-3 rounded-[16px] border border-[#dcfce7] bg-[#f2fff8] p-3 transition-transform duration-300 hover:-translate-y-0.5">
+                    <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#0EA96B] text-white shadow-[0_16px_32px_-20px_rgba(14,169,107,0.95)]">
+                      <ReceiptText className="h-5 w-5" strokeWidth={2.4} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">First invoice walkthrough</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-600">Finish setup and move directly into invoicing.</p>
+                    </div>
+                  </div>
                 </div>
-              );
-            })}
+              </div>
+            </div>
           </div>
 
           {/*<div className="mt-4 rounded-[20px] bg-gradient-to-r from-[#5B43F4] via-[#8B3AF4] to-[#F0278E] px-5 py-6 text-center text-white shadow-[0_28px_60px_-32px_rgba(91,67,244,0.8)]">*/}

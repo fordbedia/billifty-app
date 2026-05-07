@@ -82,7 +82,9 @@ export default function ProtectedLayout({children, isProtected = false}) {
 			pathname !== uri.onboarding &&
 			pathname !== uri.business_profile.create &&
 			pathname !== uri.client.create_client &&
-			pathname !== uri.create_invoice
+			pathname !== uri.create_invoice &&
+			pathname !== uri.checkout_success &&
+			pathname !== uri.h
 		) {
 			router.replace(uri.onboarding);
 			return;
