@@ -449,12 +449,12 @@ export default function BusinessProfileAppForm () {
 												</div>
 												<div className="w-full">
 													<Input
-														name="stripe_payment_link"
-														label="Stripe Payment Link"
-														description="Paste your Stripe Payment Link or Checkout URL."
-														placeholder="https://buy.stripe.com/..."
-														onValueChange={(value) => handleFormChange('pi', 'stripe_payment_link', value)}
-														value={paymentInfoForm.stripe_payment_link ?? ''}
+														name="stripe_account_id"
+														label="Stripe Account ID"
+														description="Paste your Stripe Account ID."
+														placeholder=""
+														onValueChange={(value) => handleFormChange('pi', 'stripe_account_id', value)}
+														value={paymentInfoForm.stripe_account_id ?? ''}
 													/>
 												</div>
 											</div>

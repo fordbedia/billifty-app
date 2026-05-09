@@ -27,6 +27,7 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		swift_code: '',
 		paypal_email: '',
 		cash_app: '',
+		stripe_account_id: '',
 		notes: '',
 		is_test: '',
 		created_at: '',
