@@ -1,29 +1,36 @@
-# docker/nginx/conf.d/prod-https.conf
+# docker/nginx/conf.d/prod-http.conf
 server {
   listen 80;
-  server_name billifty.com www.billifty.com;
-  resolver 127.0.0.11 ipv6=off valid=30s;
-
-  location ^~ /.well-known/acme-challenge/ {
-    root /var/www/certbot;
-    allow all;
-  }
-
-  location / { return 301 https://$host$request_uri; }
-}
-
-server {
-  listen 443 ssl http2;
   server_name billifty.com www.billifty.com;
   resolver 127.0.0.11 ipv6=off valid=30s;
   set $backend_upstream backend:9000;
   set $frontend_upstream frontend:3000;
 
-  ssl_certificate     /etc/letsencrypt/live/billifty.com/fullchain.pem;
-  ssl_certificate_key /etc/letsencrypt/live/billifty.com/privkey.pem;
+  # --- ACME challenge for issuing certs later
+  location ^~ /.well-known/acme-challenge/ {
+    root /var/www/certbot;
+    allow all;
+  }
 
-  # Laravel API
+  # === Force ALL /api/* into Laravel front controller (php-fpm) ===
   location ^~ /api/ {
+    include        /etc/nginx/fastcgi_params;
+    fastcgi_pass   $backend_upstream;
+
+    # Always execute Laravel's front controller
+    fastcgi_param  SCRIPT_FILENAME  /var/www/html/public/index.php;
+
+    # Preserve original path & query for Laravel
+    fastcgi_param  PATH_INFO        $uri;
+    fastcgi_param  REQUEST_URI      $request_uri;
+    fastcgi_param  QUERY_STRING     $query_string;
+    fastcgi_param  DOCUMENT_ROOT    /var/www/html/public;
+    fastcgi_param  SCRIPT_NAME      /index.php;
+    fastcgi_index  index.php;
+  }
+
+  # === /preview/invoice/* -> Laravel (invoice preview)
+  location ^~ /preview/invoice/ {
     include        /etc/nginx/fastcgi_params;
     fastcgi_pass   $backend_upstream;
     fastcgi_param  SCRIPT_FILENAME  /var/www/html/public/index.php;
@@ -35,13 +42,60 @@ server {
     fastcgi_index  index.php;
   }
 
-  # Next.js
+  location ^~ /pay/ {
+    include        /etc/nginx/fastcgi_params;
+    fastcgi_pass   $backend_upstream;
+    fastcgi_param  SCRIPT_FILENAME  /var/www/html/public/index.php;
+    fastcgi_param  PATH_INFO        $uri;
+    fastcgi_param  REQUEST_URI      $request_uri;
+    fastcgi_param  QUERY_STRING     $query_string;
+    fastcgi_param  DOCUMENT_ROOT    /var/www/html/public;
+    fastcgi_param  SCRIPT_NAME      /index.php;
+    fastcgi_index  index.php;
+  }
+
+  # === /email/verify/* -> Laravel (signed verification links)
+  location ^~ /email/verify/ {
+    include        /etc/nginx/fastcgi_params;
+    fastcgi_pass   $backend_upstream;
+    fastcgi_param  SCRIPT_FILENAME  /var/www/html/public/index.php;
+    fastcgi_param  PATH_INFO        $uri;
+    fastcgi_param  REQUEST_URI      $request_uri;
+    fastcgi_param  QUERY_STRING     $query_string;
+    fastcgi_param  DOCUMENT_ROOT    /var/www/html/public;
+    fastcgi_param  SCRIPT_NAME      /index.php;
+    fastcgi_index  index.php;
+  }
+
+  # Laravel dev PDF routes
+  location ^~ /dev/ {
+    include        /etc/nginx/fastcgi_params;
+    fastcgi_pass   $backend_upstream;
+    fastcgi_param  SCRIPT_FILENAME  /var/www/html/public/index.php;
+    fastcgi_param  PATH_INFO        $uri;
+    fastcgi_param  REQUEST_URI      $request_uri;
+    fastcgi_param  QUERY_STRING     $query_string;
+  }
+
+  location /storage/ {
+    alias /var/www/html/storage/app/public/;
+    access_log off;
+    expires 1y;
+  }
+
+  location /profile_images/ {
+  alias /var/www/html/storage/app/public/profile_images/;
+  access_log off;
+  expires 1y;
+}
+
+  # --- Everything else -> Next.js (production build served by next start)
   location / {
     proxy_pass http://$frontend_upstream;
     proxy_set_header Host              $host;
     proxy_set_header X-Real-IP         $remote_addr;
     proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto https;
+    proxy_set_header X-Forwarded-Proto http;
     proxy_read_timeout 120s;
   }
 }
