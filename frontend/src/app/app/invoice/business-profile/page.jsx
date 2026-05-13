@@ -26,8 +26,17 @@ function Component () {
 	const column = [
 		{key: 'name', label: 'Business Name'},
 		{key: 'email', label: 'Email'},
-		{key: 'payment_information.payment_method', label: 'Payment Method'}
+		{key: 'payment_informations.payment_method', label: 'Payment Method'}
 	]
+
+	const paymentMethodLabels = {
+		bank_transfer: 'Bank Transfer',
+		paypal: 'PayPal',
+		stripe: 'Stripe',
+		cash_app: 'Cash App',
+	};
+
+	const getPaymentMethodLabel = (method) => paymentMethodLabels[method] ?? method ?? '—';
 
 	const renderCell = (item, columnKey) => {
 		switch (columnKey) {
@@ -36,18 +45,14 @@ function Component () {
 					<Link href={`/app/invoice/business-profile/${item.id}`}>{item.name}</Link>
 				)
 
-			case 'payment_information.payment_method':
-				switch(item.payment_information.payment_method){
-					case 'bank_transfer':
-						return 'Bank Transfer'
-					case 'paypal':
-						return 'PayPal';
-					case 'stripe':
-						return 'Stripe'
-					case 'cash_app':
-						return 'Cash App'
+			case 'payment_informations.payment_method':
+				if (Array.isArray(item.payment_informations) && item.payment_informations.length > 0) {
+					return item.payment_informations
+						.map((paymentInfo) => getPaymentMethodLabel(paymentInfo.payment_method))
+						.join(', ');
 				}
-				break;
+
+				return '—';
 		  default:
 				return item[columnKey] ?? "—";
 			}

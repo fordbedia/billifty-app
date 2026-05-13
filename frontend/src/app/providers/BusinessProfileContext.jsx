@@ -19,6 +19,8 @@ export function BusinessProfileProvider({ children, id, mode }) {
 	const paymentInfoInitialState = {
 		user_id: '',
 		payment_method: '',
+		payment_methods: [],
+		payment_information_ids: {},
 		bank_name: '',
 		account_name: '',
 		account_number: '',
@@ -149,21 +151,106 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		{key: 'cash_app', label: 'Cash App'}
 	];
 
+	const normalizePaymentMethodKey = (method) => {
+		if (!method) {
+			return '';
+		}
+
+		const value = String(method).trim().toLowerCase();
+		const labels = {
+			'bank transfer': 'bank_transfer',
+			paypal: 'paypal',
+			stripe: 'stripe',
+			'cash app': 'cash_app',
+		};
+
+		return labels[value] ?? value;
+	}
+
+	const normalizePaymentInfos = (profileData) => {
+		const paymentInformations = Array.isArray(profileData?.payment_informations) && profileData.payment_informations.length > 0
+			? profileData.payment_informations
+			: [];
+
+		const nextPaymentInfo = {...paymentInfoInitialState};
+		const selectedMethods = [];
+		const paymentInfoIds = {};
+
+		paymentInformations.forEach((paymentInfo) => {
+			const method = normalizePaymentMethodKey(paymentInfo?.payment_method);
+
+			if (!method) {
+				return;
+			}
+
+			selectedMethods.push(method);
+
+			if (paymentInfo?.id) {
+				paymentInfoIds[method] = paymentInfo.id;
+			}
+
+			Object.entries(paymentInfo).forEach(([key, value]) => {
+				if (value !== undefined && value !== null && key in nextPaymentInfo) {
+					nextPaymentInfo[key] = value;
+				}
+			});
+		});
+
+		const uniqueMethods = [...new Set(selectedMethods)];
+
+		return {
+			...nextPaymentInfo,
+			payment_methods: uniqueMethods,
+			payment_method: uniqueMethods[0] ?? '',
+			payment_information_ids: paymentInfoIds,
+		};
+	}
+
+	const handlePaymentMethodsChange = (methods) => {
+		const selectedMethods = [...new Set((methods ?? []).map(normalizePaymentMethodKey).filter(Boolean))];
+
+		setPaymentInfoForm((prev) => ({
+			...prev,
+			payment_methods: selectedMethods,
+			payment_method: selectedMethods[0] ?? '',
+		}));
+	}
+
+	const appendBusinessProfileFormData = (formData) => {
+		Object.entries(businessProfileForm).forEach(([key, val]) => {
+			if (val === undefined || val === null || Array.isArray(val)) {
+				return;
+			}
+
+			if (typeof val === 'object' && !(typeof File !== 'undefined' && val instanceof File)) {
+				return;
+			}
+
+			formData.append(key, val)
+		})
+	}
+
+	const appendPaymentInformationFormData = (formData) => {
+		Object.entries(paymentInfoForm).forEach(([key, val]) => {
+			if (val === undefined || val === null) {
+				return;
+			}
+
+			if (Array.isArray(val) || (typeof val === 'object' && !(typeof File !== 'undefined' && val instanceof File))) {
+				formData.append(`paymentInfo[${key}]`, JSON.stringify(val));
+				return;
+			}
+
+			formData.append(`paymentInfo[${key}]`, val);
+		})
+	}
+
 	const {mutate: submitForm, error: errorSubmit} = useMutation({
 		mutationFn: async () => {
 			const formData = new FormData();
-			// Business Profile
-			Object.entries(businessProfileForm).forEach(([key, val]) => {
-				if (val !== undefined && val !== null) {
-					formData.append(key, val)
-				}
-			})
-			// Payment Info
-			Object.entries(paymentInfoForm).forEach(([key, val]) => {
-				if (val !== undefined && val !== null) {
-					formData.append(`paymentInfo[${key}]`, val);
-				}
-			})
+
+			appendBusinessProfileFormData(formData)
+			appendPaymentInformationFormData(formData)
 
 			return await BusinessProfile.create(formData)
 		},
@@ -187,12 +274,11 @@ export function BusinessProfileProvider({ children, id, mode }) {
 
 	useEffect(() => {
 		if (data && Object.keys(data).length > 0) {
-			const paymentInfo = {...data.payment_information}
 			const bp = { ...data };
-			delete bp.payment_information
+			delete bp.payment_informations
 
 			setBusinessProfileForm(bp)
-			setPaymentInfoForm(paymentInfo)
+			setPaymentInfoForm(normalizePaymentInfos(data))
 
 			if (bp.logo_path) {
 				console.log('sdfdf', `/storage/${bp.logo_path}`)
@@ -207,16 +293,8 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		mutationFn: async () => {
 			const formData = new FormData()
 
-			Object.entries(businessProfileForm).forEach(([k, v]) => {
-				if (v !== undefined && v !== null) {
-					formData.append(k, v)
-				}
-			})
-			Object.entries(paymentInfoForm).forEach(([key, val]) => {
-				if (val !== undefined && val !== null) {
-					formData.append(`paymentInfo[${key}]`, val);
-				}
-			})
+			appendBusinessProfileFormData(formData)
+			appendPaymentInformationFormData(formData)
 
 			return await BusinessProfile.update(id, formData)
 		},
@@ -301,6 +379,7 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		inputRef,
 		paymentMethods,
 		handleFormChange,
+		handlePaymentMethodsChange,
 		businessProfileForm,
 		paymentInfoForm,
 		submitForm,

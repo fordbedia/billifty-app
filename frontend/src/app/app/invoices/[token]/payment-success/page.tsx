@@ -6,6 +6,7 @@ import Billing from "@/app/models/Billing";
 import {formattedDate} from "@/app/utils/date";
 import {useParams} from 'next/navigation';
 import {formatMoney} from "@/app/utils/money";
+import {uri} from "@/app/constants/routePaths";
 
 export default function PaymentSuccess() {
     const params = useParams()
@@ -97,7 +98,7 @@ export default function PaymentSuccess() {
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-1">
                         <a
                             className="flex min-h-[86px] items-center justify-center gap-4 rounded-[22px] bg-[#eaf1fc] px-6 text-center text-[20px] font-extrabold leading-[1.25] text-[#2d9eea] transition-opacity hover:opacity-90 sm:text-left sm:text-[24px]"
-                            href="#"
+                            href={uri.invoices}
                         >
                             <LayoutDashboard className="h-8 w-8 shrink-0" strokeWidth={2.4}/>
                             <span>
