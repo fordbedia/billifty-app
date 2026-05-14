@@ -46,7 +46,7 @@ export default function InvoiceItem({
 					<button
 						type="button"
 						className="invoice-item-drag-handle"
-						onPointerDown={(event) => !isPaid && dragControls.start(event)}
+						onPointerDown={(event) => !isIssuedOrPaid && dragControls.start(event)}
 						aria-label={`Drag invoice item ${index + 1} to reorder`}
 						title="Drag to reorder"
 					>
