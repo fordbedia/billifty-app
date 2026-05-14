@@ -108,6 +108,12 @@ stripe listen \
   --api-key sk_test_51Sd1WjEgxqQWB3tM7oALSNQagKSFVapPtlfLXTkM0snt92OEmBl7feGLQaWCUKF221JZT5ac2v9sf1hSWjWSkcmx00r7yj80PL
   --forward-to https://int.billifty.com/api/v1/stripe/webhook \
   --skip-verify
+  
+stripe listen \
+  --api-key sk_test_51Sd1WjEgxqQWB3tM7oALSNQagKSFVapPtlfLXTkM0snt92OEmBl7feGLQaWCUKF221JZT5ac2v9sf1hSWjWSkcmx00r7yj80PL \
+  --forward-to https://int.billifty.com/api/v1/stripe/webhook \
+  --forward-connect-to https://int.billifty.com/api/v1/stripe/webhook \
+  --skip-verify
 ```
 Stripe CLI will print:
 `Your webhook signing secret is whsec_...`
