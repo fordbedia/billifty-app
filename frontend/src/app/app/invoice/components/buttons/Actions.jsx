@@ -6,7 +6,7 @@ import {useInvoice} from "@/app/providers/InvoiceContext";
 import {Alert} from "@heroui/react";
 import {uri} from "@/app/constants/routePaths";
 
-export default function Actions() {
+export default function Actions({isIssuedOrPaid, isPaid}) {
 	const {
 		save,
 		data,
@@ -79,16 +79,16 @@ export default function Actions() {
 						)}
 						{!invoiceId
 							? (<Button onPress={() => save('save_draft')} disableRipple className="my-2 text-white w-full" color="success">Create Invoice</Button>)
-							: (<Button onPress={() => save('save_changes')} disableRipple className="my-2 w-full" color="primary" variant="flat">Save Changes</Button>)}
-						{invoiceId && data.status !== 'issued' && (
+							: (!isPaid && (<Button onPress={() => save('save_changes')} disableRipple className="my-2 w-full" color="primary" variant="flat">Save Changes</Button>))}
+						{!isIssuedOrPaid && (
 							<Button onPress={confirm} isDisabled={!data.id} disableRipple className="my-2 w-full" color="warning" variant="flat">Issue Invoice</Button>
 						)}
 
 						{!invoiceId && !isEmpty && (<Button disableRipple className="my-2 w-full" color="danger" onPress={clearSticky}>Reset All</Button>)}
 						{invoiceId && (<Button className="my-2 w-full" color="secondary" onPress={onOpenPreviewInvoiceModal}>Preview Invoice</Button>)}
-						{invoiceId && (<Button onPress={generatePdf} className="my-2 w-full" color="primary">Quick Download</Button>)}
+						{invoiceId && isPaid && (<Button onPress={generatePdf} className="my-2 w-full" color="primary">Quick Download</Button>)}
 
-						{invoiceId && (<Button className="my-2 text-white w-full" as={Link} href={uri.send_invoice(invoiceId)} color="success">Send/Download Invoice</Button> )}
+						{invoiceId && !isPaid && (<Button className="my-2 text-white w-full" as={Link} href={uri.send_invoice(invoiceId)} color="success">Send/Download Invoice</Button> )}
 
 						<div className="invoice-ai-note">
 							<div className="invoice-ai-note-head">AI Invoice Draft (Beta)</div>
