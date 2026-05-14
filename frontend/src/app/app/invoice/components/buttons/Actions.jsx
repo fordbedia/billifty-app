@@ -80,7 +80,7 @@ export default function Actions({isIssuedOrPaid, isPaid}) {
 						{!invoiceId
 							? (<Button onPress={() => save('save_draft')} disableRipple className="my-2 text-white w-full" color="success">Create Invoice</Button>)
 							: (!isPaid && (<Button onPress={() => save('save_changes')} disableRipple className="my-2 w-full" color="primary" variant="flat">Save Changes</Button>))}
-						{!isIssuedOrPaid && (
+						{!isIssuedOrPaid && data.id && (
 							<Button onPress={confirm} isDisabled={!data.id} disableRipple className="my-2 w-full" color="warning" variant="flat">Issue Invoice</Button>
 						)}
 

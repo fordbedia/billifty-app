@@ -20,6 +20,7 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 		setIsTaxable,
 		currencies,
 		setSelectedCurrency,
+		selectedCurrency,
 	} = useInvoice()
 
 	const enableShipping = () => {
@@ -39,6 +40,7 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 	const isAmount = data.discount_mode === "amount";
 	const isPercent = data.discount_mode === "percent";
 	const isPerLine = data.discount_mode === "per-line";
+	const currencySymbol = selectedCurrency?.symbol ?? "";
 	return (
 		<Card className="mb-5 workspace-card invoice-info-card" fullWidth radius="sm">
 			<CardHeader className="flex gap-3">
@@ -268,7 +270,7 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 
 						{/* Invoice-level fields (amount/percent) */}
 						{isAmount && (
-							<div className="md:w-1/2 pl-2">Discount Amount ($)<Input type="number" variant="bordered"
+							<div className="md:w-1/2 pl-2">Discount Amount ({currencySymbol})<Input type="number" variant="bordered"
 																					 radius="sm"
 																					 value={centsToDollarsStr(data.discount_cents ?? 0)}
 																					 onValueChange={(val) => onDataChange('discount_cents', dollarsToCents(val))}/>

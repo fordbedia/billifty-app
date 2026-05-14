@@ -231,7 +231,7 @@ export default function Layout({showAiAssistant = false}) {
 						</div>
 
 						<div className="w-full min-w-0">
-							<InvoiceTemplate/>
+							<InvoiceTemplate isIssuedOrPaid={isIssuedOrPaid} />
 							<Actions isPaid={isPaid} isIssuedOrPaid={isIssuedOrPaid} />
 						</div>
 					</div>
