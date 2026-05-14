@@ -657,6 +657,7 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 					title: `Invoice was successfully ${r?.data?.action}!`,
 					color: r?.data?.action === 'issued' ? 'secondary' : 'success'
 				})
+				router.replace(`/app/invoice/${r.data?.id}/send`)
 			}
 		}
 	})
