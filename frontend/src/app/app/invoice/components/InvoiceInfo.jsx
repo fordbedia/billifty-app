@@ -243,7 +243,7 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 					</div>
 				</div>
 
-				{/* 🔹 NEW: Discount Mode + Inputs */}
+				{/* NEW: Discount Mode + Inputs */}
 				<div className="flex flex-col md:flex-row gap-2 py-2 invoice-info-row">
 					<div className="md:w-1/2">Discount Mode<br/>
 						<Select
@@ -270,13 +270,13 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 
 						{/* Invoice-level fields (amount/percent) */}
 						{isAmount && (
-							<div className="md:w-1/2 pl-2">Discount Amount ({currencySymbol})<Input type="number" variant="bordered"
+							<div className="md:w-1/2 pl-2">Discount Amount ({currencySymbol})<Input isDisabled={isIssuedOrPaid} type="number" variant="bordered"
 																					 radius="sm"
 																					 value={centsToDollarsStr(data.discount_cents ?? 0)}
 																					 onValueChange={(val) => onDataChange('discount_cents', dollarsToCents(val))}/>
 							</div>)}
 						{isPercent && (
-							<div className="md:w-1/2 pl-2">Discount Percent (%)<Input type="number" variant="bordered"
+							<div className="md:w-1/2 pl-2">Discount Percent (%)<Input isDisabled={isIssuedOrPaid} type="number" variant="bordered"
 																					  radius="sm"
 																					  value={String(data.discount_rate ?? 0)}
 																					  onValueChange={(val) => onDataChange('discount_rate', parseFloat(val) || 0)}/>

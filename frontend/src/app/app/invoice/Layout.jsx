@@ -79,7 +79,7 @@ export default function Layout({showAiAssistant = false}) {
 		<RootLayout>
 			<div className="app app-wrapper min-h-screen bg-white invoice-page">
 				<ConfirmDeleteModal/>
-				<ConfirmIssueInvoiceModal/>
+				<ConfirmIssueInvoiceModal invoiceId={data?.id} />
 				<ConfirmNewInvoice/>
 				<InvoicePreviewPage invoiceId={invoiceId}/>
 				<div className="mx-auto w-full max-w-[1440px] px-5 pb-12 pt-10 sm:px-8 lg:px-10 sm:pt-12 lg:pt-16">

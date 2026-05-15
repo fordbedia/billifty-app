@@ -10,13 +10,15 @@ import {
 	useDisclosure,
 } from "@heroui/react";
 import {useInvoice} from "@/app/providers/InvoiceContext";
+import {useRouter} from "next/navigation";
 
-export default function ConfirmIssueInvoiceModal() {
+export default function ConfirmIssueInvoiceModal({invoiceId}) {
 	const {
 		isOpenConfirmIssueInvoice,
 		onOpenChangeConfirmIssueInvoice,
 		save,
 	} = useInvoice()
+	const router = useRouter()
 	return (
 		<>
 			<Modal isOpen={isOpenConfirmIssueInvoice} onOpenChange={onOpenChangeConfirmIssueInvoice}>
@@ -28,13 +30,17 @@ export default function ConfirmIssueInvoiceModal() {
 							</ModalHeader>
 							<ModalBody>
 								<strong>Are you sure you want to issue this invoice?</strong>
-								<p>Once issued, financial and client-related fields will be locked and cannot be edited. Only Notes and Terms can still be updated.</p>
+								<p>Once issued, financial and client-related fields will be locked and cannot be edited.
+									Only Notes and Terms can still be updated.</p>
 							</ModalBody>
 							<ModalFooter>
 								<Button color="danger" variant="light" onPress={onClose}>
 									Close
 								</Button>
-								<Button color="warning" onPress={() => save('issue', () => onClose())}>
+								<Button color="warning" onPress={() => save('issue', () => {
+									onClose();
+									router.replace(`/app/invoice/${invoiceId}/send`)
+								})}>
 									Issue Invoice
 								</Button>
 							</ModalFooter>
