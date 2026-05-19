@@ -355,7 +355,8 @@ export default function BusinessProfileAppForm() {
 												/>
 											</div>
 										</div>
-										<h2 className="mt-8 border-b border-[#e7edf4] pb-4 text-xl font-semibold text-[#24323f]">Payment Information</h2>
+										<h2 className="mt-8 border-b border-[#e7edf4] pb-4 text-xl font-semibold text-[#24323f]">Payment
+											Information</h2>
 										<div className="mt-6 grid gap-4 md:grid-cols-2">
 											<div className="w-full">
 												<Select
@@ -446,17 +447,49 @@ export default function BusinessProfileAppForm() {
 												)}
 
 												{isPaymentMethodSelected('paypal') && (
-													<div className="w-full">
-														<Input
-															name="paypal_email"
-															label="PayPal Email"
-															labelPlacement="outside"
-															placeholder="e.g. billing@mybusiness.com"
-															description="Your PayPal account email for receiving payments."
-															onValueChange={(value) => handleFormChange('pi', 'paypal_email', value)}
-															value={paymentInfoForm.paypal_email ?? ''}
-														/>
-													</div>
+													<>
+														<div className="w-full">
+															<Input
+																name="paypal_email"
+																label="PayPal Email"
+																labelPlacement="outside"
+																placeholder="e.g. billing@mybusiness.com"
+																description="The email associated with your PayPal Business account."
+																onValueChange={(value) =>
+																	handleFormChange('pi', 'paypal_email', value)
+																}
+																value={paymentInfoForm.paypal_email ?? ''}
+															/>
+														</div>
+
+														<div className="w-full">
+															<Input
+																name="paypal_merchant_id"
+																label="PayPal Merchant ID"
+																labelPlacement="outside"
+																placeholder="e.g. ABCD1234EFGH5"
+																description="Your PayPal merchant account ID used to receive invoice payments."
+																onValueChange={(value) =>
+																	handleFormChange('pi', 'paypal_merchant_id', value)
+																}
+																value={paymentInfoForm.paypal_merchant_id ?? ''}
+															/>
+														</div>
+
+														<div className="w-full">
+															<Input
+																name="paypal_payer_id"
+																label="PayPal Payer ID"
+																labelPlacement="outside"
+																placeholder="e.g. X7F92KLMN8Q"
+																description="Your PayPal payer ID used for account identification and payment verification."
+																onValueChange={(value) =>
+																	handleFormChange('pi', 'paypal_payer_id', value)
+																}
+																value={paymentInfoForm.paypal_payer_id ?? ''}
+															/>
+														</div>
+													</>
 												)}
 
 												{isPaymentMethodSelected('stripe') && (

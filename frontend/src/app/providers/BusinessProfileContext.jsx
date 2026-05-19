@@ -28,6 +28,8 @@ export function BusinessProfileProvider({ children, id, mode }) {
 		iban: '',
 		swift_code: '',
 		paypal_email: '',
+		paypal_merchant_id: '',
+		paypal_payer_id: '',
 		cash_app: '',
 		stripe_account_id: '',
 		notes: '',
@@ -38,7 +40,6 @@ export function BusinessProfileProvider({ children, id, mode }) {
 
 	const businessProfileInitialState = {
 		user_id: '',
-		payment_information_id: '',
 		name: '',
 		legal_name: '',
 		email: '',
@@ -101,7 +102,7 @@ export function BusinessProfileProvider({ children, id, mode }) {
 
 	const handleSearchKeyDown = (e) => {
 		if (e.key === "Enter") {
-			setAppliedSearch(search);    // 👈 trigger query update
+			setAppliedSearch(search);    // trigger query update
 			setBusinessProfilePage(1);           // optional: reset pagination
 		}
 	}

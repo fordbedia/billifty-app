@@ -1,6 +1,6 @@
 "use client";
 
-import {ArrowRight, LockKeyhole, Shield} from "lucide-react";
+import {ArrowRight, Shield} from "lucide-react";
 import {useParams} from "next/navigation";
 import {type ReactNode, useState} from "react";
 import {useQuery} from "@tanstack/react-query";
@@ -84,51 +84,128 @@ function PaymentMethod({children}: { children: ReactNode }) {
     );
 }
 
+function StripeLogo() {
+    return (
+        <span className="min-w-[38px] text-right text-[13px] font-extrabold lowercase leading-none tracking-normal text-white sm:min-w-[54px] sm:text-[15px]">
+            stripe
+        </span>
+    );
+}
+
+function PayPalButtonIcon() {
+    return (
+        <svg aria-hidden="true" className="h-[31px] w-[31px] shrink-0" viewBox="0 0 34 34">
+            <path
+                d="M11.3 5.5h10.2c4.8 0 7.9 3.1 7 7.5-.9 4.7-4.5 7.4-9.8 7.4h-3.2l-1.1 6.1H8.7L11.3 5.5Z"
+                fill="#ffffff"
+                opacity="0.92"
+            />
+            <path
+                d="M15.2 8.2h8.5c4.1 0 6.5 2.6 5.7 6.3-.8 4-3.9 6.4-8.4 6.4h-3.1l-1.2 7.1h-5.5l4-19.8Z"
+                fill="#ffffff"
+            />
+        </svg>
+    );
+}
+
+function CashAppIcon() {
+    return (
+        <span className="min-w-[38px] text-right text-[30px] font-semibold leading-none text-white sm:min-w-[54px] sm:text-[34px]">
+            $
+        </span>
+    );
+}
+
+type PaymentButtonProps = {
+    brand: "stripe" | "paypal" | "cashapp";
+    children: ReactNode;
+    disabled?: boolean;
+    icon: ReactNode;
+    onClick: () => void;
+};
+
+function PaymentButton({brand, children, disabled = false, icon, onClick}: PaymentButtonProps) {
+    const brandClasses = {
+        stripe: "bg-[#2fa1e8] hover:bg-[#2398de]",
+        paypal: "bg-[#087dbd] hover:bg-[#0472ae]",
+        cashapp: "bg-[#0fd52f] hover:bg-[#0bc529]",
+    };
+
+    return (
+        <button
+            className={`cursor-pointer flex h-[60px] w-full items-center justify-center gap-[10px] rounded-[15px] text-[19px] font-medium leading-none text-white shadow-[inset_0_4px_0_rgba(255,255,255,0.08),inset_0_-4px_0_rgba(0,0,0,0.08)] transition-colors disabled:cursor-wait disabled:opacity-75 sm:h-[68px] sm:gap-[17px] sm:text-[24px] ${brandClasses[brand]}`}
+            disabled={disabled}
+            onClick={onClick}
+            type="button"
+        >
+            {icon}
+            <span>{children}</span>
+            <ArrowRight className="h-[22px] w-[22px] shrink-0 sm:h-[24px] sm:w-[24px]" strokeWidth={3}/>
+        </button>
+    );
+}
+
 export default function Pay() {
     const params = useParams<{ token?: string | string[] }>();
     const token = Array.isArray(params.token) ? params.token[0] : params.token;
     const [error, setError] = useState<string | null>(null);
-    const [isRedirecting, setIsRedirecting] = useState(false);
+    const [isRedirecting, setIsRedirecting] = useState({
+        paypal: false,
+        stripe: false,
+        cashapp: false,
+    });
 
     const {data} = useQuery({
         queryKey: ["payment", token],
         queryFn: async () => (await Billing.getPaymentRecord(token))
     })
 
+    const hasPaymentMethod = (method: string) => {
+        return data?.payment_methods.some((m: string) => m === method)
+    }
+
     const paymentDetails = [
         {label: "Invoice Number", value: data?.invoice?.invoice_number},
         {label: "Amount", value: formatMoney(data?.invoice.total_cents, data?.invoice?.currency?.code), emphasized: true},
     ];
-
-    console.log('data', data)
 
     const handleStripePayment = async () => {
         if (!token) return;
 
         try {
             setError(null);
-            setIsRedirecting(true);
+            setIsRedirecting((prev) => ({...prev, stripe: true}));
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_SECURE_URL}/pay/token/${token}`, {
-                body: JSON.stringify({provider: "stripe"}),
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                },
-                method: "POST",
-            });
-            const data = await response.json();
-
-            if (!response.ok || !data?.url) {
-                throw new Error(data?.message || "Unable to start Stripe payment.");
-            }
+            const data = await Billing.getPaymentLink('stripe', token)
+            if (!data) return;
 
             window.location.href = data.url;
         } catch (err) {
             setError(err instanceof Error ? err.message : "Unable to start Stripe payment.");
-            setIsRedirecting(false);
+            setIsRedirecting((prev) => ({...prev, stripe: false}));
         }
     };
+
+    const handlePayPalPayment = async () => {
+         if (!token) return;
+
+         try {
+            setError(null);
+            setIsRedirecting((prev) => ({...prev, paypal: true}));
+
+            const data = await Billing.getPaymentLink('paypal', token)
+            if (!data) return;
+
+            window.location.href = data.url;
+         } catch(err) {
+            setError(err instanceof Error ? err.message : "Unable to start Stripe payment.");
+            setIsRedirecting((prev) => ({...prev, paypal: false}));
+         }
+    }
+
+    const handleCashAppPayment = () => {
+        setError("Cash App payments are coming soon.");
+    }
 
     return (
         <main className="min-h-screen bg-white px-4 py-6 font-sans text-[#111827] sm:py-8">
@@ -136,15 +213,11 @@ export default function Pay() {
                 <div
                     className="w-full rounded-[21px] border border-[#dedede] bg-white px-6 pb-[42px] pt-[62px] sm:px-[48px]">
                     <div className="text-center">
-                        <div
-                            className="text-[12px] font-extrabold leading-none tracking-[-0.01em] text-[#27aee4]">
-                            stripe
-                        </div>
                         <h1 className="mt-[42px] text-[32px] font-extrabold leading-none tracking-normal text-[#151821]">
                             Secure Payment
                         </h1>
                         <p className="mx-auto mt-[13px] max-w-[360px] text-[18px] leading-[1.28] text-[#171923]">
-                            Complete your transaction with Stripe&apos;s secure
+                           Complete your payment securely
                             <br className="hidden sm:block"/>
                             payment gateway
                         </p>
@@ -167,16 +240,34 @@ export default function Pay() {
                         ))}
                     </dl>
 
-                    <button
-                        className="mt-[32px] flex h-[59px] w-full items-center justify-center gap-3 rounded-[8px] bg-[#2da1e9] text-[18px] font-extrabold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] transition-colors hover:bg-[#1994df] disabled:cursor-wait disabled:opacity-75"
-                        disabled={isRedirecting}
-                        onClick={handleStripePayment}
-                        type="button"
-                    >
-                        <LockKeyhole className="h-[21px] w-[21px]" fill="currentColor" strokeWidth={3}/>
-                        <span>{isRedirecting ? "Redirecting..." : "Pay with Stripe"}</span>
-                        <ArrowRight className="h-[19px] w-[19px]" strokeWidth={3}/>
-                    </button>
+                    <div className="mt-[32px] grid gap-[15px]">
+                        {hasPaymentMethod('stripe') && (<PaymentButton
+                            brand="stripe"
+                            disabled={isRedirecting.stripe}
+                            icon={<StripeLogo/>}
+                            onClick={handleStripePayment}
+                        >
+                            {isRedirecting.stripe ? "Redirecting..." : "Pay with Stripe"}
+                        </PaymentButton>)}
+
+                        {hasPaymentMethod('paypal') && (<PaymentButton
+                            brand="paypal"
+                            disabled={isRedirecting.paypal}
+                            icon={<PayPalButtonIcon/>}
+                            onClick={handlePayPalPayment}
+                        >
+                            {isRedirecting.paypal ? "Redirecting..." : "Pay with PayPal"}
+                        </PaymentButton>)}
+
+                        {hasPaymentMethod('cashapp') && (<PaymentButton
+                            brand="cashapp"
+                            disabled={isRedirecting.cashapp}
+                            icon={<CashAppIcon/>}
+                            onClick={handleCashAppPayment}
+                        >
+                            {isRedirecting.paypal ? "Redirecting..." : "Pay with Cash App"}
+                        </PaymentButton>)}
+                    </div>
 
                     {error ? (
                         <p className="mt-3 text-center text-[13px] font-medium text-[#d03333]">{error}</p>

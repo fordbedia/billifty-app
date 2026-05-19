@@ -86,14 +86,14 @@ export default function PaymentSuccess() {
                 </div>
 
                 <div className="mt-10 flex w-full max-w-[620px] flex-col gap-4">
-                    <a
+                    {data?.payment_method !== 'paypal' && (<a
                         target="_blank"
                         className="flex h-[68px] w-full items-center justify-center gap-4 rounded-[22px] bg-[#2d9eea] text-[20px] font-extrabold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-opacity hover:opacity-90 sm:text-[24px]"
                         href={data?.data?.receipt_url}
                     >
                         <Download className="h-7 w-7" strokeWidth={3.2}/>
                         Download Receipt
-                    </a>
+                    </a>)}
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-1">
                         <a

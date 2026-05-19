@@ -130,3 +130,20 @@ You should see events like:
 - `charge.succeeded`
 - `charge.updated`
 And Stripe CLI should show 200 responses once the webhook is correct.
+
+### PayPal Webhooks
+```shell
+PAYMENT.CAPTURE.COMPLETED
+PAYMENT.CAPTURE.DENIED
+PAYMENT.CAPTURE.REFUNDED
+PAYMENT.CAPTURE.REVERSED
+```
+#### Stripe and PayPal Webhook URLs:
+```shell
+https://int.billifty.com/api/v1/stripe/webhook
+```
+
+```shell
+https://int.billifty.com/api/v1/paypal/webhook
+```
+

@@ -3,34 +3,34 @@
 import Model from "@/foundation/Model";
 
 export default class Billing extends Model {
-  static resource = "billing";
+	static resource = "billing";
 
 	static async getDirection(payload = {}) {
 		const res = await this.axios().post("/direction-flow", payload);
 		return res.data;
 	}
 
-  static async createCheckoutSession(payload = {}) {
-    // POST /api/v1/billing/checkout-session
-    const res = await this.axios().post("/checkout-session", payload);
-    return res.data;
-  }
+	static async createCheckoutSession(payload = {}) {
+		// POST /api/v1/billing/checkout-session
+		const res = await this.axios().post("/checkout-session", payload);
+		return res.data;
+	}
 
-  static async createPortalSession(payload = {}) {
-    // POST /api/v1/billing/portal-session
-    const res = await this.axios().post("/portal-session", payload);
-    return res.data;
-  }
+	static async createPortalSession(payload = {}) {
+		// POST /api/v1/billing/portal-session
+		const res = await this.axios().post("/portal-session", payload);
+		return res.data;
+	}
 
-  static async createPaymentMethodSetupIntent(payload = {}) {
-    const res = await this.axios().post("/payment-method/setup-intent", payload);
-    return res.data;
-  }
+	static async createPaymentMethodSetupIntent(payload = {}) {
+		const res = await this.axios().post("/payment-method/setup-intent", payload);
+		return res.data;
+	}
 
-  static async updatePaymentMethod(payload = {}) {
-    const res = await this.axios().post("/payment-method/update", payload);
-    return res.data;
-  }
+	static async updatePaymentMethod(payload = {}) {
+		const res = await this.axios().post("/payment-method/update", payload);
+		return res.data;
+	}
 
 	static async cancelSubscription(payload = {}) {
 		const res = await this.axios().post("/cancel", payload);
@@ -47,15 +47,31 @@ export default class Billing extends Model {
 		return res.data;
 	}
 
-	static async invoiceSuccessPayment(token)
-	{
+	static async invoiceSuccessPayment(token) {
 		const res = await this.axios().post("/invoice-success-payment", {token});
 		return res.data;
 	}
 
-	static async getPaymentRecord(token)
-	{
+	static async getPaymentRecord(token) {
 		const res = await this.axios().post("/invoice-payment-record", {token});
 		return res.data;
+	}
+
+	static async getPaymentLink(method, token) {
+		const response = await fetch(`${process.env.NEXT_PUBLIC_SECURE_URL}/pay/token/${token}`, {
+			body: JSON.stringify({provider: method}),
+			headers: {
+				Accept: "application/json",
+				"Content-Type": "application/json",
+			},
+			method: "POST",
+		});
+		const data = await response.json();
+
+		if (!response.ok || !data?.url) {
+			throw new Error(data?.message || `Unable to start ${method} payment.`);
+		}
+
+		return data;
 	}
 }
