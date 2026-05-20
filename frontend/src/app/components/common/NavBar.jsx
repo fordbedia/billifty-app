@@ -11,12 +11,12 @@ import Avatar from '@/app/components/common/includes/Avatar'
 import {isOnboardingCompleted} from "@/app/utils/onboardingUser";
 import {useApp} from "@/app/providers/AppContext";
 
-export const BilliftyLogo = () => {
+export const BilliftyLogo = ({width =100, height=100}) => {
 	return (
 		<Link href={path.lp} className="billifty-logo-link"><Image
 			alt="Billifty Logo"
-			width={100}
-			height={100}
+			width={width}
+			height={height}
 			priority
 			quality={100}
 			className="billifty-logo-img"

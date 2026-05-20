@@ -6,6 +6,7 @@ import {type ReactNode, useState} from "react";
 import {useQuery} from "@tanstack/react-query";
 import Billing from "@/app/models/Billing";
 import {formatMoney} from "@/app/utils/money";
+import {BilliftyLogo} from "@/app/components/common/NavBar";
 
 // const paymentDetails = [
 //     {label: "Amount", value: "$99.00", emphasized: true},
@@ -213,6 +214,7 @@ export default function Pay() {
                 <div
                     className="w-full rounded-[21px] border border-[#dedede] bg-white px-6 pb-[42px] pt-[62px] sm:px-[48px]">
                     <div className="text-center">
+                        <BilliftyLogo width={140} height={140} />
                         <h1 className="mt-[42px] text-[32px] font-extrabold leading-none tracking-normal text-[#151821]">
                             Secure Payment
                         </h1>
