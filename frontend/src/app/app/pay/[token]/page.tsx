@@ -272,7 +272,7 @@ export default function Pay() {
                     </div>
 
                     {error ? (
-                        <p className="mt-3 text-center text-[13px] font-medium text-[#d03333]">{error}</p>
+                        <p className="mt-3 text-center text-[16px] font-medium text-[#d03333]">{error}</p>
                     ) : null}
 
                     <div className="mt-[19px] flex items-center justify-center gap-[7px] text-[14px] text-[#171923]">
