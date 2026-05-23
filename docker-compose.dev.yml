@@ -86,6 +86,8 @@ services:
       MYSQL_ROOT_PASSWORD: root
     ports:
       - "3307:3306"  # host:container (change host port if you want)
+    volumes:
+      - ./docker/mysql/initdb:/docker-entrypoint-initdb.d:ro
 
   redis:
     ports:
