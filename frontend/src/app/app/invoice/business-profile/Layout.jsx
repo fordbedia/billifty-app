@@ -467,7 +467,7 @@ export default function BusinessProfileAppForm() {
 																name="paypal_merchant_id"
 																label="PayPal Merchant ID"
 																labelPlacement="outside"
-																placeholder="e.g. ABCD1234EFGH5"
+																placeholder="e.g. 9Q2PZJ3KREDBH"
 																description="Your PayPal merchant account ID used to receive invoice payments."
 																onValueChange={(value) =>
 																	handleFormChange('pi', 'paypal_merchant_id', value)
@@ -481,7 +481,7 @@ export default function BusinessProfileAppForm() {
 																name="paypal_payer_id"
 																label="PayPal Payer ID"
 																labelPlacement="outside"
-																placeholder="e.g. X7F92KLMN8Q"
+																placeholder="e.g. 9Q2PZJ3KREDBH"
 																description="Your PayPal payer ID used for account identification and payment verification."
 																onValueChange={(value) =>
 																	handleFormChange('pi', 'paypal_payer_id', value)
