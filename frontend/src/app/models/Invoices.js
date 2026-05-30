@@ -25,8 +25,12 @@ export default class Invoice extends Model{
 		return await this.axios().get(`/${id}`)
 	}
 
+	// static async preview(invoiceId) {
+	// 	return await this.axios().get(`/${invoiceId}/preview-pdf`)
+	// }
+
 	static async preview(invoiceId) {
-		return await this.axios().get(`/${invoiceId}/preview-pdf`)
+		return await this.axios().get(`/${invoiceId}/preview/settings`)
 	}
 
 	static async generate(invoiceId) {
