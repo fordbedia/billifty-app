@@ -66,17 +66,19 @@ export default function InvoicePreviewPage({invoiceId}) {
 			scrollBehavior="inside"
 			hideCloseButton
 			classNames={{
-				backdrop: "bg-[#6d7373]/95",
-				wrapper: "items-center px-3 py-4 sm:px-5",
-				base: "my-0 max-h-[calc(100vh-32px)] w-full max-w-[920px] overflow-hidden rounded-[20px] bg-white p-0 shadow-[0_24px_70px_-36px_rgba(15,23,42,0.55)]",
+				backdrop: "z-[10000] bg-[#6d7373]/95",
+				wrapper: "z-[10001] items-center px-3 py-4 sm:px-5",
+				base: "z-[10002] my-0 max-h-[calc(100vh-32px)] w-full max-w-[920px] overflow-hidden rounded-[20px] bg-white p-0 shadow-[0_24px_70px_-36px_rgba(15,23,42,0.55)]",
 			}}
 		>
 			<ModalContent className="w-full max-w-[920px] overflow-hidden rounded-[20px] bg-white p-0">
 				{(onClose) => (
 					<>
-						<ModalHeader className="flex items-center justify-between border-b border-[#e4e4e4] px-5 py-5 sm:px-7">
+						<ModalHeader
+							className="flex items-center justify-between border-b border-[#e4e4e4] px-5 py-5 sm:px-7">
 							<div className="flex min-w-0 items-center gap-4">
-								<div className="flex size-11 shrink-0 items-center justify-center rounded-[16px] bg-[#e8f3ff] text-[#2da0e4]">
+								<div
+									className="flex size-11 shrink-0 items-center justify-center rounded-[16px] bg-[#e8f3ff] text-[#2da0e4]">
 									<FileText aria-hidden="true" size={21} strokeWidth={2.25}/>
 								</div>
 								<div className="min-w-0">
@@ -104,7 +106,8 @@ export default function InvoicePreviewPage({invoiceId}) {
 							<section className="border-b border-[#e4e4e4] bg-[#f8f8f8] px-5 py-5 sm:px-7">
 								<div className="mb-4 flex flex-wrap items-center gap-2.5">
 									<Link2 aria-hidden="true" className="text-[#2da0e4]" size={18} strokeWidth={2.4}/>
-									<span className="text-sm font-bold uppercase leading-none tracking-normal text-[#17191d]">
+									<span
+										className="text-sm font-bold uppercase leading-none tracking-normal text-[#17191d]">
 										Shareable Link
 									</span>
 									<Chip
@@ -126,7 +129,8 @@ export default function InvoicePreviewPage({invoiceId}) {
 										isReadOnly
 										variant="bordered"
 										radius="lg"
-										startContent={<LockOpen aria-hidden="true" className="shrink-0 text-[#2da0e4]" size={19} strokeWidth={2.4}/>}
+										startContent={<LockOpen aria-hidden="true" className="shrink-0 text-[#2da0e4]"
+																size={19} strokeWidth={2.4}/>}
 										classNames={{
 											base: "min-w-0",
 											inputWrapper: "min-h-[48px] border-[#dedede] bg-white px-4 shadow-none group-data-[focus=true]:border-[#2b99dd]",
@@ -160,7 +164,8 @@ export default function InvoicePreviewPage({invoiceId}) {
 									</Button>
 								</div>
 
-								<div className="mt-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+								<div
+									className="mt-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 									<div className="flex flex-wrap items-center gap-3">
 										<Button
 											type="button"
@@ -196,18 +201,13 @@ export default function InvoicePreviewPage({invoiceId}) {
 							</section>
 
 							<section className="bg-[#f7fbff] px-4 pb-6 pt-7 sm:px-6 lg:px-12">
-								<div className="mx-auto w-full max-w-[760px] overflow-hidden rounded-[16px] border border-[#dce6ef] bg-white shadow-[0_20px_62px_-42px_rgba(34,80,116,0.45)]">
-									{previewUrl ? (
-										<iframe
-											src={previewUrl}
-											title="Invoice preview"
-											className="block h-[520px] min-h-[55vh] w-full border-0 bg-white"
-										/>
-									) : (
-										<div className="flex min-h-[500px] items-center justify-center bg-white px-6 text-center text-lg font-semibold text-[#7b8794]">
-											<div dangerouslySetInnerHTML={{__html: html}}></div>
-										</div>
-									)}
+								<div
+									className="mx-auto w-full max-w-[760px] overflow-hidden rounded-[16px] border border-[#dce6ef] bg-white shadow-[0_20px_62px_-42px_rgba(34,80,116,0.45)]">
+									<iframe
+										srcDoc={html ?? ""}
+										title="Invoice HTML preview"
+										className="block h-[520px] min-h-[55vh] w-full border-0 bg-white"
+									/>
 								</div>
 							</section>
 						</ModalBody>
