@@ -75,10 +75,10 @@ export default function InvoicePreviewPage({invoiceId}) {
 				{(onClose) => (
 					<>
 						<ModalHeader
-							className="flex items-center justify-between border-b border-[#e4e4e4] px-5 py-5 sm:px-7">
+							className="flex min-h-[70px] items-center justify-between border-b border-[#e4e4e4] !px-[15px]">
 							<div className="flex min-w-0 items-center gap-4">
 								<div
-									className="flex size-11 shrink-0 items-center justify-center rounded-[16px] bg-[#e8f3ff] text-[#2da0e4]">
+									className="flex size-9 shrink-0 items-center justify-center rounded-[16px] bg-[#e8f3ff] text-[#2da0e4]">
 									<FileText aria-hidden="true" size={21} strokeWidth={2.25}/>
 								</div>
 								<div className="min-w-0">
