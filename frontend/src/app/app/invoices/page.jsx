@@ -32,8 +32,14 @@ function Component() {
 
 	const router = useRouter()
 	const column = [
-		{key: 'invoice_number', label: 'Invoice #', allowsSorting: true},
-		{key: 'currency.code', label: 'Currency', allowsSorting: true},
+		{
+			key: 'invoice_number',
+			label: 'Invoice #',
+			allowsSorting: true,
+			className: 'min-w-[132px] whitespace-nowrap',
+			cellClassName: 'min-w-[132px] whitespace-nowrap',
+		},
+		{key: 'business_profile.legal_name', label: 'Business Profile', allowsSorting: true},
 		{key: 'client.name', label: 'Client', allowsSorting: true},
 		{key: 'total_cents', label: 'Amount', allowsSorting: true},
 		{key: 'status', label: 'Status', allowsSorting: true},
@@ -46,18 +52,28 @@ function Component() {
 				return (
 					<Link
 						href={`/app/invoice/${item.id}`}
-						className="text-primary underline hover:opacity-80"
+						className="inline-block min-w-[112px] whitespace-nowrap text-primary underline hover:opacity-80"
 					>
 						{item.invoice_number ?? `#${item.id}`}
 					</Link>
 				);
 
-			case 'currency.code':
-				return item.currency.code
+			case 'business_profile.legal_name':
+				return (
+					<>
+						<div className="font-semibold">{item.business_profile?.legal_name}</div>
+						<div className="mt-0.5 text-xs font-normal text-[#66738a]">{item.business_profile?.email}</div>
+					</>
+				)
 
 			case "total_cents":
 				// Example formatting amount
-				return `${item.currency.symbol}${((item.total_cents ?? 0) / 100).toFixed(2)}`;
+				return (
+					<>
+						<div>{item.currency.symbol}{((item.total_cents ?? 0) / 100).toFixed(2)}</div>
+						<div className="font-semibold">({item.currency.code})</div>
+					</>
+				);
 
 			case 'status':
 				const string = item.status
@@ -107,7 +123,8 @@ function Component() {
 
 			case 'created_at':
 				return <>
-					<div className="text-sm font-semibold text-[#07142c]">created: {formattedDate(item.created_at)}</div>
+					<div
+						className="text-sm font-semibold text-[#07142c]">created: {formattedDate(item.created_at)}</div>
 					<div className="mt-0.5 text-xs font-semibold text-[#66738a]">Due: {formattedDate(item.due_on)}</div>
 				</>
 
