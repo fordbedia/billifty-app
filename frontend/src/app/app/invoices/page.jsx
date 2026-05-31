@@ -3,7 +3,7 @@
 import {InvoiceProvider} from "@/app/providers/InvoiceContext";
 import RootLayout from "@/app/components/common/RootLayout";
 import TableData from "@/app/components/Table";
-import {Button, Card, CardBody, CardHeader, Divider, Link, Input} from "@heroui/react";
+import {Button, Card, CardBody, CardHeader, Link, Input} from "@heroui/react";
 import {useInvoice} from "@/app/providers/InvoiceContext";
 import {useRouter} from "next/navigation";
 import {Chip, Tooltip} from "@heroui/react";
@@ -11,9 +11,10 @@ import {formattedDate} from "@/app/utils/date";
 import {DateRangePicker} from "@heroui/react";
 import {useApp} from "@/app/providers/AppContext";
 import DashboardSidebar from "@/app/app/component/DashboardSidebar";
+import {Pencil, Plus, Search, Trash2} from "lucide-react";
 
 const dashboardPrimaryButtonClass =
-	"group h-auto min-h-[30px] rounded-[8px] bg-[#1d84c6] px-6 py-2 text-sm font-semibold tracking-normal text-white shadow-[0_16px_32px_-22px_rgba(29,132,198,0.9)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-[#166fa8] hover:shadow-[0_22px_38px_-24px_rgba(29,132,198,0.95)] focus-visible:ring-2 focus-visible:ring-[#72bee9] focus-visible:ring-offset-2";
+	"group h-11 min-h-11 rounded-[7px] bg-[#075de8] px-6 text-[15px] font-semibold tracking-normal text-white shadow-[0_14px_24px_-18px_rgba(7,93,232,0.85)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#034fc9] hover:shadow-[0_18px_30px_-20px_rgba(7,93,232,0.9)] focus-visible:ring-2 focus-visible:ring-[#75b7ff] focus-visible:ring-offset-2";
 
 function Component() {
 	const {
@@ -62,29 +63,43 @@ function Component() {
 				const string = item.status
 				const status = string.charAt(0).toUpperCase() + string.slice(1)
 				let color = 'default'
+				let statusClass = "bg-[#eef1f5] text-[#3d4655] border border-[#d2d8e2]"
 				if (string === 'issued') {
 					color = 'secondary'
+					statusClass = "bg-[#6d31d6] text-white"
 				} else if (string === 'sent') {
 					color = 'primary'
+					statusClass = "bg-[#e6f0ff] text-[#075de8]"
 				} else if (string === 'paid') {
 					color = 'success'
+					statusClass = "bg-[#e8f7ef] text-[#14804a]"
 				} else if (string === 'partially') {
 					color = 'warning'
+					statusClass = "bg-[#fff4d8] text-[#9a6500]"
 				} else if (string === 'void') {
 					color = 'danger'
+					statusClass = "bg-[#fff0f0] text-[#de1f31]"
 				}
-				return <Chip color={color}>{status}</Chip>
+				return (
+					<Chip
+						color={color}
+						variant="flat"
+						className={`min-w-[74px] justify-center rounded-full px-3 py-0.5 text-xs font-semibold ${statusClass}`}
+					>
+						{status}
+					</Chip>
+				)
 
 		  case "client.name":
 				return <>
-					<div className="font-semibold">{item.client?.name ?? "—"}</div>
-					<div className="font-extralight">{item.client.email}</div>
+					<div className="text-sm font-semibold text-[#07142c]">{item.client?.name ?? "—"}</div>
+					<div className="mt-0.5 text-xs font-normal text-[#66738a]">{item.client?.email ?? ""}</div>
 				</>
 
 			case 'issued_on':
 				return <>
-						<div className="font-semibold">{formattedDate(item.issued_on)}</div>
-						<div className="font-light">{formattedDate(item.due_on)}</div>
+						<div className="text-sm font-semibold text-[#07142c]">{formattedDate(item.issued_on)}</div>
+						<div className="mt-0.5 text-xs font-normal text-[#66738a]">{formattedDate(item.due_on)}</div>
 				</>
 
 		  default:
@@ -94,81 +109,95 @@ function Component() {
 
 	// Actions column: Edit + Archive
   	const renderActions = (item) => (
-		<div className="flex gap-2">
+		<div className="flex items-center gap-3">
 			<Tooltip content="Edit" showArrow={true}>
 				<Button
-					size="sm"
-					variant="light"
+					isIconOnly
+					aria-label={`Edit invoice ${item.invoice_number ?? item.id}`}
+					className="h-9 w-9 min-w-9 rounded-[8px] border border-[#d9e1ec] bg-white text-[#101828] shadow-none hover:border-[#b8c6d8] hover:bg-[#f8fafc]"
+					variant="bordered"
 					onPress={() => router.push(`/app/invoice/${item.id}`)}
 				>
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-						<path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-					</svg>
+					<Pencil className="size-4" strokeWidth={2} />
 				</Button>
 			</Tooltip>
 			<Tooltip content="Archive" showArrow={true}>
 				<Button
-					size="sm"
-					color="danger"
-					variant="light"
+					isIconOnly
+					aria-label={`Archive invoice ${item.invoice_number ?? item.id}`}
+					className="h-9 w-9 min-w-9 rounded-[8px] border border-[#ffcfd2] bg-white text-[#f3123c] shadow-none hover:border-[#ff9da5] hover:bg-[#fff7f7]"
+					variant="bordered"
 					onPress={() => {
 						// handleArchive(item.id)
 						console.log("Archive invoice", item.id);
 					}}
 				>
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-						<path strokeLinecap="round" strokeLinejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-					</svg>
+					<Trash2 className="size-4" strokeWidth={2.1} />
 				</Button>
 			</Tooltip>
 		</div>
   	);
 		return (
     <RootLayout isProtected>
-      <div className="app app-wrapper min-h-screen bg-white dashboard-page">
-        <div className="mx-auto w-full max-w-[1440px] px-5 pb-12 pt-10 sm:px-8 lg:px-10 sm:pt-12 lg:pt-16">
-          <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
+      <div className="app app-wrapper min-h-screen dashboard-page invoice-dashboard-page">
+        <div className="invoice-dashboard-shell">
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
             <div className="w-full min-w-0">
-              <Card className="mb-5 border border-[#dbe7f3] bg-white shadow-[0_28px_64px_-48px_rgba(22,54,88,0.46)]" fullWidth radius="sm">
-                <CardHeader className="px-5 py-5 sm:px-6">
-									<div className="flex w-full flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+              <Card className="invoice-workspace-card" fullWidth shadow="none">
+                <CardHeader className="invoice-workspace-header">
+									<div className="flex w-full flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
 										<div className="workspace-title-wrap">
-											<p className="text-sm font-semibold uppercase tracking-normal text-[#4b9cdc]">Invoice Dashboard</p>
-											<h3 className="mt-3 text-[30px] font-light leading-tight tracking-normal text-[#202020] sm:text-[38px]">My Invoices</h3>
-											<h4 className="mt-3 text-lg font-light leading-7 text-[#4e4e4e]">Manage and track every invoice in one clean view.</h4>
-											<div className="mt-5">
-												<DateRangePicker className="max-w-xs" label="Date range" onChange={handleDateRangeChange} radius="sm" />
-											</div>
+											<p className="text-sm font-semibold uppercase leading-none tracking-normal text-[#075de8]">Invoice Dashboard</p>
+											<h1 className="mt-4 text-[32px] font-bold leading-none tracking-normal text-[#07142c] sm:text-[42px]">My Invoices</h1>
+											<p className="mt-3 text-base font-normal leading-6 text-[#5c6982]">Manage and track every invoice in one clean view.</p>
 										</div>
-										<div className="w-full self-start lg:w-auto workspace-actions">
+										<div className="w-full self-start lg:w-auto">
 											{((planCapabilities?.limits?.max_invoices_per_month === null) || (planCapabilities?.limits?.['current:invoices'] < planCapabilities?.limits?.max_invoices_per_month)) && (
 												<Button disableRipple onPress={() => {
 													clearSticky()
 													router.replace('/app/invoice/new')
 												}} variant="flat" className={dashboardPrimaryButtonClass}>
-													<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 transition-transform duration-300 group-hover:rotate-90">
-														<path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-													</svg>
+													<Plus className="size-5 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2} />
 													Create New Invoice</Button>
 												)}
-
-												<div className="mt-4 w-full lg:w-72">
-													<Input
-														name="search"
-														label="Search"
-														placeholder="Search for client name or email"
-														onValueChange={setSearch}
-														onKeyDown={handleSearchKeyDown}
-														radius="sm"
-													/>
-												</div>
 										</div>
 									</div>
                 </CardHeader>
-                <CardBody className="px-4 pb-5 pt-0 sm:px-6">
+                <CardBody className="invoice-workspace-body">
+									<div className="invoice-filter-grid">
+										<DateRangePicker
+											className="invoice-filter-control"
+											classNames={{
+												inputWrapper: "h-[60px] rounded-[8px] border border-[#dbe3ef] bg-white px-5 shadow-none",
+												label: "text-[13px] font-semibold text-[#18243a]",
+												segment: "text-[15px] text-[#5f6d84]",
+												selectorButton: "text-[#53627a]",
+											}}
+											label="Date range"
+											onChange={handleDateRangeChange}
+											radius="sm"
+											variant="bordered"
+										/>
+										<Input
+											className="invoice-filter-control"
+											classNames={{
+												inputWrapper: "h-[60px] rounded-[8px] border border-[#dbe3ef] bg-white px-5 shadow-none",
+												label: "text-[13px] font-semibold text-[#18243a]",
+												input: "text-[15px] text-[#5f6d84] placeholder:text-[#5f6d84]",
+											}}
+											name="search"
+											label="Search"
+											placeholder="Search for client name or email"
+											onValueChange={setSearch}
+											onKeyDown={handleSearchKeyDown}
+											radius="sm"
+											startContent={<Search className="mr-3 size-5 text-[#4d5d77]" strokeWidth={2} />}
+											variant="bordered"
+										/>
+									</div>
                   {userInvoices && userInvoices.data && userInvoices.data.length > 0 && (
                     <TableData
-											classNames="invoice-table"
+											classNames="invoice-table invoice-dashboard-table"
                       data={userInvoices.data}
                       column={column}
                       page={invoicePage}
@@ -176,7 +205,19 @@ function Component() {
                       onPageChange={setInvoicePage}
                       renderCell={renderCell}
                       renderActions={renderActions}
+											tableClassNames={{
+												wrapper: "min-h-[292px] rounded-[8px] border border-[#dbe3ef] bg-white p-0 shadow-none",
+												th: "h-[54px] bg-white px-5 text-[13px] font-semibold text-[#17233a]",
+												td: "border-t border-[#edf1f6] px-5 py-4 text-sm font-normal text-[#17233a]",
+												tbody: "[&>tr:last-child>td]:border-b-0",
+											}}
                     />
+                  )}
+									{(!userInvoices || !userInvoices.data || userInvoices.data.length === 0) && (
+										<div className="invoice-empty-state">
+											<h2>No invoices yet</h2>
+											<p>Create your first invoice to start tracking clients, payment status, and due dates.</p>
+										</div>
                   )}
                 </CardBody>
               </Card>

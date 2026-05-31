@@ -92,7 +92,7 @@ export default function App() {
 								<Avatar
 									src={avatarUrl}
 									name={avatarName}
-									className="h-[44px] w-[44px] min-w-[44px] overflow-hidden rounded-full text-base"
+									className="h-[42px] w-[42px] min-w-[42px] overflow-hidden rounded-full text-sm"
 									classNames={{
 										img: "h-full w-full rounded-full object-cover",
 									}}

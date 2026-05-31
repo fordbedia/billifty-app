@@ -25,8 +25,9 @@ export default function TableData({
   totalPages = 1, // from backend (last_page)
   onPageChange,           // callback to change page
   renderCell,             // optional
-  renderActions,          // optional
+	renderActions,          // optional
 	classNames = "",
+	tableClassNames = {},
 	paginationColor = 'primary',
 }) {
 	// --- sorting state ---
@@ -107,6 +108,7 @@ export default function TableData({
         wrapper: "min-h-[222px] border border-slate-200 rounded-xl shadow-[0_10px_30px_-24px_rgba(15,23,42,0.35)]",
         th: "bg-slate-50 text-slate-600",
         td: "text-slate-700",
+        ...tableClassNames,
       }}
     >
       <TableHeader columns={columns}>
