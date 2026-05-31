@@ -105,7 +105,7 @@ export default function App() {
 									{user?.email ? (
 										<div className="billifty-account-summary">
 											<span>Signed in as</span>
-											<strong>{user.email}</strong>
+											<strong className="!text-sm">{user.email}</strong>
 										</div>
 									) : null}
 

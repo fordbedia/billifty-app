@@ -37,27 +37,27 @@ function Component() {
 		{key: 'client.name', label: 'Client', allowsSorting: true},
 		{key: 'total_cents', label: 'Amount', allowsSorting: true},
 		{key: 'status', label: 'Status', allowsSorting: true},
-		{key: 'issued_on', label: 'Issue Date', allowsSorting: true}
+		{key: 'created_at', label: 'Date', allowsSorting: true}
 	]
 	const renderCell = (item, columnKey) => {
 		switch (columnKey) {
-		  case "invoice_number":
-			// Clickable Invoice # -> /app/invoice/{id}
-			return (
-			  <Link
-					href={`/app/invoice/${item.id}`}
-					className="text-primary underline hover:opacity-80"
-			  >
-					{item.invoice_number ?? `#${item.id}`}
-			  </Link>
-			);
+			case "invoice_number":
+				// Clickable Invoice # -> /app/invoice/{id}
+				return (
+					<Link
+						href={`/app/invoice/${item.id}`}
+						className="text-primary underline hover:opacity-80"
+					>
+						{item.invoice_number ?? `#${item.id}`}
+					</Link>
+				);
 
 			case 'currency.code':
 				return item.currency.code
 
-		  case "total_cents":
-			// Example formatting amount
-			return `${item.currency.symbol}${((item.total_cents ?? 0) / 100).toFixed(2)}`;
+			case "total_cents":
+				// Example formatting amount
+				return `${item.currency.symbol}${((item.total_cents ?? 0) / 100).toFixed(2)}`;
 
 			case 'status':
 				const string = item.status
@@ -72,7 +72,7 @@ function Component() {
 					statusClass = "bg-[#e6f0ff] text-[#075de8]"
 				} else if (string === 'paid') {
 					color = 'success'
-					statusClass = "bg-[#e8f7ef] text-[#14804a]"
+					statusClass = "bg-[#06b958] text-[#ffffff]"
 				} else if (string === 'partially') {
 					color = 'warning'
 					statusClass = "bg-[#fff4d8] text-[#9a6500]"
@@ -82,33 +82,42 @@ function Component() {
 				}
 				return (
 					<Chip
+						radius="none"
 						color={color}
 						variant="flat"
-						className={`min-w-[74px] justify-center rounded-full px-3 py-0.5 text-xs font-semibold ${statusClass}`}
+						className={`min-w-[74px] justify-center px-3 py-0.5 text-xs font-semibold ${statusClass}`}
 					>
-						{status}
+						<Tooltip content={(() => {
+							if (string === 'issued') {
+								return formattedDate(item.issued_at)
+							} else if (string === 'draft') {
+								return formattedDate(item.created_at)
+							} else if (string === 'paid') {
+								return formattedDate(item.paid_at)
+							}
+						})()} showArrow={true}>{status}</Tooltip>
 					</Chip>
 				)
 
-		  case "client.name":
+			case "client.name":
 				return <>
 					<div className="text-sm font-semibold text-[#07142c]">{item.client?.name ?? "—"}</div>
 					<div className="mt-0.5 text-xs font-normal text-[#66738a]">{item.client?.email ?? ""}</div>
 				</>
 
-			case 'issued_on':
+			case 'created_at':
 				return <>
-						<div className="text-sm font-semibold text-[#07142c]">{formattedDate(item.issued_on)}</div>
-						<div className="mt-0.5 text-xs font-normal text-[#66738a]">{formattedDate(item.due_on)}</div>
+					<div className="text-sm font-semibold text-[#07142c]">created: {formattedDate(item.created_at)}</div>
+					<div className="mt-0.5 text-xs font-semibold text-[#66738a]">Due: {formattedDate(item.due_on)}</div>
 				</>
 
-		  default:
+			default:
 				return item[columnKey] ?? "—";
-			}
-	  };
+		}
+	};
 
 	// Actions column: Edit + Archive
-  	const renderActions = (item) => (
+	const renderActions = (item) => (
 		<div className="flex items-center gap-3">
 			<Tooltip content="Edit" showArrow={true}>
 				<Button
@@ -118,7 +127,7 @@ function Component() {
 					variant="bordered"
 					onPress={() => router.push(`/app/invoice/${item.id}`)}
 				>
-					<Pencil className="size-4" strokeWidth={2} />
+					<Pencil className="size-4" strokeWidth={2}/>
 				</Button>
 			</Tooltip>
 			<Tooltip content="Archive" showArrow={true}>
@@ -132,24 +141,28 @@ function Component() {
 						console.log("Archive invoice", item.id);
 					}}
 				>
-					<Trash2 className="size-4" strokeWidth={2.1} />
+					<Trash2 className="size-4" strokeWidth={2.1}/>
 				</Button>
 			</Tooltip>
 		</div>
-  	);
-		return (
-    <RootLayout isProtected>
-      <div className="app app-wrapper min-h-screen dashboard-page invoice-dashboard-page">
-        <div className="invoice-dashboard-shell">
-          <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-            <div className="w-full min-w-0">
-              <Card className="invoice-workspace-card" fullWidth shadow="none">
-                <CardHeader className="invoice-workspace-header">
-									<div className="flex w-full flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+	);
+	return (
+		<RootLayout isProtected>
+			<div className="app app-wrapper min-h-screen dashboard-page invoice-dashboard-page">
+				<div className="invoice-dashboard-shell">
+					<div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+						<div className="w-full min-w-0">
+							<Card className="invoice-workspace-card" fullWidth shadow="none">
+								<CardHeader className="invoice-workspace-header">
+									<div
+										className="flex w-full flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
 										<div className="workspace-title-wrap">
-											<p className="text-sm font-semibold uppercase leading-none tracking-normal text-[#075de8]">Invoice Dashboard</p>
-											<h1 className="mt-4 text-[32px] font-bold leading-none tracking-normal text-[#07142c] sm:text-[42px]">My Invoices</h1>
-											<p className="mt-3 text-base font-normal leading-6 text-[#5c6982]">Manage and track every invoice in one clean view.</p>
+											<p className="text-sm font-semibold uppercase leading-none tracking-normal text-[#075de8]">Invoice
+												Dashboard</p>
+											<h1 className="mt-4 text-[32px] font-bold leading-none tracking-normal text-[#07142c] sm:text-[42px]">My
+												Invoices</h1>
+											<p className="mt-3 text-base font-normal leading-6 text-[#5c6982]">Manage
+												and track every invoice in one clean view.</p>
 										</div>
 										<div className="w-full self-start lg:w-auto">
 											{((planCapabilities?.limits?.max_invoices_per_month === null) || (planCapabilities?.limits?.['current:invoices'] < planCapabilities?.limits?.max_invoices_per_month)) && (
@@ -157,13 +170,15 @@ function Component() {
 													clearSticky()
 													router.replace('/app/invoice/new')
 												}} variant="flat" className={dashboardPrimaryButtonClass}>
-													<Plus className="size-5 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2} />
+													<Plus
+														className="size-5 transition-transform duration-300 group-hover:rotate-90"
+														strokeWidth={2}/>
 													Create New Invoice</Button>
-												)}
+											)}
 										</div>
 									</div>
-                </CardHeader>
-                <CardBody className="invoice-workspace-body">
+								</CardHeader>
+								<CardBody className="invoice-workspace-body">
 									<div className="invoice-filter-grid">
 										<DateRangePicker
 											className="invoice-filter-control"
@@ -191,53 +206,55 @@ function Component() {
 											onValueChange={setSearch}
 											onKeyDown={handleSearchKeyDown}
 											radius="sm"
-											startContent={<Search className="mr-3 size-5 text-[#4d5d77]" strokeWidth={2} />}
+											startContent={<Search className="mr-3 size-5 text-[#4d5d77]"
+																  strokeWidth={2}/>}
 											variant="bordered"
 										/>
 									</div>
-                  {userInvoices && userInvoices.data && userInvoices.data.length > 0 && (
-                    <TableData
+									{userInvoices && userInvoices.data && userInvoices.data.length > 0 && (
+										<TableData
 											classNames="invoice-table invoice-dashboard-table"
-                      data={userInvoices.data}
-                      column={column}
-                      page={invoicePage}
-                      totalPages={userInvoices.last_page ?? 1}
-                      onPageChange={setInvoicePage}
-                      renderCell={renderCell}
-                      renderActions={renderActions}
+											data={userInvoices.data}
+											column={column}
+											page={invoicePage}
+											totalPages={userInvoices.last_page ?? 1}
+											onPageChange={setInvoicePage}
+											renderCell={renderCell}
+											renderActions={renderActions}
 											tableClassNames={{
 												wrapper: "min-h-[292px] rounded-[8px] border border-[#dbe3ef] bg-white p-0 shadow-none",
 												th: "h-[54px] bg-white px-5 text-[13px] font-semibold text-[#17233a]",
 												td: "border-t border-[#edf1f6] px-5 py-4 text-sm font-normal text-[#17233a]",
 												tbody: "[&>tr:last-child>td]:border-b-0",
 											}}
-                    />
-                  )}
+										/>
+									)}
 									{(!userInvoices || !userInvoices.data || userInvoices.data.length === 0) && (
 										<div className="invoice-empty-state">
 											<h2>No invoices yet</h2>
-											<p>Create your first invoice to start tracking clients, payment status, and due dates.</p>
+											<p>Create your first invoice to start tracking clients, payment status, and
+												due dates.</p>
 										</div>
-                  )}
-                </CardBody>
-              </Card>
-            </div>
-
-						<div className="w-full min-w-0">
-           		<DashboardSidebar />
+									)}
+								</CardBody>
+							</Card>
 						</div>
 
-          </div>
-        </div>
-      </div>
-    </RootLayout>
-  );
+						<div className="w-full min-w-0">
+							<DashboardSidebar/>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</RootLayout>
+	);
 }
 
 export default function Invoices() {
 	return (
 		<InvoiceProvider mode="list">
-			<Component />
+			<Component/>
 		</InvoiceProvider>
 	);
 }
