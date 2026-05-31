@@ -44,7 +44,7 @@ export default function App() {
 
 	const accountLinks = [
 		{label: "Onboarding", href: uri.onboarding},
-		{label: "Dashboard", href: uri.invoices},
+		{label: "Invoices", href: uri.invoices},
 		// { label: "New Invoice", href: uri.create_invoice },
 		{label: "Profile", href: uri.profile},
 		{label: "Account Settings", href: uri.accountSettings},

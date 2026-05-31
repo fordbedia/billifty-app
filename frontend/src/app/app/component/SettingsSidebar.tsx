@@ -26,7 +26,7 @@ export default function SettingsSidebar() {
         description: "Manage security and sensitive account actions.",
         icon: Shield
     }, {
-        title: "Dashboard",
+        title: "Invoices",
         link: uri.invoices,
         description: "Review and manage your invoice activity.",
         icon: LayoutDashboard

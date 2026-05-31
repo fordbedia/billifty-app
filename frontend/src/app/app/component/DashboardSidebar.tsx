@@ -3,7 +3,7 @@
 import {Card, CardBody, Link, Button} from "@heroui/react";
 import {uri} from "@/app/constants/routePaths";
 import {usePathname} from "next/navigation";
-import {Building2, ChevronRight, Sparkles, Users} from "lucide-react";
+import {Building2, ChevronRight, Sparkles, Users, ReceiptText} from "lucide-react";
 import {ComponentType} from "react";
 
 type MenuListProps = {
@@ -16,6 +16,11 @@ export default function DashboardSidebar() {
     const pathname = usePathname();
 
     const menuList: MenuListProps[] = [{
+        title: "Invoices",
+        description: "Create, manage, and send invoices with ease.",
+        link: uri.invoices,
+        icon: ReceiptText
+    }, {
         title: "Business Profile",
         description: "Manage your company details and payment setup.",
         link: uri.business_profile.lists,
