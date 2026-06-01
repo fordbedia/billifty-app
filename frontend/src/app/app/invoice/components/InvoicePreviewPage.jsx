@@ -23,8 +23,6 @@ export default function InvoicePreviewPage({invoiceId}) {
 		isOpenPreviewInvoiceModal, onOpenChangePreviewInvoiceModal, generatePdf
 	} = useInvoice()
 	const [previewUrl, setPreviewUrl] = useState(null);
-	const [isRenewingPublicLink, setIsRenewingPublicLink] = useState(false);
-	const renewTimeoutRef = useRef(null);
 
 	const {
 		data: html,
@@ -54,14 +52,6 @@ export default function InvoicePreviewPage({invoiceId}) {
 		}
 	}, [isOpenPreviewInvoiceModal]);
 
-	useEffect(() => {
-		return () => {
-			if (renewTimeoutRef.current) {
-				clearTimeout(renewTimeoutRef.current);
-			}
-		};
-	}, []);
-
 	const invoiceNumber = invoiceId ? `${publicUrl?.invoice_number}` : "-";
 	const shareUrl = publicUrl?.link;
 	const isPublicLinkRevoked = Boolean(publicUrl?.public_token_revoked_at);
@@ -81,23 +71,8 @@ export default function InvoicePreviewPage({invoiceId}) {
 
 	const {mutate: renew, isPending: renewIsPending} = useMutation({
 		mutationFn: async () => (await Invoice.renewInvoicePublicUrl(invoiceId))?.data,
-		onMutate: () => {
-			setIsRenewingPublicLink(true);
-		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({queryKey: ['invoice-public-url', invoiceId]});
-			// if (renewTimeoutRef.current) {
-			// 	clearTimeout(renewTimeoutRef.current);
-			// }
-			//
-			// renewTimeoutRef.current = setTimeout(() => {
-			// 	queryClient.invalidateQueries({queryKey: ['invoice-public-url', invoiceId]});
-			// 	setIsRenewingPublicLink(false);
-			// 	renewTimeoutRef.current = null;
-			// }, 3000);
-		},
-		onError: () => {
-			setIsRenewingPublicLink(false);
 		}
 	})
 
