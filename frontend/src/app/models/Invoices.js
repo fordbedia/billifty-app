@@ -62,4 +62,8 @@ export default class Invoice extends Model{
 	static async revokeInvoicePublicUrl(invoiceId) {
 		return await this.axios().post(`/${invoiceId}/preview/public-invoice-link/revoke`)
 	}
+
+	static async renewInvoicePublicUrl(invoiceId) {
+		return await this.axios().post(`/${invoiceId}/preview/public-invoice-link/renew`)
+	}
 }

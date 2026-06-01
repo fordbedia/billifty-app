@@ -1,6 +1,6 @@
 "use client";
 
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import Invoice from "@/app/models/Invoices";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {Button, Chip, Input, Modal, ModalBody, ModalContent, ModalHeader, Switch} from "@heroui/react";
@@ -23,6 +23,8 @@ export default function InvoicePreviewPage({invoiceId}) {
 		isOpenPreviewInvoiceModal, onOpenChangePreviewInvoiceModal, generatePdf
 	} = useInvoice()
 	const [previewUrl, setPreviewUrl] = useState(null);
+	const [isRenewingPublicLink, setIsRenewingPublicLink] = useState(false);
+	const renewTimeoutRef = useRef(null);
 
 	const {
 		data: html,
@@ -52,14 +54,52 @@ export default function InvoicePreviewPage({invoiceId}) {
 		}
 	}, [isOpenPreviewInvoiceModal]);
 
-	const invoiceNumber = invoiceId ? `INV-${invoiceId}` : "INV-2024-0089";
+	useEffect(() => {
+		return () => {
+			if (renewTimeoutRef.current) {
+				clearTimeout(renewTimeoutRef.current);
+			}
+		};
+	}, []);
+
+	const invoiceNumber = invoiceId ? `${publicUrl?.invoice_number}` : "-";
 	const shareUrl = publicUrl?.link;
+	const isPublicLinkRevoked = Boolean(publicUrl?.public_token_revoked_at);
 
 	const copyShareUrl = async () => {
 		if (typeof navigator !== "undefined" && navigator.clipboard) {
 			await navigator.clipboard.writeText(shareUrl);
 		}
 	};
+
+	const {mutate: revoke} = useMutation({
+		mutationFn: async () => (await Invoice.revokeInvoicePublicUrl(invoiceId))?.data,
+		onSuccess: () => {
+			queryClient.invalidateQueries({queryKey: ['invoice-public-url', invoiceId]});
+		}
+	})
+
+	const {mutate: renew, isPending: renewIsPending} = useMutation({
+		mutationFn: async () => (await Invoice.renewInvoicePublicUrl(invoiceId))?.data,
+		onMutate: () => {
+			setIsRenewingPublicLink(true);
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({queryKey: ['invoice-public-url', invoiceId]});
+			// if (renewTimeoutRef.current) {
+			// 	clearTimeout(renewTimeoutRef.current);
+			// }
+			//
+			// renewTimeoutRef.current = setTimeout(() => {
+			// 	queryClient.invalidateQueries({queryKey: ['invoice-public-url', invoiceId]});
+			// 	setIsRenewingPublicLink(false);
+			// 	renewTimeoutRef.current = null;
+			// }, 3000);
+		},
+		onError: () => {
+			setIsRenewingPublicLink(false);
+		}
+	})
 
 	if (isError) {
 		return (
@@ -68,10 +108,6 @@ export default function InvoicePreviewPage({invoiceId}) {
 			</div>
 		);
 	}
-
-	const {mutate: revoke} = useMutation({
-		mutationFn: async () => (await Invoice.revokeInvoicePublicUrl(invoiceId))?.data
-	})
 
 	return (
 		<Modal
@@ -139,9 +175,15 @@ export default function InvoicePreviewPage({invoiceId}) {
 
 								<div className="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_96px_116px_132px]">
 									<Input
-										disabled={publicUrl?.public_token_revoked_at}
+										style={{
+											WebkitUserSelect: "none",
+											MozUserSelect: "none",
+											msUserSelect: "none",
+											userSelect: "none",
+										}}
+										isDisabled={isPublicLinkRevoked}
 										aria-label="Shareable invoice link"
-										value={shareUrl}
+										value={shareUrl ?? ""}
 										isReadOnly
 										variant="bordered"
 										radius="lg"
@@ -149,37 +191,53 @@ export default function InvoicePreviewPage({invoiceId}) {
 																size={19} strokeWidth={2.4}/>}
 										classNames={{
 											base: "min-w-0",
-											inputWrapper: "min-h-[48px] border-[#dedede] bg-white px-4 shadow-none group-data-[focus=true]:border-[#2b99dd]",
-											input: "truncate text-sm font-normal leading-none tracking-normal text-[#111316]",
+											inputWrapper: "min-h-[48px] border-[#dedede] bg-white px-4 shadow-none group-data-[focus=true]:border-[#2b99dd] data-[disabled=true]:opacity-100",
+											input: `truncate text-sm font-normal leading-none tracking-normal text-[#111316] ${
+												isPublicLinkRevoked ? "pointer-events-none select-none blur-[3px] [user-select:none]" : ""
+											}`,
 										}}
 									/>
-									<Button
-										disabled={publicUrl?.public_token_revoked_at}
-										type="button"
-										onPress={copyShareUrl}
-										radius="lg"
-										startContent={<Copy aria-hidden="true" size={18} strokeWidth={2.2}/>}
-										className="min-h-[48px] bg-[#e9f2ff] px-3 text-sm font-semibold leading-none tracking-normal text-[#2f9bda]"
-									>
-										Copy
-									</Button>
+									{!isPublicLinkRevoked && (
+										<Button
+											disabled={publicUrl?.public_token_revoked_at}
+											type="button"
+											onPress={copyShareUrl}
+											radius="lg"
+											startContent={<Copy aria-hidden="true" size={18} strokeWidth={2.2}/>}
+											className="h-12 min-h-12 w-full bg-[#e9f2ff] px-3 text-sm font-semibold leading-none tracking-normal text-[#2f9bda]"
+										>
+											Copy
+										</Button>
+									)}
 									<Button
 										onPress={() => revoke()}
-										disabled={publicUrl?.public_token_revoked_at}
+										disabled={isPublicLinkRevoked}
 										type="button"
 										radius="lg"
 										startContent={<Ban aria-hidden="true" size={18} strokeWidth={2.3}/>}
-										className={"min-h-[48px] px-3 text-sm font-semibold leading-none tracking-normal " + publicUrl.public_token_revoked_at ? 'bg-[#dc293c] text-[#ffff]' : 'bg-[#e8e8ea] text-[#111316]'}
+										className={`h-12 min-h-12 w-full px-3 text-sm font-semibold leading-none tracking-normal ${
+											isPublicLinkRevoked ? "bg-[#dc293c] text-white" : "bg-[#e8e8ea] text-[#111316]"
+										}`}
 									>
-										{publicUrl?.public_token_revoked_at ? 'Revoked' : 'Revoke'}
+										{isPublicLinkRevoked ? 'Revoked' : 'Revoke'}
 									</Button>
 									<Button
+										onPress={renew}
 										type="button"
 										radius="lg"
-										startContent={<RefreshCw aria-hidden="true" size={18} strokeWidth={2.5}/>}
-										className="min-h-[48px] bg-[#e8e8ea] px-3 text-sm font-semibold leading-none tracking-normal text-[#111316]"
+										startContent={
+											<RefreshCw
+												aria-hidden="true"
+												className={`transition-transform duration-300 group-hover:rotate-180 ${
+													renewIsPending ? "animate-spin" : ""
+												}`}
+												size={18}
+												strokeWidth={2.5}
+											/>
+										}
+										className="group h-12 min-h-12 w-full bg-[#e8e8ea] px-3 text-sm font-semibold leading-none tracking-normal text-[#111316]"
 									>
-										New Link
+										{isPublicLinkRevoked ? 'Activate' : 'New Link'}
 									</Button>
 								</div>
 
