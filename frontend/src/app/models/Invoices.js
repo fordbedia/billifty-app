@@ -54,4 +54,12 @@ export default class Invoice extends Model{
 			message
 		})
 	}
+
+	static async getInvoicePublicUrl(invoiceId) {
+		return await this.axios().get(`/${invoiceId}/preview/public-invoice-link`)
+	}
+
+	static async revokeInvoicePublicUrl(invoiceId) {
+		return await this.axios().post(`/${invoiceId}/preview/public-invoice-link/revoke`)
+	}
 }

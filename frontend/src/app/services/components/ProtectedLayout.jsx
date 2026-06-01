@@ -71,24 +71,24 @@ export default function ProtectedLayout({children, isProtected = false}) {
 			return;
 		}
 
-		const userConsumption = userData?.plan_capabilities?.limits;
-		const needsOnboarding =
-			Number(userConsumption?.['current:businessProfiles'] ?? 0) === 0 ||
-			Number(userConsumption?.['current:clients'] ?? 0) === 0 ||
-			Number(userConsumption?.['current:invoices'] ?? 0) === 0;
-
-		if (
-			needsOnboarding &&
-			pathname !== uri.onboarding &&
-			pathname !== uri.business_profile.create &&
-			pathname !== uri.client.create_client &&
-			pathname !== uri.create_invoice &&
-			pathname !== uri.checkout_success &&
-			pathname !== uri.h
-		) {
-			router.replace(uri.onboarding);
-			return;
-		}
+		// const userConsumption = userData?.plan_capabilities?.limits;
+		// const needsOnboarding =
+		// 	Number(userConsumption?.['current:businessProfiles'] ?? 0) === 0 ||
+		// 	Number(userConsumption?.['current:clients'] ?? 0) === 0 ||
+		// 	Number(userConsumption?.['current:invoices'] ?? 0) === 0;
+		//
+		// if (
+		// 	needsOnboarding &&
+		// 	pathname !== uri.onboarding &&
+		// 	pathname !== uri.business_profile.create &&
+		// 	pathname !== uri.client.create_client &&
+		// 	pathname !== uri.create_invoice &&
+		// 	pathname !== uri.checkout_success &&
+		// 	pathname !== uri.h
+		// ) {
+		// 	router.replace(uri.onboarding);
+		// 	return;
+		// }
 
 		// 5) Now enforce route limits (we KNOW we have caps)
 		const rule = LIMIT_RULES.find((r) => r.match(pathname));

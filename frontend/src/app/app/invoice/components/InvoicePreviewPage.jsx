@@ -2,7 +2,7 @@
 
 import {useEffect, useState} from "react";
 import Invoice from "@/app/models/Invoices";
-import {useQuery} from "@tanstack/react-query";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {Button, Chip, Input, Modal, ModalBody, ModalContent, ModalHeader, Switch} from "@heroui/react";
 import {useInvoice} from "@/app/providers/InvoiceContext";
 import {
@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 export default function InvoicePreviewPage({invoiceId}) {
+	const queryClient = useQueryClient();
 	const {
 		isOpenPreviewInvoiceModal, onOpenChangePreviewInvoiceModal, generatePdf
 	} = useInvoice()
@@ -35,14 +36,24 @@ export default function InvoicePreviewPage({invoiceId}) {
 		retry: false
 	})
 
-	// useEffect(() => {
-	// 	if (isSuccess) {
-	// 		setPreviewUrl(invoiceUrl?.url ?? null)
-	// 	}
-	// }, [invoiceUrl, isSuccess]);
+	const {
+		data: publicUrl,
+	} = useQuery({
+		queryKey: ['invoice-public-url', invoiceId],
+		queryFn: async () => (await Invoice.getInvoicePublicUrl(invoiceId))?.data,
+		enabled: !!invoiceId,
+		retry: false
+	})
+
+	useEffect(() => {
+		if (isOpenPreviewInvoiceModal && invoiceId) {
+			queryClient.invalidateQueries({queryKey: ['preview-invoice', invoiceId]});
+			queryClient.invalidateQueries({queryKey: ['invoice-public-url', invoiceId]});
+		}
+	}, [isOpenPreviewInvoiceModal]);
 
 	const invoiceNumber = invoiceId ? `INV-${invoiceId}` : "INV-2024-0089";
-	const shareUrl = previewUrl ?? `https://invoices.app/share/${invoiceNumber.toLowerCase()}`;
+	const shareUrl = publicUrl?.link;
 
 	const copyShareUrl = async () => {
 		if (typeof navigator !== "undefined" && navigator.clipboard) {
@@ -57,6 +68,10 @@ export default function InvoicePreviewPage({invoiceId}) {
 			</div>
 		);
 	}
+
+	const {mutate: revoke} = useMutation({
+		mutationFn: async () => (await Invoice.revokeInvoicePublicUrl(invoiceId))?.data
+	})
 
 	return (
 		<Modal
@@ -124,6 +139,7 @@ export default function InvoicePreviewPage({invoiceId}) {
 
 								<div className="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_96px_116px_132px]">
 									<Input
+										disabled={publicUrl?.public_token_revoked_at}
 										aria-label="Shareable invoice link"
 										value={shareUrl}
 										isReadOnly
@@ -138,6 +154,7 @@ export default function InvoicePreviewPage({invoiceId}) {
 										}}
 									/>
 									<Button
+										disabled={publicUrl?.public_token_revoked_at}
 										type="button"
 										onPress={copyShareUrl}
 										radius="lg"
@@ -147,12 +164,14 @@ export default function InvoicePreviewPage({invoiceId}) {
 										Copy
 									</Button>
 									<Button
+										onPress={() => revoke()}
+										disabled={publicUrl?.public_token_revoked_at}
 										type="button"
 										radius="lg"
 										startContent={<Ban aria-hidden="true" size={18} strokeWidth={2.3}/>}
-										className="min-h-[48px] bg-[#e8e8ea] px-3 text-sm font-semibold leading-none tracking-normal text-[#111316]"
+										className={"min-h-[48px] px-3 text-sm font-semibold leading-none tracking-normal " + publicUrl.public_token_revoked_at ? 'bg-[#dc293c] text-[#ffff]' : 'bg-[#e8e8ea] text-[#111316]'}
 									>
-										Revoke
+										{publicUrl?.public_token_revoked_at ? 'Revoked' : 'Revoke'}
 									</Button>
 									<Button
 										type="button"

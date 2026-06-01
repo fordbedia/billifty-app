@@ -21,7 +21,7 @@ type ChecklistItem = {
 const DEFAULT_ITEMS: ChecklistItem[] = [
     {
         id: 1,
-        name: "current:businessProfiles",
+        name: "business_profiles",
         title: "Business Profile",
         description: "Set up your company details, payment methods, and business information for professional invoicing.",
         status: "current",
@@ -29,7 +29,7 @@ const DEFAULT_ITEMS: ChecklistItem[] = [
     },
     {
         id: 2,
-        name: "current:clients",
+        name: "clients",
         title: "Clients",
         description: "Organize and manage your client database for streamlined contact management and communication.",
         status: "pending",
@@ -37,7 +37,7 @@ const DEFAULT_ITEMS: ChecklistItem[] = [
     },
     {
         id: 3,
-        name: "current:invoices",
+        name: "invoices",
         title: "Invoices",
         description: "Create, customize, and send professional invoices with automated tracking and payment processing.",
         status: "pending",
@@ -46,9 +46,9 @@ const DEFAULT_ITEMS: ChecklistItem[] = [
 ];
 
 const CHECKLIST_KEYS = [
-    "current:businessProfiles",
-    "current:clients",
-    "current:invoices",
+    "business_profiles",
+    "clients",
+    "invoices",
 ] as const;
 
 const buildChecklistItems = (
@@ -57,7 +57,7 @@ const buildChecklistItems = (
     const completedCount = CHECKLIST_KEYS.filter(
         (key) => Number(onboardingData?.[key] ?? 0) > 0
     ).length;
-
+    console.log('onboardingData',onboardingData)
     return DEFAULT_ITEMS.map((item, index) => {
         const value = Number(onboardingData?.[item.name] ?? 0);
 
@@ -85,7 +85,7 @@ const buildChecklistItems = (
 export default function OnboardingPage() {
     const router = useRouter();
     const {userData, isUserDataLoading} = useApp();
-    const onboardingData = userData?.plan_capabilities?.limits;
+    const onboardingData = userData?.over_all_usages;
     const calculatedCompletedSteps = CHECKLIST_KEYS.filter(
         (key) => Number(onboardingData?.[key] ?? 0) > 0
     ).length;
@@ -101,9 +101,9 @@ export default function OnboardingPage() {
             : progressValue > 0
                 ? "linear-gradient(90deg, #f3c623 0%, #d6cf30 58%, #a6cb3f 100%)"
                 : "linear-gradient(90deg, #f3c623 0%, #f3c623 100%)";
-    const currentBusinessProfiles = onboardingData?.["current:businessProfiles"];
-    const currentClients = onboardingData?.["current:clients"];
-    const currentInvoices = onboardingData?.["current:invoices"];
+    const currentBusinessProfiles = onboardingData?.["business_profiles"];
+    const currentClients = onboardingData?.["clients"];
+    const currentInvoices = onboardingData?.["invoices"];
     const currentItem: ChecklistItem | null | undefined = buildChecklistItems(onboardingData).find((item) => item.status === "current");
 
     const [items, setItems] = useState<ChecklistItem[]>(DEFAULT_ITEMS);
@@ -119,7 +119,7 @@ export default function OnboardingPage() {
 
         try {
             setIsLoading(true);
-            if (currentItem?.name === 'current:invoices') {
+            if (currentItem?.name === 'invoices') {
                 window.open(`${nextUri}?from=onboarding&clear=true`, '_blank');
                 setIsLoading(false);
                 return;
