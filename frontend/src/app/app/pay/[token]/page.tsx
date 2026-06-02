@@ -2,8 +2,9 @@
 
 import {ArrowRight, Shield} from "lucide-react";
 import {useParams} from "next/navigation";
-import {type ReactNode, useState} from "react";
+import {type ReactNode, useEffect, useState} from "react";
 import {useQuery} from "@tanstack/react-query";
+import {isAxiosError} from "axios";
 import Billing from "@/app/models/Billing";
 import {formatMoney} from "@/app/utils/money";
 import {BilliftyLogo} from "@/app/components/common/NavBar";
@@ -125,6 +126,10 @@ type PaymentButtonProps = {
     onClick: () => void;
 };
 
+type ErrorResponse = {
+    message?: string;
+};
+
 function PaymentButton({brand, children, disabled = false, icon, onClick}: PaymentButtonProps) {
     const brandClasses = {
         stripe: "bg-[#2fa1e8] hover:bg-[#2398de]",
@@ -156,9 +161,10 @@ export default function Pay() {
         cashapp: false,
     });
 
-    const {data} = useQuery({
+    const {data, error: dataError, isError: dataIsError} = useQuery({
         queryKey: ["payment", token],
-        queryFn: async () => (await Billing.getPaymentRecord(token))
+        queryFn: async () => (await Billing.getPaymentRecord(token)),
+        retry: false,
     })
 
     const hasPaymentMethod = (method: string) => {
@@ -207,6 +213,17 @@ export default function Pay() {
     const handleCashAppPayment = () => {
         setError("Cash App payments are coming soon.");
     }
+
+    useEffect(() => {
+        if (!dataIsError) return;
+
+        if (isAxiosError<ErrorResponse>(dataError)) {
+            setError(dataError.response?.data?.message ?? dataError.message);
+            return;
+        }
+
+        setError(dataError?.message ?? "Unable to load payment details.");
+    }, [dataError, dataIsError]);
 
     return (
         <main className="min-h-screen bg-white px-4 py-6 font-sans text-[#111827] sm:py-8">

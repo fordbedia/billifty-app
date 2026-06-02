@@ -86,9 +86,9 @@ export default function Actions({isIssuedOrPaid, isPaid}) {
 
 						{!invoiceId && !isEmpty && (<Button disableRipple className="my-2 w-full" color="danger" onPress={clearSticky}>Reset All</Button>)}
 						{invoiceId && (<Button className="my-2 w-full" color="secondary" onPress={onOpenPreviewInvoiceModal}>Preview Invoice</Button>)}
-						{invoiceId && isPaid && (<Button onPress={generatePdf} className="my-2 w-full" color="primary">Quick Download</Button>)}
+						{/*{invoiceId && isPaid && (<Button onPress={generatePdf} className="my-2 w-full" color="primary">Quick Download</Button>)}*/}
 
-						{invoiceId && !isPaid && (<Button className="my-2 text-white w-full" as={Link} href={uri.send_invoice(invoiceId)} color="success">Send/Download Invoice</Button> )}
+						{invoiceId && isIssuedOrPaid && (<Button className="my-2 text-white w-full" as={Link} href={uri.send_invoice(invoiceId)} color="success">Send/Download Invoice</Button> )}
 
 						<div className="invoice-ai-note">
 							<div className="invoice-ai-note-head">AI Invoice Draft (Beta)</div>

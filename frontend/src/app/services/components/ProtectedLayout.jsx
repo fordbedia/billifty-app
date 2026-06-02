@@ -10,7 +10,7 @@ import {isProtectedPath, isUnsubscribeRouteToPricing} from "@/app/config/protect
 import Forbidden from "@/app/app/invoice/components/errorPages/Forbidden";
 
 export default function ProtectedLayout({children, isProtected = false}) {
-	const {userData, isUserDataLoading, planCapabilities} = useApp(); // use one source
+	const {userData, isUserDataLoading, planCapabilities, invoiceInfo} = useApp(); // use one source
 	const subscription = userData?.subscription;
 	const router = useRouter();
 	const pathname = usePathname();
@@ -90,6 +90,16 @@ export default function ProtectedLayout({children, isProtected = false}) {
 		// 	return;
 		// }
 
+		// ----------------------------------------------------------------------------
+		// Restrict Send/Download Invoice page for Issued and Paid Invoice only
+		// ----------------------------------------------------------------------------
+		if (pathname === uri.send_invoice(invoiceInfo?.id) && invoiceInfo?.status === 'draft') {
+			setAllowed(false);
+			setForbiddenInfo(null);
+			router.replace(uri.invoice(invoiceInfo?.id));
+			return;
+		}
+
 		// 5) Now enforce route limits (we KNOW we have caps)
 		const rule = LIMIT_RULES.find((r) => r.match(pathname));
 		if (rule) {
@@ -107,7 +117,7 @@ export default function ProtectedLayout({children, isProtected = false}) {
 
 		setForbiddenInfo(null);
 		setAllowed(true);
-	}, [router, pathname, userData, isUserDataLoading, planCapabilities]);
+	}, [router, pathname, userData, isUserDataLoading, planCapabilities, invoiceInfo]);
 
 	if (forbiddenInfo) {
 		return (

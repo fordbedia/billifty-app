@@ -14,8 +14,9 @@ import Boolean = types.Boolean;
 import {useQuery, useQueryClient} from "@tanstack/react-query";
 import User from "@/app/models/User";
 import {auth} from "@/app/helpers/auth";
-import {usePathname} from "next/navigation";
+import {usePathname, useParams} from "next/navigation";
 import {uri} from "@/app/constants/routePaths";
+import Invoice from "@/app/models/Invoices";
 
 type AppProviderProps = {
     children: ReactNode
@@ -41,6 +42,7 @@ interface AppContextValue {
     isUserDataLoading: boolean
     isErrorUserData: boolean
     planCapabilities: Record<string, any>
+    invoiceInfo: Record<string, any>
 }
 
 export type PlanCapabilities = {
@@ -60,6 +62,7 @@ export function AppProvider({children}: AppProviderProps) {
     const [selectedTab, setSelectedTab] = useState<string>('signin')
     const session = auth()
     const pathname = usePathname()
+    const params = useParams()
     const queryClient = useQueryClient()
     // SignUp
     const [password, setPassword] = useState("");
@@ -78,6 +81,14 @@ export function AppProvider({children}: AppProviderProps) {
         enabled: !!session || pathname === uri.business_profile.lists || pathname === uri.onboarding,
         staleTime: 0,
         refetchOnMount: 'always',
+    })
+
+    const {data: invoiceInfo} = useQuery({
+        queryKey: ['invoice-info', params?.id],
+        queryFn: async () => (await Invoice.find(params?.id))?.data,
+        retry: true,
+        enabled: !!params?.id,
+        staleTime: 0,
     })
 
     useEffect(() => {
@@ -123,8 +134,8 @@ export function AppProvider({children}: AppProviderProps) {
         isDarkMode,
         selectedTab,
         setSelectedTab,
-        userData, isUserDataLoading, isErrorUserData, planCapabilities
-    }), [theme, user, isDarkMode, selectedTab, userData, isUserDataLoading, isErrorUserData, planCapabilities]);
+        userData, isUserDataLoading, isErrorUserData, planCapabilities, invoiceInfo
+    }), [theme, user, isDarkMode, selectedTab, userData, isUserDataLoading, isErrorUserData, planCapabilities, invoiceInfo]);
     return <AppContext.Provider value={value}>
         {children}
     </AppContext.Provider>;
