@@ -516,6 +516,23 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 		]
 	);
 
+	const invoiceItemsFrom = (invoice) => invoice?.items ?? invoice?.invoice_items ?? [];
+
+	// ----------------------------------------------------------------------------
+	// Build the save/update payload without accidentally zeroing invoice totals.
+	// In edit mode the invoice header can hydrate before line items are available; if we
+	// run computeInvoice() against an empty local item list, it recalculates totals as 0
+	// and overwrites valid DB totals. Once items are present, computeInvoice() remains the
+	// source of truth so frontend totals stay aligned with the backend calculator.
+	// ----------------------------------------------------------------------------
+	const buildInvoicePayload = () => {
+		if ((data.invoice_items ?? []).length === 0) {
+			return data;
+		}
+
+		return computeInvoice(data);
+	}
+
 	// ----------------------------------------------------------------------------
 	// Sync invoice data with selected template and color scheme
 	// Updates invoice_template_id and color_scheme_id when user makes a selection.
@@ -588,7 +605,7 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 		setData((prev) => ({
 			...prev,
 			...fetchedInvoice,
-			invoice_items: withItemPositions([...(fetchedInvoice.items ?? [])]),
+			invoice_items: withItemPositions([...invoiceItemsFrom(fetchedInvoice)]),
 		}));
 
 		// Optional: derive flags from fetched invoice once
@@ -628,7 +645,7 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 
 	const {mutate: saveDraft, error: createInvoiceError} = useMutation({
 		mutationFn: async (action) => {
-			const payload = computeInvoice(data);
+			const payload = buildInvoicePayload();
 			return await Invoice.saveDraft(payload, action)
 		},
 		onSuccess: (r) => {
@@ -647,7 +664,7 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 
 	const {mutate: update, error: updateError} = useMutation({
 		mutationFn: async (action) => {
-			const payload = computeInvoice(data);
+			const payload = buildInvoicePayload();
 			return await Invoice.update(invoiceId, payload, action)
 		},
 		onSuccess: (r) => {

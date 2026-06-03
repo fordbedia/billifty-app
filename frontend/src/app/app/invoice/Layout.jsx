@@ -46,17 +46,29 @@ export default function Layout({showAiAssistant = false}) {
 
 	const currencySymbol = selectedCurrency?.symbol ?? "";
 
-	// Fallback to data.* if invoiceComputed isn't ready for some reason
+	// ----------------------------------------------------------------------------
+	// invoiceComputed is derived from the local line-item form state. During edit-page
+	// hydration, the invoice header/totals can be available before invoice_items are
+	// populated; computing from an empty item list would produce 0 totals and hide valid
+	// DB values. Only trust computed totals after at least one local item is present.
+	// ----------------------------------------------------------------------------
+	const hasComputedItems = (invoiceComputed?.invoice_items?.length ?? 0) > 0;
+
+	// ----------------------------------------------------------------------------
+	// Use live computed totals while editing items; otherwise use server/DB totals.
+	// This keeps the UI responsive after item edits without showing temporary 0 values
+	// while the existing invoice data is still hydrating.
+	// ----------------------------------------------------------------------------
 	const subtotalCents =
-		invoiceComputed?.subtotal_cents ?? data.subtotal_cents ?? 0;
+		hasComputedItems ? invoiceComputed?.subtotal_cents ?? 0 : data.subtotal_cents ?? 0;
 	const taxCents =
-		invoiceComputed?.tax_cents ?? data.tax_cents ?? 0;
+		hasComputedItems ? invoiceComputed?.tax_cents ?? 0 : data.tax_cents ?? 0;
 	const shippingTaxCents =
-		invoiceComputed?.shipping_tax_cents ?? data.shipping_tax_cents ?? 0;
+		hasComputedItems ? invoiceComputed?.shipping_tax_cents ?? 0 : data.shipping_tax_cents ?? 0;
 	const totalCents =
-		invoiceComputed?.total_cents ?? data.total_cents ?? 0;
+		hasComputedItems ? invoiceComputed?.total_cents ?? 0 : data.total_cents ?? 0;
 	const discountRow =
-		invoiceComputed?.display_discount_row ?? data.display_discount_row ?? null;
+		hasComputedItems ? invoiceComputed?.display_discount_row ?? null : data.display_discount_row ?? null;
 
 	if (typeof isLoadingInvoice !== undefined && isLoadingInvoice) {
 		return (
