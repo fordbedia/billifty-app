@@ -5,8 +5,9 @@ import {
   ModalBody,
   ModalFooter,
   Button,
-  useDisclosure,
 } from "@heroui/react";
+import {useRouter} from "next/navigation";
+import {uri} from "@/app/constants/routePaths";
 import {useInvoice} from "@/app/providers/InvoiceContext";
 
 export default function ConfirmDeleteModal() {
@@ -15,6 +16,7 @@ export default function ConfirmDeleteModal() {
 		deleteInvoice,
 		data
 	} = useInvoice()
+	const router = useRouter()
 
   return (
     <>
@@ -22,7 +24,9 @@ export default function ConfirmDeleteModal() {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">Deleting Invoice #{data.invoice_number}</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">
+				  <h2 className="px-5 py-6">Deleting Invoice #{data.invoice_number}</h2>
+			  </ModalHeader>
               <ModalBody>
                	<p>Are you sure you want to delete this Invoice?</p>
               </ModalBody>
@@ -30,7 +34,7 @@ export default function ConfirmDeleteModal() {
                 <Button color="danger" variant="light" onPress={onClose}>
                   Close
                 </Button>
-                <Button color="danger" onPress={deleteInvoice}>
+                <Button color="danger" onPress={() => deleteInvoice(data.id).then(() => router.replace(uri.invoices))}>
                   Delete
                 </Button>
               </ModalFooter>

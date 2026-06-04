@@ -6,12 +6,20 @@ import TableData from "@/app/components/Table";
 import {Button, Card, CardBody, CardHeader, Link, Input} from "@heroui/react";
 import {useInvoice} from "@/app/providers/InvoiceContext";
 import {useRouter} from "next/navigation";
-import {Chip, Tooltip} from "@heroui/react";
+import {
+	Chip,
+	Tooltip,
+	Modal,
+	ModalContent,
+	ModalHeader,
+	ModalBody,
+	ModalFooter,
+} from "@heroui/react";
 import {formattedDate} from "@/app/utils/date";
 import {DateRangePicker} from "@heroui/react";
 import {useApp} from "@/app/providers/AppContext";
 import DashboardSidebar from "@/app/app/component/DashboardSidebar";
-import {Pencil, Plus, Search, Trash2} from "lucide-react";
+import {Pencil, Plus, Search, Trash2, Archive} from "lucide-react";
 
 const dashboardPrimaryButtonClass =
 	"group h-11 min-h-11 rounded-[7px] bg-[#075de8] px-6 text-[15px] font-semibold tracking-normal text-white shadow-[0_14px_24px_-18px_rgba(7,93,232,0.85)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#034fc9] hover:shadow-[0_18px_30px_-20px_rgba(7,93,232,0.9)] focus-visible:ring-2 focus-visible:ring-[#75b7ff] focus-visible:ring-offset-2";
@@ -30,6 +38,8 @@ function Component() {
 		planCapabilities
 	} = useApp();
 
+	const {deleteInvoice, onOpenConfirmDeleteModal, setData} = useInvoice()
+
 	const router = useRouter()
 	const column = [
 		{
@@ -44,7 +54,8 @@ function Component() {
 		{key: 'total_cents', label: 'Amount', allowsSorting: true},
 		{key: 'status', label: 'Status', allowsSorting: true},
 		{key: 'created_at', label: 'Date', allowsSorting: true}
-	]
+	];
+
 	const renderCell = (item, columnKey) => {
 		switch (columnKey) {
 			case "invoice_number":
@@ -136,6 +147,7 @@ function Component() {
 	// Actions column: Edit + Archive
 	const renderActions = (item) => (
 		<div className="flex items-center gap-3">
+			<ConfirmDeleteModal redirect={false}/>
 			<Tooltip content="Edit" showArrow={true}>
 				<Button
 					isIconOnly
@@ -154,11 +166,13 @@ function Component() {
 					className="h-9 w-9 min-w-9 rounded-[8px] border border-[#ffcfd2] bg-white text-[#f3123c] shadow-none hover:border-[#ff9da5] hover:bg-[#fff7f7]"
 					variant="bordered"
 					onPress={() => {
-						// handleArchive(item.id)
-						console.log("Archive invoice", item.id);
+						setData(item)
+						onOpenConfirmDeleteModal()
 					}}
 				>
-					<Trash2 className="size-4" strokeWidth={2.1}/>
+					{item.status === 'draft' || item.status === 'issued'
+						? <Trash2 className="size-4" strokeWidth={2.1}/>
+						: <Archive className="size-4" strokeWidth={2.1}/>}
 				</Button>
 			</Tooltip>
 		</div>
@@ -239,7 +253,7 @@ function Component() {
 											renderCell={renderCell}
 											renderActions={renderActions}
 											tableClassNames={{
-												wrapper: "min-h-[292px] rounded-[8px] border border-[#dbe3ef] bg-white p-0 shadow-none",
+												wrapper: "min-h-[292px] rounded-[8px] border border-[#dbe3ef] bg-white p-0 shadow-none pb-12",
 												th: "h-[54px] bg-white px-5 text-[13px] font-semibold text-[#17233a]",
 												td: "border-t border-[#edf1f6] px-5 py-4 text-sm font-normal text-[#17233a]",
 												tbody: "[&>tr:last-child>td]:border-b-0",
@@ -267,6 +281,51 @@ function Component() {
 		</RootLayout>
 	);
 }
+
+export function ConfirmDeleteModal() {
+	const {
+		isOpenConfirmDeleteModal, onOpenChangeConfirmDeleteModal,
+		deleteInvoice,
+		data,
+		userInvoices
+	} = useInvoice()
+	const router = useRouter()
+
+	return (
+		<>
+			<Modal isOpen={isOpenConfirmDeleteModal} onOpenChange={onOpenChangeConfirmDeleteModal}>
+				<ModalContent>
+					{(onClose) => (
+						<>
+							<ModalHeader className="flex flex-col gap-1">
+								<h2 className="px-5 py-6">Deleting Invoice #{data.invoice_number}</h2>
+							</ModalHeader>
+							<ModalBody>
+								<p>Are you sure you want to delete this Invoice?</p>
+							</ModalBody>
+							<ModalFooter>
+								<Button color="danger" variant="light" onPress={onClose}>
+									Close
+								</Button>
+								<Button color="danger" onPress={() => {
+									deleteInvoice(data.id).then((r) => {
+										console.log('r', r)
+										const inv = r?.data
+										userInvoices.data = userInvoices.data.filter(d => d.id !== inv.id)
+										onClose()
+									})
+								}}>
+									Delete
+								</Button>
+							</ModalFooter>
+						</>
+					)}
+				</ModalContent>
+			</Modal>
+		</>
+	);
+}
+
 
 export default function Invoices() {
 	return (

@@ -678,14 +678,16 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 		}
 	})
 
-	const {mutate: deleteInvoice} = useMutation({
-		mutationFn: async () => (await Invoices.delete(invoiceId)).data,
+	const {mutateAsync: deleteInvoice} = useMutation({
+		mutationFn: (id) => {
+			const targetInvoiceId = id ?? invoiceId;
+			return Invoices.delete(targetInvoiceId)
+		},
 		onSuccess: () => {
 			setHasToast({
 				title: 'Invoice was successfully deleted!',
 				color: 'danger'
 			})
-			router.replace(uri.invoices)
 		}
 	})
 
@@ -737,6 +739,7 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 		clientData,
 		generatedInvoiceNum,
 		data,
+		setData,
 		onDataChange,
 		addItems,
 		updateItems,
