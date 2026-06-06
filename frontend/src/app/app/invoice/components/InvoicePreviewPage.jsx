@@ -16,6 +16,7 @@ import {
 	RefreshCw,
 	X,
 } from "lucide-react";
+import {capitalize} from "@/app/utils/strings";
 
 export default function InvoicePreviewPage({invoiceId}) {
 	const queryClient = useQueryClient();
@@ -138,6 +139,12 @@ export default function InvoicePreviewPage({invoiceId}) {
 										{invoiceNumber}
 									</p>
 								</div>
+
+								<div className="inline-flex h-[32px] items-center self-start rounded-full bg-[#e9f1fa] px-[17px] text-[14px] font-extrabold text-[#4797d5] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+									<span className={"mr-[8px] h-[8px] w-[8px] rounded-full " + (publicUrl?.invoice_status === 'paid' ? ' bg-[#56d626] ' : publicUrl?.invoice_status === 'issued' ? 'bg-[#b26ce8]' : ' bg-[#f6bb35] ')}/>
+									{capitalize(publicUrl?.invoice_status)}
+								</div>
+
 							</div>
 							<Button
 								type="button"
@@ -152,8 +159,7 @@ export default function InvoicePreviewPage({invoiceId}) {
 							</Button>
 						</ModalHeader>
 						<ModalBody className="p-0">
-							{console.log('isInvoiceDraft', isInvoiceDraft)}
-							{!isInvoiceDraft ? (
+							{!isInvoiceDraft && (
 								<section className="border-b border-[#e4e4e4] bg-[#f8f8f8] px-5 py-5 sm:px-7">
 									<div className="mb-4 flex flex-wrap items-center gap-2.5">
 										<Link2 aria-hidden="true" className="text-[#2da0e4]" size={18}
@@ -166,11 +172,12 @@ export default function InvoicePreviewPage({invoiceId}) {
 											size="sm"
 											variant="flat"
 											classNames={{
-												base: "bg-[#e8faec] px-1",
-												content: "text-sm font-semibold leading-none tracking-normal text-[#2e9b50]",
+												base: "px-1 " + (publicUrl?.public_token_revoked_at ? 'bg-[#f6b4bb]' : 'bg-[#e8faec]'),
+												content: "text-sm font-semibold leading-none tracking-normal "
+													+ (publicUrl?.public_token_revoked_at ? 'text-[#cf1010]' : 'text-[#2e9b50]'),
 											}}
 										>
-											Active
+											{publicUrl?.public_token_revoked_at ? 'Not Active' : 'Active'}
 										</Chip>
 									</div>
 
@@ -278,12 +285,6 @@ export default function InvoicePreviewPage({invoiceId}) {
 										{/*>*/}
 										{/*	Notify client by email when link changes*/}
 										{/*</Switch>*/}
-									</div>
-								</section>
-							) : (
-								<section className="border-b border-[#e4e4e4] bg-[#f8f8f8] px-5 py-5 sm:px-7">
-									<div className="mb-4 flex flex-wrap items-center gap-2.5">
-										<div className="text-red-600">This invoice has not been issued yet.</div>
 									</div>
 								</section>
 							)}
