@@ -11,13 +11,14 @@ import {uri} from "@/app/constants/routePaths";
 
 export const BusinessProfileContext = createContext()
 
+const readOnlyBusinessProfileFields = new Set(['id', 'workspace_id', 'created_at', 'updated_at', 'deleted_at']);
+
 export function BusinessProfileProvider({ children, id, mode }) {
 	const router = useRouter()
 	const pathname = usePathname()
 	const searchParams = useSearchParams()
 
 	const paymentInfoInitialState = {
-		user_id: '',
 		payment_method: '',
 		payment_methods: [],
 		payment_information_ids: {},
@@ -39,7 +40,6 @@ export function BusinessProfileProvider({ children, id, mode }) {
 	}
 
 	const businessProfileInitialState = {
-		user_id: '',
 		name: '',
 		legal_name: '',
 		email: '',
@@ -219,6 +219,11 @@ export function BusinessProfileProvider({ children, id, mode }) {
 
 	const appendBusinessProfileFormData = (formData) => {
 		Object.entries(businessProfileForm).forEach(([key, val]) => {
+			// Ownership is server-assigned through workspace_id; never send read-only identity fields back.
+			if (readOnlyBusinessProfileFields.has(key)) {
+				return;
+			}
+
 			if (val === undefined || val === null || Array.isArray(val)) {
 				return;
 			}

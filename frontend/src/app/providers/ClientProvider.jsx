@@ -10,6 +10,21 @@ import {addToast, useDisclosure} from "@heroui/react";
 
 export const ClientContext = createContext(null)
 
+const clientFormFields = new Set([
+	'name',
+	'company',
+	'email',
+	'phone',
+	'tax_id',
+	'license_no',
+	'address_line1',
+	'address_line2',
+	'city',
+	'state',
+	'postal_code',
+	'country',
+]);
+
 export function ClientProvider({ children, mode, id }) {
 	const router = useRouter()
 	const searchParams = useSearchParams()
@@ -73,9 +88,13 @@ export function ClientProvider({ children, mode, id }) {
 		queryFn: async () => (await Clients.find(id))?.data
 	})
 	const handleFieldChange = (attr, value) => setData((prev) => ({...prev, [attr]: value}))
+	const clientPayload = () => Object.fromEntries(
+		Object.entries(data).filter(([key]) => clientFormFields.has(key))
+	)
 
 	const {mutate: create, error: createError} = useMutation({
-		mutationFn: async () => (await Clients.create(data))?.data,
+		// Ownership is server-assigned through workspace_id; only submit editable client fields.
+		mutationFn: async () => (await Clients.create(clientPayload()))?.data,
 		onSuccess: () => {
 			setHasToast({title: 'New client has been successfully created!', color: 'success'})
 			if (searchParams.get('from') === 'onboarding') {
@@ -87,7 +106,8 @@ export function ClientProvider({ children, mode, id }) {
 	})
 
 	const {mutate: updateClient, error: errorUpdateClient} = useMutation({
-		mutationFn: async () => (await Clients.update(id, data)),
+		// Ownership is server-assigned through workspace_id; only submit editable client fields.
+		mutationFn: async () => (await Clients.update(id, clientPayload())),
 		onSuccess: () => {
 			setHasToast({title: 'Your client has been successfully modified!', color: 'success'})
 			router.replace(uri.client.clients)
