@@ -45,11 +45,19 @@ export default function Actions({isIssuedOrPaid, isPaid}) {
 	) {
 		errors = createInvoiceError?.response?.data?.errors ?? updateError?.response?.data?.errors;
 	}
-	if(
+
+	if
+	(
+		(
 			typeof createInvoiceError !== 'undefined' &&
 			typeof createInvoiceError?.response?.data?.error_code !== 'undefined'
-		) {
-		errors = createInvoiceError?.response?.data?.message;
+		) ||
+		(
+			typeof updateError !== 'undefined' &&
+			typeof updateError?.response?.data?.message !== 'undefined'
+		)
+	) {
+		errors = createInvoiceError?.response?.data?.message ??  updateError?.response?.data?.message;
 	}
 
 	 return (

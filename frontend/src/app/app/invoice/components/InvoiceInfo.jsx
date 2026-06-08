@@ -25,7 +25,7 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 
 	const enableShipping = () => {
 		setHasShipping(true);
-		if (data.shipping_cents == null) onDataChange("shipping_cents", 0);
+		if (data.shipping_cents == null || Number(data.shipping_cents) === 0) onDataChange("shipping_cents", null);
 		if (data.shipping_tax_rate == null) onDataChange("shipping_tax_rate", 0);
 	};
 
@@ -135,7 +135,7 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 								<>
 									<Input
 										isRequired={hasShipping}
-										errorMessage="Please enter a shipping address"
+										errorMessage="Shipping / Delivery Address (optional)"
 										labelPlacement="outside"
 										name="shipping_address"
 										placeholder="Enter Shipping Address"
@@ -148,17 +148,24 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 									/>
 
 									{/* UI shows dollars; state stores cents */}
+									Enter a flat shipping amount.<br/>
 									<Input
 										isRequired={hasShipping}
-										errorMessage="Please enter a shipping cost"
+										errorMessage="Please enter a shipping fee"
 										labelPlacement="outside"
 										name="shipping_cents_display"
 										placeholder="Enter Shipping Cost (e.g., 12.99)"
 										type="number"
 										variant="bordered"
 										radius="sm"
-										value={centsToDollarsStr(data.shipping_cents ?? 0)}
-										onValueChange={(val) => onDataChange("shipping_cents", dollarsToCents(val))}
+										value={
+											data.shipping_cents === null || data.shipping_cents === undefined
+												? ""
+												: centsToDollarsStr(data.shipping_cents)
+										}
+										onValueChange={(val) => {
+											onDataChange("shipping_cents", val === "" ? null : dollarsToCents(val));
+										}}
 										className="mb-3"
 									/>
 
@@ -170,7 +177,7 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 										}}
 										className="mb-2"
 									>
-										Shipping is taxable
+										Apply tax to shipping
 									</Checkbox>
 
 									{isTaxable && (
