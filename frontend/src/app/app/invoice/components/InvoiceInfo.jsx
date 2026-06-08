@@ -130,11 +130,10 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 					</div>
 					{!isIssuedOrPaid && (<div className="md:w-1/2 content-center">
 						{!hasShipping
-							? (<Link onPress={enableShipping}>Add Shipping</Link>)
+							? (<Link className="cursor-pointer" onPress={enableShipping}>Add Shipping</Link>)
 							: (
 								<>
 									<Input
-										isRequired={hasShipping}
 										errorMessage="Shipping / Delivery Address (optional)"
 										labelPlacement="outside"
 										name="shipping_address"
@@ -201,7 +200,7 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 										</>
 									)}
 									<br/>
-									<Link onPress={disableShipping}>Remove Shipping</Link>
+									<Link className="cursor-pointer" onPress={disableShipping}>Remove Shipping</Link>
 								</>
 							)}
 					</div>)}
