@@ -146,7 +146,7 @@ function getFeatureIcon(planCode: string, isLastFreeItem: boolean) {
   };
 }
 
-export function PricingComponent() {
+function PricingComponent() {
   const { userData } = useApp();
   const session = auth();
   const router = useRouter();
@@ -245,26 +245,25 @@ export function PricingComponent() {
 
   return (
     <RootLayout>
-      <section className="relative overflow-hidden bg-[#fbf7ff]">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-white/70 to-transparent" />
-        <div className="pointer-events-none absolute left-1/2 top-20 h-64 w-64 -translate-x-1/2 rounded-full bg-indigo-200/60 blur-3xl" />
-        <div className="pointer-events-none absolute left-0 top-72 h-72 w-72 rounded-full bg-amber-100/70 blur-3xl" />
-        <div className="pointer-events-none absolute right-0 top-40 h-80 w-80 rounded-full bg-slate-200/50 blur-3xl" />
+      <section className="relative overflow-hidden bg-[#f8f9fb]">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-white to-transparent" />
+        <div className="pointer-events-none absolute left-1/2 top-24 h-64 w-64 -translate-x-1/2 rounded-full bg-indigo-200/35 blur-3xl" />
+        <div className="pointer-events-none absolute left-0 top-96 h-72 w-72 rounded-full bg-sky-100/60 blur-3xl" />
+        <div className="pointer-events-none absolute right-0 top-64 h-80 w-80 rounded-full bg-slate-200/45 blur-3xl" />
 
-        <div className="relative mx-auto max-w-7xl px-4 pb-20 pt-10 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center">
-            <h1 className="subpixel-antialiased py-3 text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-              Simple pricing for powerful invoices
+        <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-10 sm:px-6 sm:pt-12 lg:px-8">
+          <div className="mx-auto max-w-[650px] text-center">
+            <h1 className="subpixel-antialiased py-2 text-[38px] font-extrabold leading-[0.98] tracking-[-0.045em] text-[#111827] sm:text-[50px] lg:text-[56px]">
+              Simple pricing for powerful
+              <span className="block">invoices</span>
             </h1>
-            <p className="subpixel-antialiased py-3 text-base font-light text-slate-600 sm:text-lg">
-              Start free, then scale as your business grows.
-            </p>
-            <p className="subpixel-antialiased text-base font-light text-slate-600 sm:text-lg">
+            <p className="mx-auto mt-4 max-w-[520px] text-sm leading-6 text-slate-500">
+              Start free, then scale as your business grows.{" "}
               Billifty is designed for freelancers and small business owners who
               need professional invoicing without the complexity.
             </p>
 
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button
                 disableRipple
                 className="btn-colored min-w-[200px] px-6 py-6 text-base font-semibold shadow-lg shadow-indigo-200 sm:text-lg"
@@ -275,14 +274,14 @@ export function PricingComponent() {
                 disableRipple
                 onPress={moveToCompareSection}
                 variant="bordered"
-                className="min-w-[200px] border-slate-300 bg-white/80 px-6 py-6 text-base font-semibold text-slate-700 shadow-sm backdrop-blur sm:text-lg"
+                className="min-w-[200px] rounded-md border-slate-300 bg-white/80 px-6 py-6 text-base font-semibold text-slate-700 shadow-sm backdrop-blur sm:text-lg"
               >
                 View all features
               </Button>
             </div>
 
-            <div className="mt-10 flex justify-center">
-              <div className="inline-flex rounded-full border border-white/80 bg-white/90 p-1 shadow-lg shadow-slate-200/80 backdrop-blur">
+            <div className="mt-7 flex justify-center">
+              <div className="inline-flex rounded-full border border-slate-200 bg-white p-1 shadow-sm shadow-slate-200/70">
                 {(["monthly", "yearly"] as BillingCycle[]).map((billingCycle) => {
                   const isActive = billingCycle === cycleType;
 
@@ -292,13 +291,18 @@ export function PricingComponent() {
                       type="button"
                       onClick={() => setCycleType(billingCycle)}
                       className={cn(
-                        "rounded-full px-6 py-2.5 text-sm font-semibold capitalize transition sm:px-8",
+                        "rounded-full px-5 py-2 text-xs font-semibold capitalize transition sm:px-6",
                         isActive
-                          ? "bg-indigo-600 text-white shadow-md shadow-indigo-200"
-                          : "text-slate-600"
+                          ? "bg-[#111827] text-white shadow-sm"
+                          : "text-slate-500 hover:bg-slate-50"
                       )}
                     >
                       {billingCycle}
+                      {/*{billingCycle === "yearly" && (*/}
+                      {/*  <span className={cn("ml-1", isActive ? "text-emerald-200" : "text-emerald-500")}>*/}
+                      {/*    -20%*/}
+                      {/*  </span>*/}
+                      {/*)}*/}
                     </button>
                   );
                 })}
@@ -306,33 +310,30 @@ export function PricingComponent() {
             </div>
           </div>
 
-          <div className="relative mt-14 grid gap-6 lg:grid-cols-3 lg:items-end">
+          <div className="relative mx-auto mt-14 grid max-w-5xl gap-6 pt-4 md:grid-cols-2 lg:grid-cols-3 lg:items-stretch">
             {orderedPlans.map((plan) => {
               const isFree = plan.code === "free";
               const isPro = plan.code === "pro";
               const isPremium = plan.code === "premium";
 
               return (
-                <div
-                  key={plan.code}
-                  className={cn("relative", isPro && "lg:-translate-y-6")}
-                >
+                <div key={plan.code} className="relative">
                   {plan.actions?.card_label && (
-                    <div className="absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-300 px-4 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-900 shadow-lg shadow-amber-200/80">
+                    <div className="absolute left-1/2 top-0 z-20 max-w-[calc(100%-32px)] -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-amber-300 px-4 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-900 shadow-lg shadow-amber-200/80">
                       {plan.actions.card_label}
                     </div>
                   )}
 
                   <Card
                     className={cn(
-                      "overflow-visible rounded-[28px] border-0 shadow-[0_28px_80px_rgba(15,23,42,0.08)]",
-                      isFree && "bg-white",
+                      "h-full overflow-visible rounded-[28px] border shadow-[0_28px_80px_rgba(15,23,42,0.08)]",
+                      isFree && "border-slate-200 bg-white",
                       isPro &&
-                        "bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-500 text-white",
-                      isPremium && "bg-premium-color"
+                        "border-transparent bg-gradient-to-br from-[#5B4BFF] via-[#5547F5] to-[#6D5DF6] text-white shadow-[0_26px_70px_-42px_rgba(91,75,255,0.9)]",
+                      isPremium && "border-[#111827] bg-[#111827] text-white"
                     )}
                   >
-                    <CardBody className="p-6 sm:p-8">
+                    <CardBody className="flex h-full flex-col p-6 sm:p-8">
                       {plan.actions?.upper_text && (
                         <div
                           className={cn(
@@ -346,11 +347,11 @@ export function PricingComponent() {
                       )}
 
                       <div className="pt-5">
-                        <h2 className="text-2xl font-semibold sm:text-3xl">
+                        <h2 className="text-2xl font-semibold tracking-[-0.02em] sm:text-3xl">
                           {plan.name}
                         </h2>
-                        <div className="mt-3 flex items-end gap-2">
-                          <h3 className="text-5xl font-semibold tracking-tight sm:text-6xl">
+                        <div className="mt-3 flex items-end gap-1.5">
+                          <h3 className="text-5xl font-semibold leading-none tracking-tight sm:text-6xl">
                             ${plan.billing[cycleType]?.price}
                           </h3>
                           <span
@@ -366,8 +367,8 @@ export function PricingComponent() {
                         </div>
                         <p
                           className={cn(
-                            "mt-3 text-sm font-light subpixel-antialiased",
-                            isFree ? "text-slate-600" : "text-white/80"
+                            "mt-3 min-h-12 text-sm font-light leading-6 subpixel-antialiased",
+                            isFree ? "text-slate-500" : "text-white/75"
                           )}
                         >
                           {plan.actions?.text1}
@@ -386,10 +387,10 @@ export function PricingComponent() {
                           )
                         }
                         className={cn(
-                          "my-8 h-14 text-base font-semibold sm:text-lg",
-                          isFree && "bg-slate-900 text-white",
-                          isPro && "bg-white text-indigo-700",
-                          isPremium && "bg-white text-slate-900"
+                          "my-8 h-14 w-full rounded-md text-base font-semibold sm:text-lg",
+                          isFree && "bg-[#111827] text-white hover:bg-slate-800",
+                          isPro && "bg-white text-[#5547F5] hover:bg-slate-50",
+                          isPremium && "bg-white text-[#111827] hover:bg-slate-50"
                         )}
                       >
                         {plan.actions?.btn}
@@ -398,7 +399,7 @@ export function PricingComponent() {
                       <div
                         className={cn(
                           "rounded-[24px] border p-5",
-                          isFree && "border-slate-200 bg-slate-50/80",
+                          isFree && "border-slate-100 bg-slate-50/80",
                           isPro && "border-white/20 bg-white/10",
                           isPremium && "border-white/10 bg-white/5"
                         )}
@@ -412,7 +413,7 @@ export function PricingComponent() {
                                 isFree ? "text-slate-700" : "text-white"
                               )}
                             >
-                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/80">
+                              <div className={"flex h-8 w-8 shrink-0 items-center justify-center rounded-full " + (plan.code === 'premium' ? ' bg-[#050505]/85' : ' bg-white/85')}>
                                 <Image
                                   alt={item.alt}
                                   src={item.src}
@@ -444,11 +445,11 @@ export function PricingComponent() {
                             <li
                               key={`${plan.code}-${feature}-${index}`}
                               className={cn(
-                                "flex items-center gap-3 text-sm font-light subpixel-antialiased",
+                                "flex items-center gap-3 text-sm font-light leading-5 subpixel-antialiased",
                                 isFree ? "text-slate-600" : "text-white/90"
                               )}
                             >
-                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/80">
+                              <div className={"flex h-8 w-8 shrink-0 items-center justify-center rounded-full " + (plan.code === 'premium' ? " bg-[#050505]/80" : " bg-white/80")}>
                                 <Image
                                   alt={icon.alt}
                                   src={icon.src}
@@ -470,9 +471,35 @@ export function PricingComponent() {
         </div>
       </section>
 
-      <div id="compare-features-table" className="bg-[#fbf7ff] pb-20">
+      <div id="compare-features-table" className="bg-[#f8f9fb] pb-10">
         <CompareFeaturesTable data={data} />
       </div>
+
+      <section className="bg-[#f8f9fb] px-4 pb-20">
+        <div className="mx-auto max-w-[560px] rounded-xl bg-[#111827] px-6 py-10 text-center shadow-[0_24px_60px_-36px_rgba(17,24,39,0.85)] sm:px-10">
+          <h2 className="text-2xl font-bold tracking-[-0.035em] text-white">
+            Ready to get started?
+          </h2>
+          <p className="mx-auto mt-3 max-w-[420px] text-sm leading-6 text-slate-400">
+            Join freelancers and small businesses already using Billifty to create professional invoices.
+          </p>
+          <Button
+            disableRipple
+            onPress={() =>
+              handlePlanButton(
+                "free",
+                cycleType,
+                planCapabilities ?? [],
+                session,
+                router
+              )
+            }
+            className="mt-6 h-11 rounded-md bg-[#5547F5] px-6 text-sm font-semibold text-white shadow-lg shadow-indigo-950/30"
+          >
+            Start for free today
+          </Button>
+        </div>
+      </section>
     </RootLayout>
   );
 }

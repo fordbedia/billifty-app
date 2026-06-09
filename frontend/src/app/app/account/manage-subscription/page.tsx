@@ -488,11 +488,11 @@ export default function ManageSubscriptionPage() {
                   {hasStripeSubscription && (
                     <Button
                       variant="bordered"
-                      className="border-slate-300 text-slate-700"
+                      className="h-8 min-w-24 border-0 px-5 text-xs font-semibold bg-slate-200 text-slate-500 opacity-100"
                       onPress={goToPaymentMethodPage}
                       isDisabled={isBusy}
                     >
-                      Open Stripe Billing
+                      Open Billing
                     </Button>
                   )}
                 </div>

@@ -122,9 +122,9 @@ export default function Layout({showAiAssistant = false}) {
 									<h1 className="text-[40px] font-light leading-tight tracking-normal text-[#202020] sm:text-[54px]">
 										Invoice Portal
 									</h1>
-									<span className={`invoice-status-badge ${invoiceStatusBadgeClass}`}>
+									{data?.id && (<span className={`invoice-status-badge ${invoiceStatusBadgeClass}`}>
 										{formatStatusLabel(invoiceStatus)}
-									</span>
+									</span>)}
 								</div>
 								<h2 className="mt-3 text-lg font-light leading-7 text-[#4e4e4e]">
 									Create and customize your invoice with a premium, minimal workflow.
