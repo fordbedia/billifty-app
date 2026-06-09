@@ -19,7 +19,21 @@ import ChatWidget from "@/app/components/common/ChatWidget";
 import {useApp} from "@/app/providers/AppContext";
 
 const workspacePrimaryButtonClass =
-	"group h-auto min-h-[50px] rounded-[8px] bg-[#1d84c6] px-6 py-2 text-base font-semibold tracking-normal text-white shadow-[0_16px_32px_-22px_rgba(29,132,198,0.9)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-[#166fa8] hover:shadow-[0_22px_38px_-24px_rgba(29,132,198,0.95)] focus-visible:ring-2 focus-visible:ring-[#72bee9] focus-visible:ring-offset-2";
+	"group h-auto min-h-[42px] rounded-full bg-[#2299dc] px-5 py-2 text-sm font-semibold tracking-normal text-white shadow-[0_16px_32px_-22px_rgba(29,132,198,0.9)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-[#1684c5] hover:shadow-[0_22px_38px_-24px_rgba(29,132,198,0.95)] focus-visible:ring-2 focus-visible:ring-[#72bee9] focus-visible:ring-offset-2";
+
+const statusBadgeClassMap = {
+	draft: "border-[#f7d47b] bg-[#fff4cf] text-[#8a5a00]",
+	issued: "border-[#b8cdfa] bg-[#eaf2ff] text-[#0b5ecb]",
+	paid: "border-[#a7e6c6] bg-[#e8fbf1] text-[#087a3d]",
+};
+
+const formatStatusLabel = (status) => {
+	if (!status) return "Draft";
+
+	return String(status)
+		.replace(/[-_]/g, " ")
+		.replace(/\b\w/g, (letter) => letter.toUpperCase());
+};
 
 export default function Layout({showAiAssistant = false}) {
 	const {
@@ -86,6 +100,8 @@ export default function Layout({showAiAssistant = false}) {
 
 	const isIssuedOrPaid = data?.is_issued || data?.is_paid;
 	const isPaid = data?.is_paid;
+	const invoiceStatus = String(data?.status || (isPaid ? "paid" : data?.is_issued ? "issued" : "draft")).toLowerCase();
+	const invoiceStatusBadgeClass = statusBadgeClassMap[invoiceStatus] ?? "border-[#d2d8e2] bg-[#eef1f5] text-[#3d4655]";
 
 	return (
 		<RootLayout>
@@ -96,39 +112,47 @@ export default function Layout({showAiAssistant = false}) {
 				<InvoicePreviewPage invoiceId={invoiceId}/>
 				<div className="mx-auto w-full max-w-[1440px] px-5 pb-12 pt-10 sm:px-8 lg:px-10 sm:pt-12 lg:pt-16">
 					<div
-						className="mb-9 flex w-full flex-col gap-5 md:flex-row md:items-end md:justify-between invoice-page-head">
-						<div className="max-w-[680px]">
-							<p className="text-sm font-semibold uppercase tracking-normal text-[#4b9cdc]">
-								Invoice Studio
-							</p>
-							<h1 className="mt-3 text-[40px] font-light leading-tight tracking-normal text-[#202020] sm:text-[54px]">
-								Invoice Portal
-							</h1>
-							<h2 className="mt-4 text-lg font-light leading-7 text-[#4e4e4e]">
-								Create and customize your invoice with a premium, minimal workflow.
-							</h2>
+						className="mb-8 grid w-full grid-cols-1 gap-5 invoice-page-head 2xl:grid-cols-[minmax(0,1fr)_390px] xl:grid-cols-[minmax(0,1fr)_360px]">
+						<div className="flex w-full flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+							<div className="max-w-[680px]">
+								<p className="text-sm font-semibold uppercase tracking-normal text-[#4b9cdc]">
+									Invoice Studio
+								</p>
+								<div className="mt-3 flex flex-wrap items-center gap-3">
+									<h1 className="text-[40px] font-light leading-tight tracking-normal text-[#202020] sm:text-[54px]">
+										Invoice Portal
+									</h1>
+									<span className={`invoice-status-badge ${invoiceStatusBadgeClass}`}>
+										{formatStatusLabel(invoiceStatus)}
+									</span>
+								</div>
+								<h2 className="mt-3 text-lg font-light leading-7 text-[#4e4e4e]">
+									Create and customize your invoice with a premium, minimal workflow.
+								</h2>
+							</div>
+							<div className="flex shrink-0 justify-start sm:pt-7">
+								<Button variant="flat" className={workspacePrimaryButtonClass} onPress={() => {
+									clearSticky()
+									router.replace('/app/invoice/new')
+								}}>
+									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+										 strokeWidth={1.5} stroke="currentColor"
+										 className="size-4 transition-transform duration-300 group-hover:rotate-90">
+										<path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+									</svg>
+									New Invoice
+								</Button>
+							</div>
 						</div>
-						<div className="flex justify-start md:justify-end">
-							<Button variant="flat" className={workspacePrimaryButtonClass} onPress={() => {
-								clearSticky()
-								router.replace('/app/invoice/new')
-							}}>
-								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-									 strokeWidth={1.5} stroke="currentColor"
-									 className="size-5 transition-transform duration-300 group-hover:rotate-90">
-									<path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-								</svg>
-								New Invoice
-							</Button>
-						</div>
+						<div className="hidden xl:block" aria-hidden="true"></div>
 					</div>
 
 					<div
-						className="grid w-full grid-cols-1 gap-5 2xl:grid-cols-[minmax(0,1fr)_390px] xl:grid-cols-[minmax(0,1fr)_360px]">
+						className="grid w-full grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,1fr)_390px] xl:grid-cols-[minmax(0,1fr)_360px]">
 						<div className="w-full min-w-0">
 							<InvoiceInfo isPaid={isPaid} isIssuedOrPaid={isIssuedOrPaid}/>
 							<Card fullWidth radius="sm"
-								  className="border border-[#dbe7f3] bg-white shadow-[0_28px_64px_-48px_rgba(22,54,88,0.46)]">
+								  className="workspace-card invoice-line-items-card border border-[#dbe7f3] bg-white shadow-[0_28px_64px_-48px_rgba(22,54,88,0.46)]">
 								<CardHeader className="flex gap-3 px-5 py-5 sm:px-6">
 									<div className="flex w-full justify-between items-center">
 										<div>
@@ -242,7 +266,7 @@ export default function Layout({showAiAssistant = false}) {
 							</Card>
 						</div>
 
-						<div className="w-full min-w-0">
+						<div className="invoice-sidebar w-full min-w-0">
 							<InvoiceTemplate isIssuedOrPaid={isIssuedOrPaid} />
 							<Actions isPaid={isPaid} isIssuedOrPaid={isIssuedOrPaid} />
 						</div>

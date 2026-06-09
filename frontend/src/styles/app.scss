@@ -486,17 +486,57 @@
   align-items: flex-start;
 }
 
+.invoice-status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 9999px;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  box-shadow: 0 10px 22px -18px rgba(15, 23, 42, 0.5);
+}
+
+.invoice-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
 .invoice-side-card {
   border-radius: 12px;
+  margin-bottom: 0 !important;
+  overflow: hidden;
+}
+
+.invoice-side-card [data-slot="header"],
+.invoice-info-card [data-slot="header"],
+.invoice-line-items-card [data-slot="header"] {
+  padding: 1.25rem 1.5rem;
+}
+
+.invoice-side-card [data-slot="body"],
+.invoice-info-card [data-slot="body"] {
+  padding: 1.25rem 1.5rem;
 }
 
 .invoice-info-card .invoice-info-row {
   border-bottom: 1px dashed #e2e8f0;
-  padding-bottom: 0.75rem;
+  gap: 1.25rem;
+  padding-bottom: 1rem;
 }
 
 .invoice-info-card .invoice-info-row:last-child {
   border-bottom: 0;
+}
+
+.invoice-line-items-card {
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .invoice-items-sortable-list {
@@ -615,10 +655,52 @@
 .invoice-actions-body {
   display: flex;
   flex-direction: column;
+  gap: 0.7rem;
+}
+
+.invoice-action-button {
+  min-height: 42px;
+  border-radius: 9999px !important;
+  font-weight: 700;
+  box-shadow: 0 16px 28px -24px rgba(15, 23, 42, 0.65);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.invoice-action-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 30px -24px rgba(15, 23, 42, 0.75);
+}
+
+.invoice-action-button-primary {
+  background: #2299dc !important;
+  color: #ffffff !important;
+}
+
+.invoice-action-button-preview {
+  background: #5947e8 !important;
+  color: #ffffff !important;
+}
+
+.invoice-action-button-send {
+  background: #18b985 !important;
+  color: #ffffff !important;
+}
+
+.invoice-action-button-issue {
+  border: 1px solid #f0cc74 !important;
+  background: #fff4cf !important;
+  color: #8a5a00 !important;
+}
+
+.invoice-action-button-danger {
+  border: 1px solid #fecaca !important;
+  background: #ffffff !important;
+  color: #dc2626 !important;
+  font-weight: 700;
 }
 
 .invoice-ai-note {
-  margin-top: 0.4rem;
+  margin-top: 0.1rem;
   border: 1px solid #dbeafe;
   border-radius: 12px;
   background-color: #f8fbff;

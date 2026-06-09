@@ -21,6 +21,18 @@
   }
 }
 
+@keyframes billifty-landing-invoice-float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
 @keyframes billifty-float-soft {
   0% {
     transform: translate3d(0, 0, 0);
@@ -2202,7 +2214,10 @@
 
 .home.home-simple {
   overflow: hidden;
-  background: #ffffff;
+  background:
+    radial-gradient(circle at 13% 0%, rgba(32, 168, 243, 0.11), transparent 27%),
+    radial-gradient(circle at 88% 8%, rgba(11, 119, 213, 0.09), transparent 28%),
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 36%, #ffffff 72%);
   color: #111827;
 }
 
@@ -2241,10 +2256,40 @@
 }
 
 .simple-hero {
-  padding: 66px 0 88px;
+  position: relative;
+  isolation: isolate;
+  padding: 78px 0 98px;
+}
+
+.simple-hero::before,
+.simple-hero::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 9999px;
+  pointer-events: none;
+}
+
+.simple-hero::before {
+  top: 42px;
+  right: max(4vw, 36px);
+  width: clamp(240px, 31vw, 430px);
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(32, 168, 243, 0.18), rgba(125, 211, 252, 0.08) 46%, transparent 72%);
+  filter: blur(30px);
+}
+
+.simple-hero::after {
+  left: max(3vw, 24px);
+  bottom: 24px;
+  width: clamp(170px, 22vw, 300px);
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(191, 219, 254, 0.36), rgba(239, 246, 255, 0.18) 48%, transparent 74%);
+  filter: blur(22px);
 }
 
 .simple-hero-grid {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 0.95fr) minmax(360px, 0.82fr);
   gap: 78px;
@@ -2264,11 +2309,16 @@
   font-size: 58px;
   font-weight: 760;
   line-height: 0.96;
+  letter-spacing: -0.045em;
 }
 
 .simple-hero-copy h1 span {
   display: block;
-  color: #169eea;
+  width: fit-content;
+  background: linear-gradient(135deg, #0b77d5 0%, #20a8f3 48%, #0b5db8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .simple-hero-copy p {
@@ -2290,12 +2340,12 @@
 
 .simple-button {
   display: inline-flex;
-  min-height: 38px;
+  min-height: 42px;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-radius: 8px;
-  padding: 0 18px;
+  border-radius: 9999px;
+  padding: 0 20px;
   font-family: var(--font-family);
   font-size: 13px;
   font-weight: 700;
@@ -2309,20 +2359,25 @@
 }
 
 .simple-button-primary {
-  background: #20a8f3;
+  background: linear-gradient(135deg, #20a8f3, #0b8fda);
   color: #ffffff;
   border: 1px solid #20a8f3;
+  box-shadow: 0 18px 36px -24px rgba(32, 168, 243, 0.9);
 }
 
 .simple-button-primary:hover {
-  background: #0c98e5;
+  background: linear-gradient(135deg, #169eea, #087ec2);
   border-color: #0c98e5;
+  box-shadow: 0 20px 38px -23px rgba(32, 168, 243, 1);
 }
 
 .simple-button-ghost {
-  color: #111827;
-  border: 1px solid transparent;
-  background: transparent;
+  color: #1e293b;
+  border: 1px solid rgba(191, 219, 254, 0.8);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 14px 30px -28px rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .simple-button-ghost:hover {
@@ -2350,18 +2405,67 @@
 }
 
 .simple-invoice-preview {
+  position: relative;
   display: flex;
   justify-content: center;
+  isolation: isolate;
+}
+
+.simple-invoice-preview::before,
+.simple-invoice-preview::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 9999px;
+  pointer-events: none;
+}
+
+.simple-invoice-preview::before {
+  inset: 9% 4% auto auto;
+  width: min(74%, 370px);
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(32, 168, 243, 0.24), rgba(147, 197, 253, 0.14) 48%, transparent 74%);
+  filter: blur(34px);
+}
+
+.simple-invoice-preview::after {
+  right: 3%;
+  bottom: 3%;
+  width: 116px;
+  aspect-ratio: 1;
+  background: rgba(219, 234, 254, 0.52);
+  filter: blur(18px);
+  opacity: 0.72;
 }
 
 .simple-invoice-card {
+  position: relative;
   width: 100%;
   max-width: 455px;
-  border: 1px solid #edf0f5;
-  border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 0 28px 70px -58px rgba(17, 24, 39, 0.38);
-  padding: 28px;
+  border: 1px solid rgba(219, 234, 254, 0.92);
+  border-radius: 24px;
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, 0.92), rgba(248, 251, 255, 0.76));
+  box-shadow:
+    0 34px 88px -52px rgba(15, 23, 42, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  padding: 30px;
+  animation: billifty-landing-invoice-float 6s ease-in-out infinite;
+  backdrop-filter: blur(18px) saturate(135%);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+  overflow: hidden;
+}
+
+.simple-invoice-card::before {
+  content: "";
+  position: absolute;
+  top: -42%;
+  left: -24%;
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.9), transparent 64%);
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 .simple-invoice-top,
@@ -2435,8 +2539,9 @@
 }
 
 .simple-invoice-lines div {
-  border-radius: 8px;
-  background: #fbfcfd;
+  border: 1px solid rgba(226, 232, 240, 0.78);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.74);
   padding: 15px 16px;
 }
 
@@ -2495,23 +2600,40 @@
 .simple-feature-card {
   min-height: 176px;
   min-width: 0;
-  border: 1px solid #f0f2f6;
-  border-radius: 8px;
-  background: #fbfcfd;
+  border: 1px solid #e9f1fb;
+  border-radius: 16px;
+  background: rgba(251, 253, 255, 0.86);
   padding: 25px 24px;
+  box-shadow: 0 24px 44px -38px rgba(15, 23, 42, 0.34);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.simple-feature-card:hover {
+  border-color: #bfdbfe;
+  box-shadow: 0 28px 54px -40px rgba(32, 168, 243, 0.45);
+  transform: translateY(-2px);
 }
 
 .simple-feature-icon {
-  width: 20px;
-  height: 20px;
+  width: 42px;
+  height: 42px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #eff6ff, #ffffff);
   color: #20a8f3;
+  box-shadow: 0 16px 28px -24px rgba(32, 168, 243, 0.74);
+}
+
+.simple-feature-icon svg {
+  width: 20px;
+  height: 20px;
 }
 
 .simple-feature-card h3 {
-  margin-top: 23px;
+  margin-top: 20px;
   font-size: 15px;
   font-weight: 760;
   overflow-wrap: anywhere;
@@ -2599,20 +2721,35 @@
 }
 
 .simple-step-grid {
+  max-width: 920px;
   margin-top: 42px;
+  margin-inline: auto;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 38px;
+  align-items: stretch;
+  gap: 18px;
 }
 
 .simple-step {
+  min-width: 0;
+  min-height: 184px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #e9f1fb;
+  border-radius: 16px;
+  background: rgba(251, 253, 255, 0.86);
+  padding: 28px 24px 26px;
   text-align: center;
+  box-shadow: 0 24px 44px -38px rgba(15, 23, 42, 0.28);
 }
 
 .simple-step span {
   width: 42px;
   height: 42px;
   margin: 0 auto;
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2624,14 +2761,15 @@
 }
 
 .simple-step h3 {
-  margin-top: 22px;
+  margin-top: 20px;
   font-size: 15px;
   font-weight: 760;
+  line-height: 1.25;
 }
 
 .simple-step p {
-  max-width: 270px;
-  margin: 8px auto 0;
+  max-width: 240px;
+  margin: 9px auto 0;
   font-size: 12px;
   line-height: 1.55;
 }
@@ -2755,7 +2893,7 @@
 
 @media (max-width: 920px) {
   .simple-hero {
-    padding: 48px 0 70px;
+    padding: 58px 0 76px;
   }
 
   .simple-hero-grid {
@@ -2772,11 +2910,20 @@
     margin-inline: auto;
   }
 
+  .simple-hero-copy h1 span {
+    margin-inline: auto;
+  }
+
   .simple-actions {
     justify-content: center;
   }
 
   .simple-feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .simple-step-grid {
+    max-width: 640px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -2830,6 +2977,7 @@
   .simple-invoice-card {
     max-width: 300px;
     padding: 20px;
+    border-radius: 18px;
   }
 
   .simple-invoice-lines div,
@@ -2878,7 +3026,13 @@
   }
 
   .simple-step-grid {
-    gap: 32px;
+    max-width: 320px;
+    gap: 16px;
+  }
+
+  .simple-step {
+    min-height: auto;
+    padding: 24px 20px;
   }
 
   .simple-cta-band {
@@ -2891,9 +3045,22 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .simple-invoice-card {
+    animation: none !important;
+  }
+
+  .simple-button:hover,
+  .billifty-nav-button:hover,
+  .simple-feature-card:hover {
+    transform: none;
+  }
+}
+
 @media (max-width: 360px) {
   .simple-invoice-card,
   .simple-feature-grid,
+  .simple-step-grid,
   .simple-template-grid {
     max-width: 284px;
   }

@@ -57,7 +57,7 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 						{(businessProfileData || []).length > 0 ? (
 							<Select
 								isDisabled={isIssuedOrPaid}
-								className="max-w-xs"
+								className="w-full"
 								label="Select a Business Profile"
 								selectionMode="single"
 								selectedKeys={data.business_profile_id ? new Set([String(data.business_profile_id)]) : new Set()}
@@ -90,7 +90,7 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 						Issue Date<br/>
 						<DatePicker
 							isDisabled={isIssuedOrPaid}
-							className="max-w-[284px]"
+							className="w-full"
 							label="Issue date"
 							granularity="day"
 							value={toDateValue(data.issued_on)}
@@ -101,7 +101,7 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 						Due Date<br/>
 						<DatePicker
 							isDisabled={isIssuedOrPaid}
-							className="max-w-[284px]"
+							className="w-full"
 							label="Due date"
 							granularity="day"
 							value={toDateValue(data.due_on)}
@@ -115,7 +115,7 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 						{(clientData || []).length > 0 ? (
 							<Select
 								isDisabled={isIssuedOrPaid}
-								className="max-w-xs"
+								className="w-full"
 								label="Select a Client"
 								selectionMode="single"
 								selectedKeys={
@@ -210,7 +210,7 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 					<div className="md:w-1/2">
 						<Select
 							isDisabled={isIssuedOrPaid}
-							className="max-w-xs"
+							className="w-full"
 							label="Select a currency"
 							selectionMode="single"
 							selectedKeys={new Set([String(data.currency_id ?? 1)])}
@@ -254,7 +254,7 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 					<div className="md:w-1/2">Discount Mode<br/>
 						<Select
 							isDisabled={isIssuedOrPaid}
-							className="max-w-xs"
+							className="w-full"
 							label="Select discount mode"
 							selectionMode="single"
 							selectedKeys={new Set([data.discount_mode || 'none'])}

@@ -86,17 +86,17 @@ export default function Actions({isIssuedOrPaid, isPaid}) {
 							</Alert>
 						)}
 						{!invoiceId
-							? (<Button onPress={() => save('save_draft')} disableRipple className="my-2 text-white w-full" color="success">Create Invoice</Button>)
-							: (!isPaid && (<Button onPress={() => save('save_changes')} disableRipple className="my-2 w-full" color="primary" variant="flat">Save Changes</Button>))}
+							? (<Button onPress={() => save('save_draft')} disableRipple className="invoice-action-button invoice-action-button-primary w-full" color="success">Create Invoice</Button>)
+							: (!isPaid && (<Button onPress={() => save('save_changes')} disableRipple className="invoice-action-button invoice-action-button-primary w-full" color="primary" variant="flat">Save Changes</Button>))}
 						{!isIssuedOrPaid && data.id && (
-							<Button onPress={confirm} isDisabled={!data.id} disableRipple className="my-2 w-full" color="warning" variant="flat">Issue Invoice</Button>
+							<Button onPress={confirm} isDisabled={!data.id} disableRipple className="invoice-action-button invoice-action-button-issue w-full" color="warning" variant="flat">Issue Invoice</Button>
 						)}
 
-						{!invoiceId && !isEmpty && (<Button disableRipple className="my-2 w-full" color="danger" onPress={clearSticky}>Reset All</Button>)}
-						{invoiceId && (<Button className="my-2 w-full" color="secondary" onPress={onOpenPreviewInvoiceModal}>Preview Invoice</Button>)}
+						{!invoiceId && !isEmpty && (<Button disableRipple className="invoice-action-button invoice-action-button-danger w-full" color="danger" onPress={clearSticky}>Reset All</Button>)}
+						{invoiceId && (<Button className="invoice-action-button invoice-action-button-preview w-full" color="secondary" onPress={onOpenPreviewInvoiceModal}>Preview Invoice</Button>)}
 						{/*{invoiceId && isPaid && (<Button onPress={generatePdf} className="my-2 w-full" color="primary">Quick Download</Button>)}*/}
 
-						{invoiceId && isIssuedOrPaid && (<Button className="my-2 text-white w-full" as={Link} href={uri.send_invoice(invoiceId)} color="success">Send/Download Invoice</Button> )}
+						{invoiceId && isIssuedOrPaid && (<Button className="invoice-action-button invoice-action-button-send w-full" as={Link} href={uri.send_invoice(invoiceId)} color="success">Send/Download Invoice</Button> )}
 
 						<div className="invoice-ai-note">
 							<div className="invoice-ai-note-head">AI Invoice Draft (Beta)</div>
@@ -106,7 +106,7 @@ export default function Actions({isIssuedOrPaid, isPaid}) {
 						{invoiceId && (
 							<>
 								<Divider className="border-2" />
-								<Button className="my-2 font-bold w-full" onPress={onOpenConfirmDeleteModal} color="danger">Delete</Button>
+								<Button className="invoice-action-button invoice-action-button-danger w-full" onPress={onOpenConfirmDeleteModal} color="danger">Delete</Button>
 							</>
 						)}
 					</CardBody>
