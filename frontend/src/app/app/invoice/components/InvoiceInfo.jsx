@@ -2,11 +2,16 @@
 
 import {Card, CardHeader, CardBody, CardFooter, Divider, Link, Image} from "@heroui/react";
 import {Textarea, Input, Button, DatePicker} from "@heroui/react";
-import {Select, SelectItem, Checkbox} from "@heroui/react";
+import {Autocomplete, AutocompleteItem, Select, SelectItem, Checkbox} from "@heroui/react";
 import {useInvoice} from "@/app/providers/InvoiceContext";
 import {centsToDollarsStr, dollarsToCents} from "@/app/utils/computeInvoice";
 import {toDateValue, toISO} from "@/app/utils/date";
 import {uri} from "@/app/constants/routePaths";
+
+const compactText = (...parts) => parts.filter(Boolean).join(" ");
+
+const currencySearchText = (currency) =>
+	compactText(currency?.code, currency?.name, currency?.symbol);
 
 export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 	const {
@@ -55,17 +60,19 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 					<div className="md:w-1/2">
 						Business Profile <br/>
 						{(businessProfileData || []).length > 0 ? (
-							<Select
+							<Autocomplete
 								isDisabled={isIssuedOrPaid}
 								className="w-full"
 								label="Select a Business Profile"
-								selectionMode="single"
-								selectedKeys={data.business_profile_id ? new Set([String(data.business_profile_id)]) : new Set()}
-								onSelectionChange={(keys) => onDataChange('business_profile_id', Array.from(keys)[0] ?? null)}>
+								placeholder="Search business profiles"
+								selectedKey={data.business_profile_id ? String(data.business_profile_id) : null}
+								onSelectionChange={(key) => onDataChange('business_profile_id', key ? String(key) : null)}>
 								{businessProfileData && Object.keys(businessProfileData).length > 0 && businessProfileData.map(b =>
-									<SelectItem key={b.id}>{b.name}</SelectItem>
+									<AutocompleteItem key={String(b.id)} textValue={b.name}>
+										{b.name}
+									</AutocompleteItem>
 								)}
-							</Select>
+							</Autocomplete>
 						) : (<Link href={uri.business_profile.create}>Create Business Profile</Link>)}
 					</div>
 					<div className="md:w-1/2">
@@ -113,19 +120,19 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 					<div className="md:w-1/2">
 						Your Client/Bill To<br/>
 						{(clientData || []).length > 0 ? (
-							<Select
+							<Autocomplete
 								isDisabled={isIssuedOrPaid}
 								className="w-full"
 								label="Select a Client"
-								selectionMode="single"
-								selectedKeys={
-									data.client_id ? new Set([String(data.client_id)]) : new Set()
-								}
-								onSelectionChange={(keys) => onDataChange('client_id', Array.from(keys)[0] ?? null)}>
+								placeholder="Search clients"
+								selectedKey={data.client_id ? String(data.client_id) : null}
+								onSelectionChange={(key) => onDataChange('client_id', key ? String(key) : null)}>
 								{clientData && Object.keys(clientData).length > 0 && clientData.map(b =>
-									<SelectItem key={b.id}>{b.name}</SelectItem>
+									<AutocompleteItem key={String(b.id)} textValue={b.name}>
+										{b.name}
+									</AutocompleteItem>
 								)}
-							</Select>
+							</Autocomplete>
 						) : (<Link href={uri.client.create_client}>Create Client Profile</Link>)}
 					</div>
 					{!isIssuedOrPaid && (<div className="md:w-1/2 content-center">
@@ -208,31 +215,33 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 
 				<div className="flex flex-col md:flex-row gap-2 py-2 invoice-info-row">
 					<div className="md:w-1/2">
-						<Select
+						<Autocomplete
 							isDisabled={isIssuedOrPaid}
 							className="w-full"
 							label="Select a currency"
-							selectionMode="single"
-							selectedKeys={new Set([String(data.currency_id ?? 1)])}
-							onSelectionChange={(val) => {
-								const id = Array.from(val)[0];
+							placeholder="Search currencies"
+							isClearable={false}
+							selectedKey={String(data.currency_id ?? 1)}
+							onSelectionChange={(key) => {
+								if (!key) return;
+								const id = String(key);
 								onDataChange('currency_id', Number(id));
 								setSelectedCurrency((currencies.filter(f => parseInt(f.id) === parseInt(id))[0] || {}))
 							}}
 						>
 							{currencies && Object.keys(currencies).length > 0 && currencies.map(c => (
-								<SelectItem
+								<AutocompleteItem
 									key={String(c.id)}
-									textValue={`${c.code} — ${c.name}`}
+									textValue={currencySearchText(c)}
 								>
 									<div className="flex items-center gap-2">
 										<span className="font-medium">{c.code}</span>
 										<span className="text-default-500">— {c.name}</span>
 										<span className="ml-auto">{c.symbol}</span>
 									</div>
-								</SelectItem>
+								</AutocompleteItem>
 							))}
-						</Select>
+						</Autocomplete>
 					</div>
 					<div className="md:w-1/2">Note:<br/>
 						<Textarea
