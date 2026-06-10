@@ -57,7 +57,7 @@ const buildChecklistItems = (
     const completedCount = CHECKLIST_KEYS.filter(
         (key) => Number(onboardingData?.[key] ?? 0) > 0
     ).length;
-    console.log('onboardingData',onboardingData)
+    console.log('onboardingData', onboardingData)
     return DEFAULT_ITEMS.map((item, index) => {
         const value = Number(onboardingData?.[item.name] ?? 0);
 
@@ -121,11 +121,9 @@ export default function OnboardingPage() {
             setIsLoading(true);
             if (currentItem?.name === 'invoices') {
                 window.open(`${nextUri}?from=onboarding&clear=true`, '_blank');
-                setIsLoading(false);
                 return;
             }
             router.replace(`${nextUri}?from=onboarding`);
-            setIsLoading(false);
         } catch (error) {
             console.error("Error redirecting to next URI:", error);
             setIsLoading(false);
@@ -157,12 +155,14 @@ export default function OnboardingPage() {
                     </p>
                 </div>
 
-                <div className="mt-12 rounded-[28px] border border-[#e8edf3] bg-white px-6 py-8 shadow-[0_12px_36px_rgba(15,23,42,0.04)] sm:px-8 lg:px-10">
+                <div
+                    className="mt-12 rounded-[28px] border border-[#e8edf3] bg-white px-6 py-8 shadow-[0_12px_36px_rgba(15,23,42,0.04)] sm:px-8 lg:px-10">
                     <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                         <h2 className="text-[28px] font-semibold leading-none text-[#111827]">
                             Your Progress
                         </h2>
-                        <div className="inline-flex min-h-[42px] items-center rounded-full bg-[#edf4ff] px-6 text-[16px] font-medium text-[#2793d7]">
+                        <div
+                            className="inline-flex min-h-[42px] items-center rounded-full bg-[#edf4ff] px-6 text-[16px] font-medium text-[#2793d7]">
                             {calculatedCompletedSteps} of {calculatedTotalSteps} completed
                         </div>
                     </div>
@@ -215,9 +215,11 @@ export default function OnboardingPage() {
                                         </div>
 
                                         {showConnector ? (
-                                            <div className={`ml-[26px] mt-1 h-[100px] w-[4px] rounded-full sm:ml-[31px] ${connectorClassName}`}/>
+                                            <div
+                                                className={`ml-[26px] mt-1 h-[100px] w-[4px] rounded-full sm:ml-[31px] ${connectorClassName}`}/>
                                         ) : (
-                                            <div className="ml-[26px] mt-1 h-[100px] w-[4px] rounded-full bg-[#e5e7eb] sm:ml-[31px]"/>
+                                            <div
+                                                className="ml-[26px] mt-1 h-[100px] w-[4px] rounded-full bg-[#e5e7eb] sm:ml-[31px]"/>
                                         )}
                                     </div>
 
@@ -262,10 +264,13 @@ export default function OnboardingPage() {
                     </div>
 
                     <div className="lg:pt-[2px]">
-                        <div className="overflow-hidden rounded-[28px] bg-[linear-gradient(135deg,#f7bd18_0%,#66c08c_55%,#1aa7ff_100%)] p-[1px] shadow-[0_18px_40px_rgba(15,23,42,0.14)]">
-                            <div className="rounded-[27px] bg-[linear-gradient(135deg,rgba(247,189,24,0.88)_0%,rgba(102,192,140,0.82)_52%,rgba(26,167,255,0.95)_100%)] px-7 py-8 text-white sm:px-8 sm:py-9">
+                        <div
+                            className="overflow-hidden rounded-[28px] bg-[linear-gradient(135deg,#f7bd18_0%,#66c08c_55%,#1aa7ff_100%)] p-[1px] shadow-[0_18px_40px_rgba(15,23,42,0.14)]">
+                            <div
+                                className="rounded-[27px] bg-[linear-gradient(135deg,rgba(247,189,24,0.88)_0%,rgba(102,192,140,0.82)_52%,rgba(26,167,255,0.95)_100%)] px-7 py-8 text-white sm:px-8 sm:py-9">
                                 <div className="flex items-start gap-5">
-                                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white/16">
+                                    <div
+                                        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white/16">
                                         <FileText className="h-7 w-7 text-white"/>
                                     </div>
                                     <div>
@@ -284,10 +289,12 @@ export default function OnboardingPage() {
                                     type="button"
                                     onClick={onContinue}
                                     disabled={!currentItem || isLoading}
-                                    className="group relative mt-8 flex min-h-[58px] w-full items-center justify-center overflow-hidden rounded-[16px] bg-white px-6 text-[21px] font-semibold text-[#1c9cea] shadow-[0_0_0_1px_rgba(255,255,255,0.4),0_18px_38px_rgba(28,156,234,0.25)] transition duration-300 hover:-translate-y-[1px] hover:bg-white hover:shadow-[0_0_0_1px_rgba(255,255,255,0.55),0_24px_52px_rgba(28,156,234,0.32)] disabled:cursor-not-allowed disabled:opacity-80 disabled:hover:translate-y-0 animate-[ctaGlow_2.2s_ease-in-out_infinite]"
+                                    className="group cursor-pointer relative mt-8 flex min-h-[58px] w-full items-center justify-center overflow-hidden rounded-[16px] bg-white px-6 text-[21px] font-semibold text-[#1c9cea] shadow-[0_0_0_1px_rgba(255,255,255,0.4),0_18px_38px_rgba(28,156,234,0.25)] transition duration-300 hover:-translate-y-[1px] hover:bg-white hover:shadow-[0_0_0_1px_rgba(255,255,255,0.55),0_24px_52px_rgba(28,156,234,0.32)] disabled:cursor-not-allowed disabled:opacity-80 disabled:hover:translate-y-0 animate-[ctaGlow_2.2s_ease-in-out_infinite]"
                                 >
-                                    <span className="absolute inset-0 rounded-[16px] bg-[radial-gradient(circle_at_center,rgba(125,211,252,0.35),transparent_62%)] opacity-90 blur-[2px] animate-[ctaGlowInner_2.2s_ease-in-out_infinite]"/>
-                                    <span className="absolute inset-y-0 left-[-35%] w-[34%] skew-x-[-18deg] bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.92),transparent)] opacity-80 animate-[ctaShimmer_2.8s_ease-in-out_infinite]"/>
+                                    <span
+                                        className="absolute inset-0 rounded-[16px] bg-[radial-gradient(circle_at_center,rgba(125,211,252,0.35),transparent_62%)] opacity-90 blur-[2px] animate-[ctaGlowInner_2.2s_ease-in-out_infinite]"/>
+                                    <span
+                                        className="absolute inset-y-0 left-[-35%] w-[34%] skew-x-[-18deg] bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.92),transparent)] opacity-80 animate-[ctaShimmer_2.8s_ease-in-out_infinite]"/>
                                     <span className="absolute inset-0 rounded-[16px] ring-1 ring-[#7ed6ff]/50"/>
                                     <span className="relative z-[1]">
                                         {typeof currentItem === 'undefined' ? 'Setup Completed' : (isLoading ? "Redirecting..." : (`Complete ${(currentItem?.title || '')} Setup`))}
@@ -309,16 +316,14 @@ export default function OnboardingPage() {
             <style jsx global>{`
                 @keyframes ctaGlow {
                     0%, 100% {
-                        box-shadow:
-                            0 0 0 1px rgba(255, 255, 255, 0.4),
-                            0 18px 38px rgba(28, 156, 234, 0.25),
-                            0 0 0 rgba(125, 211, 252, 0);
+                        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4),
+                        0 18px 38px rgba(28, 156, 234, 0.25),
+                        0 0 0 rgba(125, 211, 252, 0);
                     }
                     50% {
-                        box-shadow:
-                            0 0 0 1px rgba(255, 255, 255, 0.6),
-                            0 24px 54px rgba(28, 156, 234, 0.34),
-                            0 0 28px rgba(125, 211, 252, 0.55);
+                        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6),
+                        0 24px 54px rgba(28, 156, 234, 0.34),
+                        0 0 28px rgba(125, 211, 252, 0.55);
                     }
                 }
 
