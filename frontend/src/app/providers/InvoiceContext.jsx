@@ -658,7 +658,7 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 		}
 	})
 
-	const {mutateAsync: update, error: updateError} = useMutation({
+	const {mutateAsync: update, isPending: updateIsPending, error: updateError} = useMutation({
 		mutationFn: async (action) => {
 			const payload = buildInvoicePayload();
 			return await Invoice.update(invoiceId, payload, action)
@@ -753,7 +753,7 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 		isTaxable,
 		setIsTaxable,
 		removeItem,
-		save, saveDraftIsPending,
+		save, saveDraftIsPending, updateIsPending,
 		setHasToast,
 		currencies,
 		setSelectedCurrency,

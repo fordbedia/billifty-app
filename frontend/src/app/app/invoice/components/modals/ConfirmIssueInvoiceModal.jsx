@@ -17,6 +17,7 @@ export default function ConfirmIssueInvoiceModal({invoiceId}) {
 		isOpenConfirmIssueInvoice,
 		onOpenChangeConfirmIssueInvoice,
 		save,
+		updateIsPending
 	} = useInvoice()
 	const router = useRouter()
 	return (
@@ -37,11 +38,11 @@ export default function ConfirmIssueInvoiceModal({invoiceId}) {
 								<Button color="danger" variant="light" onPress={onClose}>
 									Close
 								</Button>
-								<Button color="warning" onPress={() => save('issue', () => {
+								<Button isDisabled={updateIsPending} color="warning" onPress={() => save('issue', () => {
 									onClose();
 									router.replace(`/app/invoice/${invoiceId}/send`)
 								}).catch(() => {})}>
-									Issue Invoice
+									{updateIsPending ? 'Issuing Invoice...' : 'Issue Invoice'}
 								</Button>
 							</ModalFooter>
 						</>
