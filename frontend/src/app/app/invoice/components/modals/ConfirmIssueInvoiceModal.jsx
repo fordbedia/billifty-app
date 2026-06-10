@@ -40,7 +40,7 @@ export default function ConfirmIssueInvoiceModal({invoiceId}) {
 								<Button color="warning" onPress={() => save('issue', () => {
 									onClose();
 									router.replace(`/app/invoice/${invoiceId}/send`)
-								})}>
+								}).catch(() => {})}>
 									Issue Invoice
 								</Button>
 							</ModalFooter>

@@ -9,6 +9,7 @@ import {
 import {useRouter} from "next/navigation";
 import {uri} from "@/app/constants/routePaths";
 import {useInvoice} from "@/app/providers/InvoiceContext";
+import {capitalize} from "@/app/utils/strings";
 
 export default function ConfirmDeleteModal() {
 	const {
@@ -18,6 +19,10 @@ export default function ConfirmDeleteModal() {
 	} = useInvoice()
 	const router = useRouter()
 
+	const modalTitle = data?.status === 'paid' ? 'archive' : 'delete';
+
+	const modalAction = data?.status === 'paid' ? 'Archiving' : 'Deleting';
+
   return (
     <>
       <Modal isOpen={isOpenConfirmDeleteModal} onOpenChange={onOpenChangeConfirmDeleteModal}>
@@ -25,17 +30,17 @@ export default function ConfirmDeleteModal() {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-				  <h2 className="px-5 py-6">Deleting Invoice #{data.invoice_number}</h2>
+				  <h2 className="px-5 py-6">{modalAction} Invoice #{data.invoice_number}</h2>
 			  </ModalHeader>
               <ModalBody>
-               	<p>Are you sure you want to delete this Invoice?</p>
+               	<p>Are you sure you want to {modalTitle} this Invoice?</p>
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
                   Close
                 </Button>
                 <Button color="danger" onPress={() => deleteInvoice(data.id).then(() => router.replace(uri.invoices))}>
-                  Delete
+					{capitalize(modalTitle)}
                 </Button>
               </ModalFooter>
             </>

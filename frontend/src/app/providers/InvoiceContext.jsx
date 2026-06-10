@@ -643,7 +643,7 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 		router.replace('/app/invoice/new?clear=true');
 	}
 
-	const {mutate: saveDraft, error: createInvoiceError} = useMutation({
+	const {mutateAsync: saveDraft, isPending: saveDraftIsPending, error: createInvoiceError} = useMutation({
 		mutationFn: async (action) => {
 			const payload = buildInvoicePayload();
 			return await Invoice.saveDraft(payload, action)
@@ -652,17 +652,13 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 			if (r && r.data) {
 				window.localStorage.removeItem(STORAGE_KEY)
 				setData(prev => ({...prev, status: r?.data?.status}))
-				setHasToast({
-					title: 'Invoice was successfully created!',
-					color: 'success'
-				})
 				queryClient.invalidateQueries({queryKey: ['me']})
 				router.replace(`/app/invoice/${r.data?.id}`)
 			}
 		}
 	})
 
-	const {mutate: update, error: updateError} = useMutation({
+	const {mutateAsync: update, error: updateError} = useMutation({
 		mutationFn: async (action) => {
 			const payload = buildInvoicePayload();
 			return await Invoice.update(invoiceId, payload, action)
@@ -692,19 +688,27 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 	})
 
 	const save = (type, callback = null) => {
+		let request;
+
 		switch (type) {
 			case 'save_draft':
-				saveDraft(type)
+				request = saveDraft(type)
 				break;
 			case 'save_changes':
 			case 'issue':
-				update(type)
+				request = update(type)
 				break;
+			default:
+				return Promise.resolve(null);
 		}
 
-		if (callback) {
-			callback()
-		}
+		return request.then((response) => {
+			if (callback) {
+				callback(response)
+			}
+
+			return response;
+		})
 	}
 
 	// ----------------------------------------------------------------------------
@@ -749,7 +753,8 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 		isTaxable,
 		setIsTaxable,
 		removeItem,
-		save,
+		save, saveDraftIsPending,
+		setHasToast,
 		currencies,
 		setSelectedCurrency,
 		selectedCurrency,

@@ -1,5 +1,6 @@
 "use client"
 
+import {useEffect, useState} from "react";
 import {Card, CardHeader, CardBody, CardFooter, Divider, Link, Image} from "@heroui/react";
 import {Button} from "@heroui/react";
 import {useInvoice} from "@/app/providers/InvoiceContext";
@@ -8,7 +9,8 @@ import {uri} from "@/app/constants/routePaths";
 
 export default function Actions({isIssuedOrPaid, isPaid}) {
 	const {
-		save,
+		save, saveDraftIsPending,
+		setHasToast,
 		data,
 		clearSticky,
 		isEmpty,
@@ -23,6 +25,29 @@ export default function Actions({isIssuedOrPaid, isPaid}) {
 
 	const confirm = () => {
 		onOpenConfirmIssueInvoice()
+	}
+
+	const [createInvoiceIsSubmitting, setCreateInvoiceIsSubmitting] = useState(false);
+	const createInvoiceIsBusy = Boolean(saveDraftIsPending || createInvoiceIsSubmitting);
+
+	useEffect(() => {
+		if (createInvoiceError) {
+			setCreateInvoiceIsSubmitting(false);
+		}
+	}, [createInvoiceError]);
+
+	const handleCreateInvoice = () => {
+		if (createInvoiceIsBusy) return;
+
+		setCreateInvoiceIsSubmitting(true);
+		save('save_draft').then(() => {
+			setHasToast({
+				title: 'Invoice was successfully created!',
+				color: 'success'
+			})
+		}).catch(() => {
+			setCreateInvoiceIsSubmitting(false);
+		});
 	}
 
 	let errors = null;
@@ -86,8 +111,10 @@ export default function Actions({isIssuedOrPaid, isPaid}) {
 							</Alert>
 						)}
 						{!invoiceId
-							? (<Button onPress={() => save('save_draft')} disableRipple className="invoice-action-button invoice-action-button-primary w-full" color="success">Create Invoice</Button>)
-							: (!isPaid && (<Button onPress={() => save('save_changes')} disableRipple className="invoice-action-button invoice-action-button-primary w-full" color="primary" variant="flat">Save Changes</Button>))}
+							? (<Button isDisabled={createInvoiceIsBusy} isLoading={createInvoiceIsBusy} onPress={handleCreateInvoice} disableRipple className="invoice-action-button invoice-action-button-primary w-full" color="success">
+								{createInvoiceIsBusy ? 'Creating Invoice...' : 'Create Invoice'}
+							</Button>)
+							: (!isPaid && (<Button onPress={() => save('save_changes').catch(() => {})} disableRipple className="invoice-action-button invoice-action-button-primary w-full" color="primary" variant="flat">Save Changes</Button>))}
 						{!isIssuedOrPaid && data.id && (
 							<Button onPress={confirm} isDisabled={!data.id} disableRipple className="invoice-action-button invoice-action-button-issue w-full" color="warning" variant="flat">Issue Invoice</Button>
 						)}
@@ -106,7 +133,9 @@ export default function Actions({isIssuedOrPaid, isPaid}) {
 						{invoiceId && (
 							<>
 								<Divider className="border-2" />
-								<Button className="invoice-action-button invoice-action-button-danger w-full" onPress={onOpenConfirmDeleteModal} color="danger">Delete</Button>
+								<Button className="invoice-action-button invoice-action-button-danger w-full" onPress={onOpenConfirmDeleteModal} color="danger">
+									{data.status === 'paid' ? 'Archive' : 'Delete' }
+								</Button>
 							</>
 						)}
 					</CardBody>
