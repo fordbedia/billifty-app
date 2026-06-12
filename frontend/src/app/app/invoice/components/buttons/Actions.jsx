@@ -81,6 +81,11 @@ export default function Actions({isIssuedOrPaid, isPaid}) {
 			typeof updateError !== 'undefined' &&
 			typeof updateError?.response?.data?.message !== 'undefined'
 		)
+		||
+		(
+			typeof createInvoiceError !== 'undefined' &&
+			typeof createInvoiceError?.response?.data?.code !== 'undefined'
+		)
 	) {
 		errors = createInvoiceError?.response?.data?.message ??  updateError?.response?.data?.message;
 	}

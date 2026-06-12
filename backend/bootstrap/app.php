@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
            'plan.capability' => \BilliftySDK\SharedResources\Modules\Billing\Http\Middleware\EnsurePlanCapability::class,
            'plan.limit' => \BilliftySDK\SharedResources\Modules\Billing\Http\Middleware\EnsurePlanLimit::class,
            'auth' => \App\Http\Middleware\Authenticate::class,
+           'userMustBeVerified' => \BilliftySDK\SharedResources\Modules\User\Http\Middleware\VerifiedUser::class,
        ]);
     })
     ->withProviders([

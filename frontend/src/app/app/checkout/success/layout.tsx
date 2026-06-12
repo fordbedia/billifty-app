@@ -1,6 +1,5 @@
 import React from "react";
 import RootLayout from "@/app/components/common/RootLayout";
-import {UserProvider} from "@/app/providers/UserContext";
 
 function Inner({children}: {children: React.ReactNode}) {
     return (
@@ -11,9 +10,5 @@ function Inner({children}: {children: React.ReactNode}) {
 }
 
 export default function Layout({children}: {children: React.ReactNode}) {
-    return (
-        <UserProvider>
-            <Inner>{children}</Inner>
-        </UserProvider>
-    )
+    return <Inner>{children}</Inner>
 }

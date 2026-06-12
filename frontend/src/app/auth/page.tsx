@@ -11,7 +11,7 @@ import React, {
     type SetStateAction,
 } from "react";
 import {useApp} from "@/app/providers/AppContext";
-import {UserProvider, useUser} from "@/app/providers/UserContext";
+import {useUser} from "@/app/providers/UserContext";
 import {useAuth} from "@/app/providers/AuthContext";
 
 export function Component() {
@@ -78,9 +78,5 @@ export function Component() {
 }
 
 export default function Authentication() {
-    return (
-        <UserProvider>
-            <Component />
-        </UserProvider>
-    )
+    return <Component />
 }

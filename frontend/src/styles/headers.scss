@@ -8,6 +8,7 @@
   --header-text: #0f172a;
   --header-divider-color: #eef1f5;
   --app-header-height: 72px;
+  --email-verification-banner-height: 0px;
 }
 
 /* --------------------- */
@@ -26,7 +27,7 @@ header {
 }
 .app-header {
   position: fixed;
-  top: 0;
+  top: var(--email-verification-banner-height);
   left: 0;
   right: 0;
   width: 100%;
@@ -40,7 +41,7 @@ header {
 }
 
 .app-shell {
-  padding-top: var(--app-header-height);
+  padding-top: calc(var(--app-header-height) + var(--email-verification-banner-height));
 }
 .billifty-navbar {
   width: 100%;

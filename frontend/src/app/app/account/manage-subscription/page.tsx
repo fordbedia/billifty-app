@@ -230,6 +230,8 @@ export default function ManageSubscriptionPage() {
       ? subscription.unit_amount_dollars
       : 0;
   const nextBillingDate = subscription?.renews_at ? formattedDate(subscription.renews_at) : "No renewal date available";
+  const hasCancellationDate = subscription?.cancels_at ?? false;
+  const cancellationDate = subscription?.cancels_at ? formattedDate(subscription.cancels_at) : null;
   const planStartedAt = subscription?.created_at ? formattedDate(subscription.created_at) : null;
   const currentStatus = capitalize(subscription?.status ?? (hasStripeSubscription ? "active" : "free"));
   const usageCards = [
@@ -353,9 +355,11 @@ export default function ManageSubscriptionPage() {
                     <Divider className="my-4 bg-white/10" />
                     <div className="space-y-1.5">
                       <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
-                        Next Billing Date
+                          {hasCancellationDate ? 'Cancellation Date' : 'Next Billing Date'}
                       </p>
-                      <p className="text-sm font-semibold text-white">{nextBillingDate}</p>
+                      <p className="text-sm font-semibold text-white">
+                          {hasCancellationDate ? cancellationDate : nextBillingDate}
+                      </p>
                     </div>
                     <Button
                       className="mt-5 h-10 w-full rounded-md border-0 bg-white text-xs font-semibold text-[#111827] shadow-sm hover:bg-slate-50"

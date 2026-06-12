@@ -6,7 +6,7 @@ import type {AxiosError} from "axios";
 import User from "@/app/models/User";
 import {useRouter, useSearchParams} from "next/navigation";
 import {uri} from "@/app/constants/routePaths";
-import {storeAuth} from "@/app/helpers/auth";
+import {auth, storeAuth} from "@/app/helpers/auth";
 import {usePathname} from "next/navigation";
 import {addToast} from "@heroui/react";
 
@@ -63,6 +63,7 @@ type UserContextValue = {
     reSendVerification: UseMutateFunction<unknown, Error, void, unknown>;
     reSendVerificationSuccess: boolean;
     reSendVerificationisPending: boolean;
+    isEmailVerified: boolean;
     updatePasswordForm: {
         new_password: string;
         current_password: string;
@@ -153,10 +154,7 @@ export function UserProviderInner({children}: { children: React.ReactNode }) {
 
     const [updatePasswordForm, setUpdatePasswordForm] = useState<updatePasswordProp>({...updatePasswordInitialState})
 
-    const shouldFetchProfile =
-        pathname === uri.profile ||
-        pathname === uri.accountSettings ||
-        pathname === uri.checkout_success
+    const shouldFetchProfile = Boolean(auth());
 
     const {
         data: me = null,
@@ -319,6 +317,7 @@ export function UserProviderInner({children}: { children: React.ReactNode }) {
         reSendVerification,
         reSendVerificationSuccess,
         reSendVerificationisPending,
+        isEmailVerified: Boolean(me?.email_verified_at),
         updatePasswordForm,
         setUpdatePasswordForm,
         updatePassword,

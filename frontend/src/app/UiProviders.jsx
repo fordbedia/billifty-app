@@ -6,6 +6,7 @@ import ReduxProvider from "./providers/ReduxProvider";
 import {HeroUIProvider} from "@heroui/react";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {ToastProvider} from "@heroui/toast";
+import {UserProvider} from "@/app/providers/UserContext";
 
 const providers = [
 	AppProvider,
@@ -24,7 +25,9 @@ export default function UiProviders({children}) {
 			<ToastProvider/>
 			<ReduxProvider>
 				<QueryClientProvider client={queryClient}>
-					<AppContextProvider>{children}</AppContextProvider>
+					<UserProvider>
+						<AppContextProvider>{children}</AppContextProvider>
+					</UserProvider>
 				</QueryClientProvider>
 			</ReduxProvider>
 		</HeroUIProvider>
