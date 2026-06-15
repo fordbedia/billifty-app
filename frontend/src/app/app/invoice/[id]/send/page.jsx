@@ -128,6 +128,10 @@ function Main({initialId}) {
 	const reminderSwitchSelected = hasExistingReminderSchedule
 		? Boolean(data?.payment_reminders_enabled)
 		: paymentRemindersEnabled;
+	const isVoidInvoice = data?.status === 'void';
+	const exportOptions = isVoidInvoice
+		? EXPORT_OPTIONS.filter((opt) => opt.value !== "directSendToClient")
+		: EXPORT_OPTIONS;
 
 	const handlePaymentReminderChange = (enabled) => {
 		if (hasExistingReminderSchedule) {
@@ -198,7 +202,7 @@ function Main({initialId}) {
 					Send Copy to Email
 				</Button>
 			);
-		} else if (exportOption?.selectedOption === "directSendToClient") {
+		} else if (exportOption?.selectedOption === "directSendToClient" && !isVoidInvoice) {
 			button = (
 				<Button
 					onPress={() => sendToClient({
@@ -251,7 +255,7 @@ function Main({initialId}) {
 							</legend>
 
 							<div className="grid gap-4">
-								{EXPORT_OPTIONS.map((opt) => {
+								{exportOptions.map((opt) => {
 									const selected = exportOption.selectedOption === opt.value;
 
 									return (
@@ -331,7 +335,8 @@ function Main({initialId}) {
 
 					{exportOption &&
 						Object.keys(exportOption).length > 0 &&
-						exportOption?.selectedOption === "directSendToClient" && (
+						exportOption?.selectedOption === "directSendToClient" &&
+						!isVoidInvoice && (
 							<div className="mx-auto w-full space-y-6">
 								{data?.due_on && data?.status === 'issued' && (
 									<section

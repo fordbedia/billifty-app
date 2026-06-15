@@ -28,6 +28,7 @@ const statusBadgeClassMap = {
 	draft: "border-[#f7d47b] bg-[#fff4cf] text-[#8a5a00]",
 	issued: "border-[#b8cdfa] bg-[#eaf2ff] text-[#0b5ecb]",
 	paid: "border-[#a7e6c6] bg-[#e8fbf1] text-[#087a3d]",
+	void: "border-[#d2d8e2] bg-[#eef1f5] text-[#3d4655]",
 };
 
 const formatStatusLabel = (status) => {
@@ -102,9 +103,10 @@ export default function Layout({showAiAssistant = false}) {
 		)
 	}
 
-	const isIssuedOrPaid = data?.is_issued || data?.is_paid;
-	const isPaid = data?.is_paid;
-	const invoiceStatus = String(data?.status || (isPaid ? "paid" : data?.is_issued ? "issued" : "draft")).toLowerCase();
+	const invoiceStatus = String(data?.status || (data?.is_paid ? "paid" : data?.is_issued ? "issued" : "draft")).toLowerCase();
+	const isVoidInvoice = invoiceStatus === "void";
+	const isIssuedOrPaid = data?.is_issued || data?.is_paid || isVoidInvoice;
+	const isPaid = data?.is_paid || isVoidInvoice;
 	const invoiceStatusBadgeClass = statusBadgeClassMap[invoiceStatus] ?? "border-[#d2d8e2] bg-[#eef1f5] text-[#3d4655]";
 	const paymentRemindersEnabled = Boolean(data?.payment_reminders_enabled);
 	const autoReminderToggleClass = [
@@ -164,6 +166,11 @@ export default function Layout({showAiAssistant = false}) {
 								<h2 className="mt-3 text-lg font-light leading-7 text-[#4e4e4e]">
 									Create and customize your invoice with a premium, minimal workflow.
 								</h2>
+								{isVoidInvoice && (
+									<p className="mt-3 text-sm font-medium text-[#6b7280]">
+										This invoice has been voided and can no longer be edited.
+									</p>
+								)}
 							</div>
 							<div className="flex shrink-0 justify-start sm:pt-7">
 								<Button variant="flat" className={workspacePrimaryButtonClass} onPress={() => {
