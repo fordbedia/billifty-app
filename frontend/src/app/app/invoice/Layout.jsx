@@ -1,7 +1,8 @@
 "use client";
 
 import RootLayout from "@/app/components/common/RootLayout";
-import {Button, Card, CardHeader, CardBody, CardFooter, Divider} from "@heroui/react";
+import {Button, Card, CardHeader, CardBody, CardFooter, Divider, Switch} from "@heroui/react";
+import {Clock3} from "lucide-react";
 import {Reorder} from "framer-motion";
 import InvoiceItem from "@/app/app/invoice/components/InvoiceItem";
 import AddMoreItems from "@/app/app/invoice/components/buttons/AddMoreItems";
@@ -14,9 +15,11 @@ import ConfirmNewInvoice from "@/app/app/invoice/components/modals/ConfirmNewInv
 import NotFound from "@/app/app/invoice/components/errorPages/NotFound";
 import BSpinner from "@/app/components/Spinner";
 import ConfirmDeleteModal from "@/app/app/invoice/components/modals/ConfirmDeleteModal";
+import ConfirmVoidInvoiceModal from "@/app/app/invoice/components/modals/ConfirmVoidInvoiceModal";
 import InvoicePreviewPage from "@/app/app/invoice/components/InvoicePreviewPage";
 import ChatWidget from "@/app/components/common/ChatWidget";
 import {useApp} from "@/app/providers/AppContext";
+import {reminderIndicator, isInvoiceIssued} from "@/app/helpers/paymentReminder";
 
 const workspacePrimaryButtonClass =
 	"group h-auto min-h-[42px] rounded-full bg-[#2299dc] px-5 py-2 text-sm font-semibold tracking-normal text-white shadow-[0_16px_32px_-22px_rgba(29,132,198,0.9)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-[#1684c5] hover:shadow-[0_22px_38px_-24px_rgba(29,132,198,0.95)] focus-visible:ring-2 focus-visible:ring-[#72bee9] focus-visible:ring-offset-2";
@@ -49,6 +52,7 @@ export default function Layout({showAiAssistant = false}) {
 		isInvoiceError,
 		isLoadingInvoice,
 		invoiceId,
+		setPaymentReminder
 	} = useInvoice();
 	const {planCapabilities} = useApp();
 	const aiAssistantCapability =
@@ -102,12 +106,22 @@ export default function Layout({showAiAssistant = false}) {
 	const isPaid = data?.is_paid;
 	const invoiceStatus = String(data?.status || (isPaid ? "paid" : data?.is_issued ? "issued" : "draft")).toLowerCase();
 	const invoiceStatusBadgeClass = statusBadgeClassMap[invoiceStatus] ?? "border-[#d2d8e2] bg-[#eef1f5] text-[#3d4655]";
+	const paymentRemindersEnabled = Boolean(data?.payment_reminders_enabled);
+	const autoReminderToggleClass = [
+		"auto-reminder-toggle",
+		"inline-flex h-[30px] shrink-0 items-center gap-1.5 rounded-full border border-[#dce5ee] bg-white/95 px-2.5 py-1",
+		"text-xs font-semibold tracking-normal text-[#334155]",
+		"shadow-[0_10px_28px_-24px_rgba(15,23,42,0.45)]",
+		"transition-colors duration-200",
+		paymentRemindersEnabled ? "border-[#bcd5f6] bg-[#f8fbff]" : "",
+	].filter(Boolean).join(" ");
 
 	return (
 		<RootLayout>
 			<div className="app app-wrapper min-h-screen bg-white invoice-page">
 				<ConfirmDeleteModal/>
-				<ConfirmIssueInvoiceModal invoiceId={data?.id} />
+				<ConfirmVoidInvoiceModal />
+				<ConfirmIssueInvoiceModal invoiceId={data?.id}/>
 				<ConfirmNewInvoice/>
 				<InvoicePreviewPage invoiceId={invoiceId}/>
 				<div className="mx-auto w-full max-w-[1440px] px-5 pb-12 pt-10 sm:px-8 lg:px-10 sm:pt-12 lg:pt-16">
@@ -125,6 +139,27 @@ export default function Layout({showAiAssistant = false}) {
 									{data?.id && (<span className={`invoice-status-badge ${invoiceStatusBadgeClass}`}>
 										{formatStatusLabel(invoiceStatus)}
 									</span>)}
+									{data?.reminder_schedule && reminderIndicator(data) && (
+										<div className={autoReminderToggleClass}>
+											<Clock3 aria-hidden="true" className="size-4.5 text-[#64748b]"/>
+											<span className="flex min-w-0 flex-col leading-none">
+												<span className="whitespace-nowrap text-[12px] leading-[13px]">Auto-Reminder</span>
+												<span className="whitespace-nowrap text-[9px] font-medium leading-[10px] text-[#7b8794]">
+													{/*{paymentRemindersEnabled ? "Active" : "Paused"}*/}
+													{reminderIndicator(data)}
+												</span>
+											</span>
+											{isInvoiceIssued(data) && (
+												<Switch
+													aria-label="Auto-Reminder"
+													color="primary"
+													size="sm"
+													isSelected={paymentRemindersEnabled}
+													onValueChange={setPaymentReminder}
+												/>
+											)}
+										</div>
+									)}
 								</div>
 								<h2 className="mt-3 text-lg font-light leading-7 text-[#4e4e4e]">
 									Create and customize your invoice with a premium, minimal workflow.
@@ -267,8 +302,8 @@ export default function Layout({showAiAssistant = false}) {
 						</div>
 
 						<div className="invoice-sidebar w-full min-w-0">
-							<InvoiceTemplate isIssuedOrPaid={isIssuedOrPaid} />
-							<Actions isPaid={isPaid} isIssuedOrPaid={isIssuedOrPaid} />
+							<InvoiceTemplate isIssuedOrPaid={isIssuedOrPaid}/>
+							<Actions isPaid={isPaid} isIssuedOrPaid={isIssuedOrPaid}/>
 						</div>
 					</div>
 				</div>

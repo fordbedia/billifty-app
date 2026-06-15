@@ -102,6 +102,7 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 		render_snapshot_html: '',
 		meta: '',
 		invoice_items: [],
+		payment_reminders_enabled: false,
 	};
 	const toastInitialState = {
 		title: '',
@@ -122,7 +123,6 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 			cc: ''
 		}
 	}
-
 	const [exportMessage, setExportMessage] = useState(exportOptionInitialState.payload.message);
 
 	const [toGenerateANdDownload, setToGenerateANdDownload] = useState(false);
@@ -138,6 +138,7 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 	const [isEmpty, setIsEmpty] = useState(false);
 	const [isTaxable, setIsTaxable] = useState((data.shipping_tax_rate ?? 0) > 0);
 	const [hasToast, setHasToast] = useState(toastInitialState)
+	const [paymentRemindersEnabled, setPaymentRemindersEnabled] = useState(false);
 
 	const STORAGE_KEY = "billifty.invoice.form.v1";
 	const STORAGE_VERSION = 1;
@@ -223,6 +224,11 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 		isOpen: isOpenConfirmDeleteModal,
 		onOpen: onOpenConfirmDeleteModal,
 		onOpenChange: onOpenChangeConfirmDeleteModal
+	} = useDisclosure();
+	const {
+		isOpen: isOpenConfirmVoidInvoiceModal,
+		onOpen: onOpenConfirmVoidInvoiceModal,
+		onOpenChange: onOpenChangeConfirmVoidInvoiceModal
 	} = useDisclosure();
 	const {
 		isOpen: isOpenPreviewInvoiceModal,
@@ -474,9 +480,9 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 	})
 
 	const {mutate: sendToClient} = useMutation({
-		mutationFn: async () => {
+		mutationFn: async (reminderOptions = {}) => {
 			setExportOption(prev => ({...prev, status: 'processing'}))
-			return (await Invoice.directlySendToClient(invoiceId, exportMessage))
+			return (await Invoice.directlySendToClient(invoiceId, exportMessage, reminderOptions))
 		},
 		onSuccess: () => {
 			setExportOption(prev => ({...prev, status: 'done'}))
@@ -619,6 +625,7 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 		if (fetchedInvoice?.currency) {
 			setSelectedCurrency(fetchedInvoice?.currency)
 		}
+		setPaymentRemindersEnabled(Boolean(fetchedInvoice?.payment_reminders_enabled));
 	}, [fetchedInvoice]);
 
 	// ----------------------------------------------------------------------------
@@ -685,6 +692,40 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 				color: 'danger'
 			})
 		}
+	})
+
+	const {mutateAsync: setPaymentReminder} = useMutation({
+		mutationFn: async (isPaymentEnabled) => {
+			const response = await Invoice.setPaymentReminder(invoiceId, Boolean(isPaymentEnabled));
+
+			return response?.data;
+		},
+		onMutate: (isPaymentEnabled) => {
+			const enabled = Boolean(isPaymentEnabled);
+
+			setPaymentRemindersEnabled(enabled);
+			setData((prev) => ({
+				...prev,
+				payment_reminders_enabled: enabled,
+			}));
+		},
+		onSuccess: (invoice) => {
+			const enabled = Boolean(invoice?.payment_reminders_enabled);
+
+			setPaymentRemindersEnabled(enabled);
+			setData((prev) => ({
+				...prev,
+				payment_reminders_enabled: enabled,
+			}));
+		}
+	})
+
+	const {
+		mutateAsync: voidInvoice,
+		error: voidError,
+		isPending: voidIsPending
+	} = useMutation({
+		mutationFn: async() => Invoice.voidInvoice(invoiceId)
 	})
 
 	const save = (type, callback = null) => {
@@ -795,7 +836,9 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 		isOpenPreviewInvoiceModal, onOpenPreviewInvoiceModal, onOpenChangePreviewInvoiceModal,
 		generatePdf,
 		exportOption, setExportOption,
-		sendCopyToMyEmail, exportMessage, setExportMessage, sendToClient, hasCsvReport, setHasCsvReport
+		sendCopyToMyEmail, exportMessage, setExportMessage, sendToClient, hasCsvReport, setHasCsvReport,
+		setPaymentReminder, paymentRemindersEnabled, setPaymentRemindersEnabled,
+		isOpenConfirmVoidInvoiceModal, onOpenConfirmVoidInvoiceModal, onOpenChangeConfirmVoidInvoiceModal, voidInvoice, voidError, voidIsPending
 	}
 
 	return <InvoiceContext.Provider value={value}>

@@ -20,7 +20,7 @@ export default function Actions({isIssuedOrPaid, isPaid}) {
 		updateError,
 		onOpenConfirmDeleteModal,
 		isOpenPreviewInvoiceModal, onOpenPreviewInvoiceModal, onOpenChangePreviewInvoiceModal,
-		generatePdf
+		generatePdf, onOpenConfirmVoidInvoiceModal
 	} = useInvoice()
 
 	const confirm = () => {
@@ -138,7 +138,12 @@ export default function Actions({isIssuedOrPaid, isPaid}) {
 						{invoiceId && (
 							<>
 								<Divider className="border-2" />
-								<Button className="invoice-action-button invoice-action-button-danger w-full" onPress={onOpenConfirmDeleteModal} color="danger">
+								{data?.status === 'issued' && (
+									<Button disableRipple={true} onPress={onOpenConfirmVoidInvoiceModal} className="invoice-action-button invoice-action-button-void w-full" color="danger">
+										Void Invoice
+									</Button>
+								)}
+								<Button disableRipple={true} className="invoice-action-button invoice-action-button-danger w-full" onPress={onOpenConfirmDeleteModal} color="danger">
 									{data.status === 'paid' ? 'Archive' : 'Delete' }
 								</Button>
 							</>

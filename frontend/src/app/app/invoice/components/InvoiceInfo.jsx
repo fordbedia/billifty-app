@@ -1,7 +1,7 @@
 "use client";
 
 import {Card, CardHeader, CardBody, CardFooter, Divider, Link, Image} from "@heroui/react";
-import {Textarea, Input, Button, DatePicker} from "@heroui/react";
+import {Textarea, Input, Button, DatePicker, Tooltip} from "@heroui/react";
 import {Autocomplete, AutocompleteItem, Select, SelectItem, Checkbox} from "@heroui/react";
 import {useInvoice} from "@/app/providers/InvoiceContext";
 import {centsToDollarsStr, dollarsToCents} from "@/app/utils/computeInvoice";
@@ -106,15 +106,17 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 						/>
 					</div>
 					<div className="md:w-1/2">
-						<DatePicker
-							isDisabled={isIssuedOrPaid}
-							className="w-full"
-							labelPlacement="outside"
-							label="Due Date"
-							granularity="day"
-							value={toDateValue(data.due_on)}
-							onChange={(v) => onDataChange('due_on', toISO(v))}
-						/>
+							<DatePicker
+								isDisabled={isIssuedOrPaid}
+								className="w-full"
+								labelPlacement="outside"
+								label="Due Date"
+								granularity="day"
+								value={toDateValue(data.due_on)}
+								onChange={(v) => onDataChange('due_on', toISO(v))}
+							/>
+						<span className="text-xs/2 italic">Set when this invoice is due. </span>
+						<span className="text-xs/2 italic">A due date enables automatic payment reminders if the invoice remains unpaid.</span>
 					</div>
 				</div>
 				<div className="flex flex-col md:flex-row gap-2 py-2 invoice-info-row">
@@ -156,7 +158,7 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 									/>
 
 									{/* UI shows dollars; state stores cents */}
-									<br />
+									<br/>
 									<Input
 										isRequired={hasShipping}
 										errorMessage="Please enter a shipping fee"
@@ -290,13 +292,15 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 
 						{/* Invoice-level fields (amount/percent) */}
 						{isAmount && (
-							<div className="md:w-1/2 pl-2">Discount Amount ({currencySymbol})<Input isDisabled={isIssuedOrPaid} type="number" variant="bordered"
-																					 radius="sm"
-																					 value={centsToDollarsStr(data.discount_cents ?? 0)}
-																					 onValueChange={(val) => onDataChange('discount_cents', dollarsToCents(val))}/>
+							<div className="md:w-1/2 pl-2">Discount Amount ({currencySymbol})<Input
+								isDisabled={isIssuedOrPaid} type="number" variant="bordered"
+								radius="sm"
+								value={centsToDollarsStr(data.discount_cents ?? 0)}
+								onValueChange={(val) => onDataChange('discount_cents', dollarsToCents(val))}/>
 							</div>)}
 						{isPercent && (
-							<div className="md:w-1/2 pl-2">Discount Percent (%)<Input isDisabled={isIssuedOrPaid} type="number" variant="bordered"
+							<div className="md:w-1/2 pl-2">Discount Percent (%)<Input isDisabled={isIssuedOrPaid}
+																					  type="number" variant="bordered"
 																					  radius="sm"
 																					  value={String(data.discount_rate ?? 0)}
 																					  onValueChange={(val) => onDataChange('discount_rate', parseFloat(val) || 0)}/>

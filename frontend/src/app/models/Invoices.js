@@ -49,9 +49,10 @@ export default class Invoice extends Model{
 		})
 	}
 
-	static async directlySendToClient(invoiceId, message) {
+	static async directlySendToClient(invoiceId, message, reminderOptions = {}) {
 		return await this.axios().post(`/${invoiceId}/pdf/send-to-client`, {
-			message
+			message,
+			...reminderOptions,
 		})
 	}
 
@@ -65,5 +66,15 @@ export default class Invoice extends Model{
 
 	static async renewInvoicePublicUrl(invoiceId) {
 		return await this.axios().post(`/${invoiceId}/preview/public-invoice-link/renew`)
+	}
+
+	static async setPaymentReminder(invoiceId, isPaymentEnabled) {
+		return await this.axios().post(`/${invoiceId}/set-payment-reminder`, {isPaymentEnabled})
+	}
+
+	static async voidInvoice(invoiceId) {
+		return await this.axios().post(`/${invoiceId}/void`, {
+			action: 'void'
+		})
 	}
 }
