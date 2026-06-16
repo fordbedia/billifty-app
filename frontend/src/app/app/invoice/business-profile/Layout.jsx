@@ -394,7 +394,7 @@ export default function BusinessProfileAppForm() {
 																name="account_name"
 																label="Account Name"
 																labelPlacement="outside"
-																placeholder="e.g. John Doe or EHD Enterprise LLC"
+																placeholder="e.g. John Doe, Acme Corporation LLC"
 																description="Name registered with your bank."
 																onValueChange={(value) => handleFormChange('pi', 'account_name', value)}
 																value={paymentInfoForm.account_name ?? ''}

@@ -6,6 +6,7 @@ import BSpinner from "@/app/components/Spinner";
 import {uri} from "@/app/constants/routePaths";
 import {useApp} from "@/app/providers/AppContext";
 import {useRouter} from "next/navigation";
+import {useUser} from "@/app/providers/UserContext";
 
 type ChecklistStatus = "completed" | "current" | "pending";
 
@@ -57,7 +58,6 @@ const buildChecklistItems = (
     const completedCount = CHECKLIST_KEYS.filter(
         (key) => Number(onboardingData?.[key] ?? 0) > 0
     ).length;
-    console.log('onboardingData', onboardingData)
     return DEFAULT_ITEMS.map((item, index) => {
         const value = Number(onboardingData?.[item.name] ?? 0);
 
@@ -85,6 +85,8 @@ const buildChecklistItems = (
 export default function OnboardingPage() {
     const router = useRouter();
     const {userData, isUserDataLoading} = useApp();
+    const {me} = useUser()
+    const onboardingCompleted: boolean  = Boolean(me?.onboarding?.is_completed)
     const onboardingData = userData?.over_all_usages;
     const calculatedCompletedSteps = CHECKLIST_KEYS.filter(
         (key) => Number(onboardingData?.[key] ?? 0) > 0
@@ -94,11 +96,13 @@ export default function OnboardingPage() {
         0,
         Math.min(100, Math.round((calculatedCompletedSteps / calculatedTotalSteps) * 100))
     );
-    const progressFill = progressValue >= 100
+    const onboardingTrueProgress = onboardingCompleted ? 100 : 0;
+    const trueProgressValue = onboardingTrueProgress >= 100 ? 100 : progressValue
+    const progressFill = trueProgressValue >= 100
         ? "linear-gradient(90deg, #10c97f 0%, #10c97f 100%)"
-        : progressValue >= 67
+        : trueProgressValue >= 67
             ? "linear-gradient(90deg, #f3c623 0%, #86c93c 55%, #10c97f 100%)"
-            : progressValue > 0
+            : trueProgressValue > 0
                 ? "linear-gradient(90deg, #f3c623 0%, #d6cf30 58%, #a6cb3f 100%)"
                 : "linear-gradient(90deg, #f3c623 0%, #f3c623 100%)";
     const currentBusinessProfiles = onboardingData?.["business_profiles"];
@@ -171,7 +175,7 @@ export default function OnboardingPage() {
                         <div
                             className="h-full rounded-full"
                             style={{
-                                width: `${progressValue}%`,
+                                width: `${trueProgressValue}%`,
                                 background: progressFill,
                             }}
                         />
@@ -205,7 +209,7 @@ export default function OnboardingPage() {
                                         <div
                                             className={[
                                                 "flex h-[56px] w-[56px] items-center rounded-full text-[20px] font-semibold sm:h-[66px] sm:w-[66px] sm:text-[22px]",
-                                                isCompleted ? "bg-[#10c97f] text-white" : "",
+                                                isCompleted || onboardingCompleted ? "bg-[#10c97f] text-white" : "",
                                                 isCurrent ? "bg-[#10c97f] text-white" : "",
                                                 !isCompleted && !isCurrent ? "bg-[#e5e7eb] text-[#6b7280]" : "",
                                                 isCompleted ? "justify-center" : "justify-start pl-[22px] sm:pl-[26px]",
@@ -240,7 +244,7 @@ export default function OnboardingPage() {
                                                     !isCompleted && !isCurrent ? "bg-[#e5e7eb]" : "",
                                                 ].join(" ")}
                                             >
-                                                {isCompleted ? (
+                                                {isCompleted || onboardingCompleted ? (
                                                     <Check className="h-4 w-4 stroke-[3] text-white"/>
                                                 ) : (
                                                     <span className="h-2.5 w-2.5 rounded-full bg-white/90"/>
@@ -249,12 +253,12 @@ export default function OnboardingPage() {
                                             <span
                                                 className={[
                                                     "text-[16px] font-medium sm:text-[17px]",
-                                                    isCompleted ? "text-[#10c97f]" : "",
+                                                    isCompleted || onboardingCompleted ? "text-[#10c97f]" : "",
                                                     isCurrent ? "text-[#10c97f]" : "",
                                                     !isCompleted && !isCurrent ? "text-[#6b7280]" : "",
                                                 ].join(" ")}
                                             >
-                                                {isCompleted ? "Completed" : isCurrent ? "Current" : "Pending"}
+                                                {isCompleted || onboardingCompleted ? "Completed" : isCurrent ? "Current" : "Pending"}
                                             </span>
                                         </div>
                                     </div>
@@ -278,7 +282,7 @@ export default function OnboardingPage() {
                                             {typeof currentItem === 'undefined' ? 'Congrats, You’re Ready to Invoice!' : 'Ready to Create Invoices?'}
                                         </h3>
                                         <p className="mt-3 text-[18px] leading-[1.5] text-white/95">
-                                            {currentItem?.status === "current"
+                                            {currentItem?.status === "current" || onboardingCompleted
                                                 ? "Complete your setup and start billing your clients today."
                                                 : "Your setup is complete and your invoicing workspace is ready."}
                                         </p>

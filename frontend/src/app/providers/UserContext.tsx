@@ -36,7 +36,8 @@ type UserInitialState = {
     provider_id: string;
     avatar: string;
     image_url?: string | null;
-    plan: Plan
+    plan: Plan;
+    onboarding: Record<string, any>;
 };
 
 type UpdateProfileInput = {
@@ -125,6 +126,7 @@ export function UserProviderInner({children}: { children: React.ReactNode }) {
         avatar: "",
         plan: {code: '', name: ''},
         subscription: {},
+        onboarding: {}
     };
 
     const updatePasswordInitialState = {
