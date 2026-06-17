@@ -76,6 +76,7 @@ function DetailRow({ icon, title, description }) {
 export default function CongratsScreen({ invoice, options, footer }) {
   const selectedOption = options.selectedOption;
   const invoiceNumber = invoice?.invoice_number;
+  const businessProfile = invoice?.businessProfile ?? invoice?.business_profile ?? null;
 
   const details = [];
 
@@ -84,7 +85,7 @@ export default function CongratsScreen({ invoice, options, footer }) {
       {
         icon: <MailIcon />,
         title: "Email Sent Successfully",
-        description: `A copy of invoice #${invoiceNumber} has been sent to your email ${invoice?.business_profile?.email}`,
+        description: `A copy of invoice #${invoiceNumber} has been sent to your email ${businessProfile?.email ?? ""}`,
       },
       {
         icon: <PdfIcon />,

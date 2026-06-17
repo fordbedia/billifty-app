@@ -6,9 +6,12 @@ export const isInvoicePaid = <T extends InvoiceProps>(data: T): boolean | null =
 
 export const isInvoiceIssued = <T extends InvoiceProps>(data: T): boolean | null => data?.status === 'issued';
 
-export const isPaymentReminderCompleted = <T extends InvoiceProps>(data: T): boolean | null => !!data?.payment_reminders && !!data?.payment_reminders_completed_at;
+const paymentRemindersFor = <T extends InvoiceProps>(data: T): Record<string, any> | null =>
+    data?.payment_reminders ?? data?.paymentReminders ?? null;
 
-export const isPaymentReminderEnabled = <T extends InvoiceProps>(data: T): boolean | null => !!data?.payment_reminders && !!data?.payment_reminders_enabled;
+export const isPaymentReminderCompleted = <T extends InvoiceProps>(data: T): boolean | null => !!paymentRemindersFor(data) && !!data?.payment_reminders_completed_at;
+
+export const isPaymentReminderEnabled = <T extends InvoiceProps>(data: T): boolean | null => !!paymentRemindersFor(data) && !!data?.payment_reminders_enabled;
 
 export const reminderIndicator = (data: InvoiceProps): ReminderIndicatorProps => {
     if (isInvoicePaid(data) && isPaymentReminderCompleted(data)) {
@@ -31,7 +34,7 @@ export const reminderIndicator = (data: InvoiceProps): ReminderIndicatorProps =>
         return 'Active'
     }
 
-    if (!!data?.payment_reminders && !isPaymentReminderEnabled(data) && isInvoiceIssued(data)) {
+    if (!!paymentRemindersFor(data) && !isPaymentReminderEnabled(data) && isInvoiceIssued(data)) {
         // User manually turned reminders off
         return 'Cancelled'
     }

@@ -524,6 +524,36 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 
 	const invoiceItemsFrom = (invoice) => invoice?.items ?? invoice?.invoice_items ?? [];
 
+	const normalizeInvoiceFromApi = (invoice) => {
+		if (!invoice) return invoice;
+
+		const businessProfile = invoice.business_profile ?? invoice.businessProfile ?? null;
+		const colorScheme = invoice.color_scheme ?? invoice.colorScheme ?? null;
+		const paymentLink = invoice.payment_link ?? invoice.paymentLink ?? null;
+		const reminderSchedule = invoice.reminder_schedule ?? invoice.reminderSchedule ?? null;
+		const paymentReminders = invoice.payment_reminders ?? invoice.paymentReminders ?? null;
+
+		return {
+			...invoice,
+			business_profile_id: invoice.business_profile_id ?? businessProfile?.id ?? null,
+			client_id: invoice.client_id ?? invoice.client?.id ?? null,
+			invoice_template_id: invoice.invoice_template_id ?? invoice.template?.id ?? null,
+			color_scheme_id: invoice.color_scheme_id ?? colorScheme?.id ?? null,
+			currency_id: invoice.currency_id ?? invoice.currency?.id ?? null,
+			invoice_items: withItemPositions([...invoiceItemsFrom(invoice)]),
+			business_profile: businessProfile,
+			businessProfile,
+			color_scheme: colorScheme,
+			colorScheme,
+			payment_link: paymentLink,
+			paymentLink,
+			reminder_schedule: reminderSchedule,
+			reminderSchedule,
+			payment_reminders: paymentReminders,
+			paymentReminders,
+		};
+	};
+
 	// ----------------------------------------------------------------------------
 	// Build the save/update payload without accidentally zeroing invoice totals.
 	// In edit mode the invoice header can hydrate before line items are available; if we
@@ -606,26 +636,26 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 
 	useEffect(() => {
 		if (!fetchedInvoice) return;
+		const normalizedInvoice = normalizeInvoiceFromApi(fetchedInvoice);
 
 		// Merge server invoice into local form state
 		setData((prev) => ({
 			...prev,
-			...fetchedInvoice,
-			invoice_items: withItemPositions([...invoiceItemsFrom(fetchedInvoice)]),
+			...normalizedInvoice,
 		}));
 
 		// Optional: derive flags from fetched invoice once
-		if (fetchedInvoice.shipping_address || fetchedInvoice.shipping_cents) {
+		if (normalizedInvoice.shipping_address || normalizedInvoice.shipping_cents) {
 			setHasShipping(true);
 		}
-		const shippingIsTaxable = Boolean(parseInt(fetchedInvoice.shipping_tax_rate))
+		const shippingIsTaxable = Boolean(parseInt(normalizedInvoice.shipping_tax_rate))
 		if (shippingIsTaxable) {
 			setIsTaxable(true);
 		}
-		if (fetchedInvoice?.currency) {
-			setSelectedCurrency(fetchedInvoice?.currency)
+		if (normalizedInvoice?.currency) {
+			setSelectedCurrency(normalizedInvoice?.currency)
 		}
-		setPaymentRemindersEnabled(Boolean(fetchedInvoice?.payment_reminders_enabled));
+		setPaymentRemindersEnabled(Boolean(normalizedInvoice?.payment_reminders_enabled));
 	}, [fetchedInvoice]);
 
 	// ----------------------------------------------------------------------------

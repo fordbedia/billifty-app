@@ -69,13 +69,16 @@ function Component() {
 					</Link>
 				);
 
-			case 'business_profile.legal_name':
+			case 'business_profile.legal_name': {
+				const businessProfile = item.business_profile ?? item.businessProfile ?? null;
+
 				return (
 					<>
-						<div className="font-semibold">{item.business_profile?.legal_name}</div>
-						<div className="mt-0.5 text-xs font-normal text-[#66738a]">{item.business_profile?.email}</div>
+						<div className="font-semibold">{businessProfile?.legal_name}</div>
+						<div className="mt-0.5 text-xs font-normal text-[#66738a]">{businessProfile?.email}</div>
 					</>
 				)
+			}
 
 			case "total_cents":
 				// Example formatting amount
@@ -121,6 +124,8 @@ function Component() {
 								return formattedDate(item.created_at)
 							} else if (string === 'paid') {
 								return formattedDate(item.paid_at)
+							} else if (string === 'void') {
+								return formattedDate(item.void_at)
 							}
 						})()} showArrow={true}>{status}</Tooltip>
 					</Chip>
@@ -137,7 +142,7 @@ function Component() {
 					<div
 						className="text-sm font-semibold text-[#07142c]">created: {formattedDate(item.created_at)}</div>
 					<div className="mt-0.5 text-xs font-semibold text-[#66738a]">Due: {formattedDate(item.due_on)}</div>
-					{item?.reminder_schedule && (<span className="flex items-center text-xs text-red-300"><Clock size={12} /> Payment Reminder</span>)}
+					{(item?.reminder_schedule ?? item?.reminderSchedule) && (<span className="flex items-center text-xs text-red-300"><Clock size={12} /> Payment Reminder</span>)}
 				</>
 
 			default:

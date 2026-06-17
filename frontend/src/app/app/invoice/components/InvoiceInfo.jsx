@@ -46,6 +46,15 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 	const isPercent = data.discount_mode === "percent";
 	const isPerLine = data.discount_mode === "per-line";
 	const currencySymbol = selectedCurrency?.symbol ?? "";
+	// ----------------------------------------------------------------------------
+	// Show snapshot client and business profile on issued, void and paid
+	// ----------------------------------------------------------------------------
+	const statusesForSnapshot = ['issued', 'void', 'paid'];
+	const useSnapshot = statusesForSnapshot.includes(data?.status);
+	const selectedClientName = data?.client?.name ?? "";
+	const selectedBusinessProfile = data?.business_profile ?? data?.businessProfile ?? null;
+	const selectedBusinessProfileName = selectedBusinessProfile?.name ?? "";
+
 	return (
 		<Card className="mb-5 workspace-card invoice-info-card" fullWidth radius="sm">
 			<CardHeader className="flex gap-3">
@@ -58,22 +67,34 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 			<CardBody>
 				<div className="flex flex-col md:flex-row gap-2 py-2 invoice-info-row">
 					<div className="md:w-1/2">
-						{(businessProfileData || []).length > 0 ? (
-							<Autocomplete
-								isDisabled={isIssuedOrPaid}
+						{useSnapshot ? (
+							<Input
+								isDisabled
 								className="w-full"
 								label="Select a Business Profile"
 								labelPlacement="outside"
-								placeholder="Search business profiles"
-								selectedKey={data.business_profile_id ? String(data.business_profile_id) : null}
-								onSelectionChange={(key) => onDataChange('business_profile_id', key ? String(key) : null)}>
-								{businessProfileData && Object.keys(businessProfileData).length > 0 && businessProfileData.map(b =>
-									<AutocompleteItem key={String(b.id)} textValue={b.name}>
-										{b.name}
-									</AutocompleteItem>
-								)}
-							</Autocomplete>
-						) : (<Link href={uri.business_profile.create}>Create Business Profile</Link>)}
+								value={selectedBusinessProfileName}
+							/>
+						) : (
+							<>
+								{(businessProfileData || []).length > 0 ? (
+									<Autocomplete
+										isDisabled={isIssuedOrPaid}
+										className="w-full"
+										label="Select a Business Profile"
+										labelPlacement="outside"
+										placeholder="Search business profiles"
+										selectedKey={data.business_profile_id ? String(data.business_profile_id) : null}
+										onSelectionChange={(key) => onDataChange('business_profile_id', key ? String(key) : null)}>
+										{businessProfileData && Object.keys(businessProfileData).length > 0 && businessProfileData.map(b =>
+											<AutocompleteItem key={String(b.id)} textValue={b.name}>
+												{b.name}
+											</AutocompleteItem>
+										)}
+									</Autocomplete>
+								) : (<Link href={uri.business_profile.create}>Create Business Profile</Link>)}
+							</>
+						)}
 					</div>
 					<div className="md:w-1/2">
 						<Input
@@ -106,37 +127,49 @@ export default function InvoiceInfo({isIssuedOrPaid, isPaid}) {
 						/>
 					</div>
 					<div className="md:w-1/2">
-							<DatePicker
-								isDisabled={isIssuedOrPaid}
-								className="w-full"
-								labelPlacement="outside"
-								label="Due Date"
-								granularity="day"
-								value={toDateValue(data.due_on)}
-								onChange={(v) => onDataChange('due_on', toISO(v))}
-							/>
+						<DatePicker
+							isDisabled={isIssuedOrPaid}
+							className="w-full"
+							labelPlacement="outside"
+							label="Due Date"
+							granularity="day"
+							value={toDateValue(data.due_on)}
+							onChange={(v) => onDataChange('due_on', toISO(v))}
+						/>
 						<span className="text-xs/2 italic">Set when this invoice is due. </span>
 						<span className="text-xs/2 italic">A due date enables automatic payment reminders if the invoice remains unpaid.</span>
 					</div>
 				</div>
 				<div className="flex flex-col md:flex-row gap-2 py-2 invoice-info-row">
 					<div className="md:w-1/2">
-						{(clientData || []).length > 0 ? (
-							<Autocomplete
-								isDisabled={isIssuedOrPaid}
+						{useSnapshot ? (
+							<Input
+								isDisabled
 								className="w-full"
 								label="Your Client/Bill To"
 								labelPlacement="outside"
-								placeholder="Search clients"
-								selectedKey={data.client_id ? String(data.client_id) : null}
-								onSelectionChange={(key) => onDataChange('client_id', key ? String(key) : null)}>
-								{clientData && Object.keys(clientData).length > 0 && clientData.map(b =>
-									<AutocompleteItem key={String(b.id)} textValue={b.name}>
-										{b.name}
-									</AutocompleteItem>
-								)}
-							</Autocomplete>
-						) : (<Link href={uri.client.create_client}>Create Client Profile</Link>)}
+								value={selectedClientName}
+							/>
+						) : (
+							<>
+								{(clientData || []).length > 0 ? (
+									<Autocomplete
+										isDisabled={isIssuedOrPaid}
+										className="w-full"
+										label="Your Client/Bill To"
+										labelPlacement="outside"
+										placeholder="Search clients"
+										selectedKey={data.client_id ? String(data.client_id) : null}
+										onSelectionChange={(key) => onDataChange('client_id', key ? String(key) : null)}>
+										{clientData && Object.keys(clientData).length > 0 && clientData.map(b =>
+											<AutocompleteItem key={String(b.id)} textValue={b.name}>
+												{b.name}
+											</AutocompleteItem>
+										)}
+									</Autocomplete>
+								) : (<Link href={uri.client.create_client}>Create Client Profile</Link>)}
+							</>
+						)}
 					</div>
 					{!isIssuedOrPaid && (<div className="md:w-1/2 content-center">
 						{!hasShipping
