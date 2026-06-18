@@ -47,6 +47,7 @@ return [
         // Match StripePaymentGateway::resolvePriceId("planCode","billingCycle")
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
         'connect_webhook_secret' => env('STRIPE_CONNECT_WEBHOOK_SECRET'),
+        'billing_portal_configuration' => env('STRIPE_BILLING_PORTAL_CONFIGURATION_ID'),
         'prices' => [
             'pro' => [
                 'monthly' => env('STRIPE_PRICE_PRO_MONTHLY'),

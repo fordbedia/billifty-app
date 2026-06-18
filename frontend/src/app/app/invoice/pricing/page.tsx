@@ -26,15 +26,14 @@ export type Plan = {
   billing: Record<BillingCycle, BillingDetails>;
   actions: Record<string, any>;
   code: string;
+  description?: string | null;
   features: Record<string, any>;
   limits: Record<string, any>;
   name: string;
   monthly: number;
-  yearly: number;
+  yearly: number | null;
   features_text: string[];
 };
-
-const PLAN_ORDER = ["free", "pro", "premium"] as const;
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -191,10 +190,7 @@ function PricingComponent() {
     retry: false,
   });
 
-  const orderedPlans =
-    PLAN_ORDER.map((code) => data?.find((plan) => plan.code === code)).filter(
-      (plan): plan is Plan => Boolean(plan)
-    ) ?? [];
+  const orderedPlans = data ?? [];
 
   const moveToCompareSection = () => {
     const compareSection = document.getElementById("compare-features-table");

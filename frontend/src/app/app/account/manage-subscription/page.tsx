@@ -33,7 +33,6 @@ type ButtonProps = { code: PlanCode; name: string };
 type PortalPayload = { return_url?: string };
 type FAQItem = { question: string; answer: string[] };
 
-const PLAN_ORDER: PlanCode[] = ["free", "pro", "premium"];
 const CURRENT_PLAN_GRADIENT = "from-[#070C22] via-[#10172F] to-[#151B38]";
 
 const FAQ_ITEMS: FAQItem[] = [
@@ -219,10 +218,7 @@ export default function ManageSubscriptionPage() {
 
   const cycleLabel = cycleType === "monthly" ? "month" : "year";
   const subscriptionCycleLabel = subscription?.billing_cycle === "yearly" ? "year" : "month";
-  const orderedPlans =
-    PLAN_ORDER.map((code) => data?.find((item) => item.code === code)).filter(
-      (item): item is Plan => Boolean(item)
-    ) ?? [];
+  const orderedPlans = data ?? [];
 
   const currentPlanName = userData?.plan?.name ?? capitalize(effectivePlanCode);
   const currentPrice =
@@ -417,11 +413,7 @@ export default function ManageSubscriptionPage() {
                         <div className="text-center">
                           <h3 className="text-lg font-bold text-[#121827]">{p.name}</h3>
                           <p className="mt-1.5 min-h-9 text-xs leading-5 text-slate-500">
-                            {code === "free"
-                              ? "Best for getting started"
-                              : code === "pro"
-                                ? "Best for growing businesses"
-                                : "For larger teams and higher usage"}
+                            {p.description}
                           </p>
                         </div>
 
