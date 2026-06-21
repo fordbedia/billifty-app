@@ -9,17 +9,24 @@ import {
 	Mail,
 	RefreshCw,
 	Unlink,
+    Banknote,
 	X,
 } from "lucide-react";
 
 import {uri} from "@/app/constants/routePaths";
 
 const reasons = [
-	{
-		title: "Expired",
-		description: "Link validity period has ended",
-		icon: Clock3,
-		iconClassName: "bg-amber-50 text-amber-500",
+	// {
+	// 	title: "Expired",
+	// 	description: "Link validity period has ended",
+	// 	icon: Clock3,
+	// 	iconClassName: "bg-amber-50 text-amber-500",
+	// },
+    {
+		title: "Paid",
+		description: "An invoice has been paid",
+		icon: Banknote,
+		iconClassName: "bg-sky-50 text-green-400",
 	},
 	{
 		title: "Revoked",
@@ -76,7 +83,7 @@ export default function PaymentLinkNotFound() {
 
 						<p className="mt-6 max-w-[540px] text-[17px] leading-7 text-[#667487]">
 							The payment link you&apos;re trying to access has either{" "}
-							<strong className="font-extrabold text-[#2b3442]">expired</strong>, been{" "}
+							<strong className="font-extrabold text-[#2b3442]">paid</strong>, been{" "}
 							<strong className="font-extrabold text-[#2b3442]">revoked</strong>, or is no longer valid.
 							Please reach out to the person who sent you this link to request a new one.
 						</p>
