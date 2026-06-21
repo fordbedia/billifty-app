@@ -7,7 +7,11 @@ import Link from "next/link";
 import Billing from "@/app/models/Billing";
 import {uri} from "@/app/constants/routePaths";
 import {formatMoney} from "@/app/utils/money";
-import {BilliftyLogo} from "@/app/components/common/NavBar";
+import {showPlanBranding} from "@/app/helpers/planBranding";
+import {
+    getBusinessName,
+    getBusinessLogoUrl,
+} from "@/app/helpers/invoiceAccessors";
 
 const formatDateTime = (value?: string | null) => {
     const date = value ? new Date(value) : new Date();
@@ -29,27 +33,30 @@ export default function PaymentCancelled() {
     const params = useParams<{ token?: string | string[] }>();
     const token = Array.isArray(params.token) ? params.token[0] : params.token;
 
-    const {data} = useQuery({
+    const {data, isPending} = useQuery({
         queryKey: ["payment", token],
         queryFn: async () => (await Billing.getPaymentRecord(token)),
         enabled: Boolean(token),
     });
 
+    const me = data?.user;
     const invoice = data?.invoice;
     const invoiceNumber = invoice?.invoice_number ? String(invoice.invoice_number) : "Pending";
     const transactionId = invoiceNumber === "Pending" ? "TXN-CANCELLED" : `TXN-${invoiceNumber}-CANCELLED`;
     const amount = formatMoney(invoice?.total_cents, invoice?.currency?.code);
     const cancelledAt = formatDateTime(invoice?.updated_at ?? invoice?.created_at);
     const retryHref = token ? `/app/pay/${token}` : uri.invoices;
+    const businessLogoUrl = getBusinessLogoUrl(invoice);
+    const brandingName = getBusinessName(invoice);
 
     return (
         <main className="min-h-screen bg-white px-4 py-[58px] font-sans text-[#10141d] sm:px-6">
             <section
                 className="mx-auto flex w-full max-w-[672px] flex-col items-center rounded-[18px] border border-[#dedede] bg-[#fbfbfb] px-6 pb-[49px] pt-[83px] sm:px-[48px]">
-                <BilliftyLogo width={140} height={140} />
-                <div className="flex h-[45px] w-[45px] items-center justify-center">
-                    <X className="h-[45px] w-[45px] text-[#ff1f3d]" strokeLinecap="round" strokeWidth={4.8}/>
-                </div>
+                {!isPending ? showPlanBranding(me?.subscription?.plan, businessLogoUrl, brandingName, 'text-center') : null}
+                {/*<div className="flex h-[45px] w-[45px] items-center justify-center">*/}
+                {/*    <X className="h-[45px] w-[45px] text-[#ff1f3d]" strokeLinecap="round" strokeWidth={4.8}/>*/}
+                {/*</div>*/}
 
                 <h1 className="mt-[57px] text-center text-[34px] font-extrabold leading-none tracking-normal text-[#10141d] sm:text-[38px]">
                     Payment Cancelled

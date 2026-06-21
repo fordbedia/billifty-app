@@ -8,88 +8,31 @@ import {isAxiosError} from "axios";
 import Billing from "@/app/models/Billing";
 import {formatMoney} from "@/app/utils/money";
 import {BilliftyLogo} from "@/app/components/common/NavBar";
-
-type ErrorResponse = {
-    message?: string;
-};
-
-type PaymentProvider = "stripe" | "paypal" | "cashapp";
-
-type CurrencyRecord = {
-    code?: string | null;
-};
-
-type ClientRecord = {
-    company?: string | null;
-    email?: string | null;
-    name?: string | null;
-};
-
-type BusinessProfileRecord = {
-    email?: string | null;
-    legal_name?: string | null;
-    logo_path?: string | null;
-    logo_url?: string | null;
-    name?: string | null;
-};
-
-type InvoiceItemRecord = {
-    amount_cents?: number | string | null;
-    description?: string | null;
-    id?: number | string | null;
-    line_discount_cents?: number | string | null;
-    line_discount_rate?: number | string | null;
-    line_total_cents?: number | string | null;
-    name?: string | null;
-    quantity?: number | string | null;
-    tax_cents?: number | string | null;
-    unit?: string | null;
-    unit_price_cents?: number | string | null;
-};
-
-type InvoiceRecord = {
-    amount_due_cents?: number | string | null;
-    businessProfile?: BusinessProfileRecord | null;
-    business_profile?: BusinessProfileRecord | null;
-    client?: ClientRecord | null;
-    currency?: CurrencyRecord | null;
-    discount_cents?: number | string | null;
-    discount_mode?: "none" | "amount" | "percent" | "per-line" | string | null;
-    discount_rate?: number | string | null;
-    due_on?: string | null;
-    invoice_items?: InvoiceItemRecord[] | null;
-    invoice_number?: string | null;
-    issued_on?: string | null;
-    items?: InvoiceItemRecord[] | null;
-    shipping_cents?: number | string | null;
-    shipping_tax_cents?: number | string | null;
-    status?: string | null;
-    subtotal_cents?: number | string | null;
-    tax_cents?: number | string | null;
-    total_cents?: number | string | null;
-};
-
-type PaymentRecord = {
-    invoice?: InvoiceRecord | null;
-    payment_methods?: PaymentProvider[] | string[] | null;
-};
-
-type DisplayInvoiceItem = {
-    detail: string;
-    discountCents: number;
-    discountLabel: string | null;
-    id: string;
-    lineTotalCents: number;
-    title: string;
-};
-
-type PaymentButtonProps = {
-    children: ReactNode;
-    disabled?: boolean;
-    icon: ReactNode;
-    onClick: () => void;
-    tone: "primary" | "light" | "cashapp";
-};
+import {useUser} from "@/app/providers/UserContext";
+import {UserPlan} from "@/app/enums/UserPlan";
+import {showPlanBranding} from "@/app/helpers/planBranding";
+import {
+    InvoiceProps,
+    PaymentRecord,
+    BusinessProfileRecord,
+    InvoiceItemRecord,
+    PaymentButtonProps,
+    DisplayInvoiceItem,
+    PaymentProvider,
+    ErrorResponse
+} from "@/app/props/invoice";
+import {
+    getBusinessProfile,
+    getCurrencyCode,
+    getInvoiceItems,
+    getClientName,
+    getClientEmail,
+    getClientInitials,
+    getBusinessName,
+    getBusinessLogoUrl,
+} from "@/app/helpers/invoiceAccessors";
+import {formattedDate} from "@/app/utils/date";
+import PaymentLinkNotFound from "@/app/app/invoice/components/errorPages/PaymentLinkNotFound";
 
 function PayPalButtonIcon() {
     return (
@@ -129,24 +72,6 @@ function percent(value: unknown): number {
     return toOptionalNumber(value) ?? 0;
 }
 
-function formatDate(value?: string | null): string {
-    if (!value) {
-        return "-";
-    }
-
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
-        return "-";
-    }
-
-    return new Intl.DateTimeFormat("en-US", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-    }).format(date);
-}
-
 function formatQuantity(value: unknown): string {
     const quantity = toOptionalNumber(value) ?? 0;
 
@@ -169,20 +94,6 @@ function formatPercent(value: unknown): string {
     });
 }
 
-function getCurrencyCode(invoice?: InvoiceRecord | null): string {
-    return invoice?.currency?.code ?? "USD";
-}
-
-function getBusinessProfile(invoice?: InvoiceRecord | null): BusinessProfileRecord | null {
-    return invoice?.businessProfile ?? invoice?.business_profile ?? null;
-}
-
-function getInvoiceItems(invoice?: InvoiceRecord | null): InvoiceItemRecord[] {
-    const rawItems = invoice?.items ?? invoice?.invoice_items;
-
-    return Array.isArray(rawItems) ? rawItems : [];
-}
-
 function getItemBaseCents(item: InvoiceItemRecord): number {
     return Math.round((toOptionalNumber(item.quantity) ?? 0) * (toOptionalNumber(item.unit_price_cents) ?? 0));
 }
@@ -199,7 +110,7 @@ function getItemLineTotalCents(item: InvoiceItemRecord): number {
     return getItemBaseCents(item) + cents(item.tax_cents);
 }
 
-function getItemDiscountCents(item: InvoiceItemRecord, invoice?: InvoiceRecord | null): number {
+function getItemDiscountCents(item: InvoiceItemRecord, invoice?: InvoiceProps | null): number {
     if (invoice?.discount_mode !== "per-line") {
         return 0;
     }
@@ -219,7 +130,7 @@ function getItemDiscountCents(item: InvoiceItemRecord, invoice?: InvoiceRecord |
     return Math.round(getItemBaseCents(item) * (lineDiscountRate / 100));
 }
 
-function getLineSubtotalCents(item: InvoiceItemRecord, invoice?: InvoiceRecord | null): number {
+function getLineSubtotalCents(item: InvoiceItemRecord, invoice?: InvoiceProps | null): number {
     const lineTotal = getItemLineTotalCents(item);
     const tax = cents(item.tax_cents);
 
@@ -238,7 +149,7 @@ function buildItemDetail(item: InvoiceItemRecord, currency: string): string {
     return `${quantity} x ${unitPrice}${unit}`;
 }
 
-function buildDiscountLabel(invoice?: InvoiceRecord | null): string | null {
+function buildDiscountLabel(invoice?: InvoiceProps | null): string | null {
     const discountCents = cents(invoice?.discount_cents);
     const discountRate = percent(invoice?.discount_rate);
 
@@ -274,47 +185,6 @@ function getStatusLabel(status?: string | null): string {
     return labels[status ?? ""] ?? "Awaiting Payment";
 }
 
-function getClientName(invoice?: InvoiceRecord | null): string {
-    return invoice?.client?.company || invoice?.client?.name || "Client";
-}
-
-function getClientEmail(invoice?: InvoiceRecord | null): string {
-    return invoice?.client?.email || "";
-}
-
-function getClientInitials(invoice?: InvoiceRecord | null): string {
-    const name = getClientName(invoice);
-    const initials = name
-        .split(/\s+/)
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((part) => part[0]?.toUpperCase())
-        .join("");
-
-    return initials || "C";
-}
-
-function getBusinessName(invoice?: InvoiceRecord | null): string {
-    const businessProfile = getBusinessProfile(invoice);
-
-    return businessProfile?.legal_name || businessProfile?.name || "Billifty";
-}
-
-function getBusinessLogoUrl(invoice?: InvoiceRecord | null): string | null {
-    const businessProfile = getBusinessProfile(invoice);
-    const logoPath = businessProfile?.logo_url || businessProfile?.logo_path;
-
-    if (!logoPath) {
-        return null;
-    }
-
-    if (logoPath.startsWith("http://") || logoPath.startsWith("https://") || logoPath.startsWith("/")) {
-        return logoPath;
-    }
-
-    return `/storage/${logoPath.replace(/^\/+/, "")}`;
-}
-
 function PaymentButton({children, disabled = false, icon, onClick, tone}: PaymentButtonProps) {
     const toneClasses = {
         cashapp: "border border-[#10d837] bg-[#10d837] text-white shadow-[0_14px_28px_rgba(16,216,55,0.24),inset_0_1px_0_rgba(255,255,255,0.2)] hover:bg-[#0fcf34]",
@@ -333,6 +203,10 @@ function PaymentButton({children, disabled = false, icon, onClick, tone}: Paymen
             <span>{children}</span>
         </button>
     );
+}
+
+function getLogoPath(businessProfile: BusinessProfileRecord): string | null {
+    return businessProfile?.logo_path ? '/storage/'+businessProfile?.logo_path : null;
 }
 
 export default function Pay() {
@@ -364,6 +238,9 @@ export default function Pay() {
     const discountLabel = buildDiscountLabel(invoice);
     const invoiceNumber = invoice?.invoice_number ? `#${invoice.invoice_number}` : "-";
     const businessLogoUrl = getBusinessLogoUrl(invoice);
+    const me = data?.user;
+    const businessLogoPath = businessProfile ? getLogoPath(businessProfile) : undefined;
+    const shouldShowLogo = !isLoading && me?.subscription?.plan?.code;
 
     const hasPaymentMethod = (method: PaymentProvider) => {
         return data?.payment_methods?.some((paymentMethod) => paymentMethod === method) ?? false;
@@ -437,14 +314,16 @@ export default function Pay() {
         setError(dataError?.message ?? "Unable to load payment details.");
     }, [dataError, dataIsError]);
 
-    return (
+    return !isLoading ? (error ? <PaymentLinkNotFound /> : (
         <main className="min-h-screen bg-[#eef6ff] px-4 py-8 font-sans text-[#0d111b] sm:px-6 sm:py-10">
             <section className="mx-auto w-full max-w-[640px]">
                 <div className="overflow-hidden rounded-[28px] border border-[#dce8f2] bg-white shadow-[0_18px_52px_rgba(27,70,115,0.13)] sm:rounded-[32px]">
                     <header className="!px-9 !pb-8 !pt-8 sm:px-[44px] sm:pb-9 sm:pt-10">
                         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
                             <div className="[&_.billifty-logo-img]:!h-auto [&_.billifty-logo-link]:inline-flex [&_.billifty-logo-link]:items-center">
-                                <BilliftyLogo width={142} height={52}/>
+                                {shouldShowLogo ? (
+                                    showPlanBranding(me?.subscription?.plan, businessLogoPath, getBusinessName(invoice))
+                                ) : null}
                             </div>
 
                             <div className="inline-flex h-[32px] items-center self-start rounded-full bg-[#e9f1fa] px-[17px] text-[14px] font-extrabold text-[#4797d5] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
@@ -468,7 +347,7 @@ export default function Pay() {
                                     Due Date
                                 </p>
                                 <p className="mt-3 text-[19px] font-extrabold leading-tight text-[#0d111b]">
-                                    {formatDate(invoice?.due_on)}
+                                    {formattedDate(invoice?.due_on)}
                                 </p>
                             </div>
                         </div>
@@ -643,7 +522,7 @@ export default function Pay() {
 
                         <div className="mt-7 flex items-center justify-center gap-[8px] text-center text-[15px] font-medium leading-tight text-[#0d111b]">
                             <LockKeyhole className="h-[17px] w-[17px] fill-[#0d111b] text-[#0d111b]" strokeWidth={2.5}/>
-                            <span>256-bit SSL encryption · Powered by Billifty</span>
+                            <span>256-bit SSL encryption {me?.subscription?.plan?.code !== UserPlan.Premium && '· Powered by Billifty'}</span>
                         </div>
                     </section>
                 </div>
@@ -654,5 +533,6 @@ export default function Pay() {
                 </p>
             </section>
         </main>
-    );
+        )
+    ) : null;
 }

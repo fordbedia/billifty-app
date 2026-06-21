@@ -13,20 +13,23 @@ export const toDateValue = (s) => {
 
 export const toISO = (v) => (v ? v.toString().slice(0, 10) : null); // DateValue → "YYYY-MM-DD"\
 
-export const formattedDate = (dateString) => {
-	if (!dateString) {
-		return "-";
-	}
+export const formattedDate = (value) => {
+	if (!value) {
+        return "-";
+    }
 
-	const date = new Date(dateString);
+    const dateOnly = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const date = dateOnly
+        ? new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]))
+        : new Date(value);
 
-	if (isNaN(date.getTime())) {
-		return "-";
-	}
+    if (Number.isNaN(date.getTime())) {
+        return "-";
+    }
 
-	return new Intl.DateTimeFormat("en-US", {
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	}).format(date);
+    return new Intl.DateTimeFormat("en-US", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+    }).format(date);
 }

@@ -94,7 +94,7 @@ export default function InvoicePreviewPage({invoiceId}) {
 	})
 
 	const {mutate: renew, isPending: renewIsPending} = useMutation({
-		mutationFn: async () => (await Invoice.renewInvoicePublicUrl(invoiceId))?.data,
+		mutationFn: async (from) => (await Invoice.renewInvoicePublicUrl(invoiceId, from))?.data,
 		onSuccess: () => {
 			queryClient.invalidateQueries({queryKey: ['invoice-public-url', invoiceId]});
 		}
@@ -232,7 +232,7 @@ export default function InvoicePreviewPage({invoiceId}) {
 											{isPublicLinkRevoked ? 'Revoked' : 'Revoke'}
 										</Button>
 										<Button
-											onPress={renew}
+											onPress={() => renew(isPublicLinkRevoked ? 'revoked' : null)}
 											type="button"
 											radius="lg"
 											startContent={

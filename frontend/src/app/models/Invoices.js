@@ -64,8 +64,8 @@ export default class Invoice extends Model{
 		return await this.axios().post(`/${invoiceId}/preview/public-invoice-link/revoke`)
 	}
 
-	static async renewInvoicePublicUrl(invoiceId) {
-		return await this.axios().post(`/${invoiceId}/preview/public-invoice-link/renew`)
+	static async renewInvoicePublicUrl(invoiceId, from = null) {
+		return await this.axios().post(`/${invoiceId}/preview/public-invoice-link/renew`, {from})
 	}
 
 	static async setPaymentReminder(invoiceId, isPaymentEnabled) {
