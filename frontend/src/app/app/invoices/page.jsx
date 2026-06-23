@@ -19,7 +19,7 @@ import {formattedDate} from "@/app/utils/date";
 import {DateRangePicker} from "@heroui/react";
 import {useApp} from "@/app/providers/AppContext";
 import DashboardSidebar from "@/app/app/component/DashboardSidebar";
-import {Pencil, Plus, Search, Trash2, Archive, Clock} from "lucide-react";
+import {Pencil, Plus, Search, Trash2, Archive, Clock, FileText, TriangleAlert, X} from "lucide-react";
 
 const dashboardPrimaryButtonClass =
 	"group h-11 min-h-11 rounded-[7px] bg-[#075de8] px-6 text-[15px] font-semibold tracking-normal text-white shadow-[0_14px_24px_-18px_rgba(7,93,232,0.85)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#034fc9] hover:shadow-[0_18px_30px_-20px_rgba(7,93,232,0.9)] focus-visible:ring-2 focus-visible:ring-[#75b7ff] focus-visible:ring-offset-2";
@@ -38,7 +38,7 @@ function Component() {
 		planCapabilities
 	} = useApp();
 
-	const {deleteInvoice, onOpenConfirmDeleteModal, setData} = useInvoice()
+	const {onOpenConfirmDeleteModal, setData} = useInvoice()
 
 	const router = useRouter()
 	const column = [
@@ -176,9 +176,7 @@ function Component() {
 						onOpenConfirmDeleteModal()
 					}}
 				>
-					{item.status === 'draft' || item.status === 'issued'
-						? <Trash2 className="size-4" strokeWidth={2.1}/>
-						: <Archive className="size-4" strokeWidth={2.1}/>}
+					<Archive className="size-4" strokeWidth={2.1}/>
 				</Button>
 			</Tooltip>
 		</div>
@@ -295,33 +293,84 @@ export function ConfirmDeleteModal() {
 		data,
 		userInvoices
 	} = useInvoice()
-	const router = useRouter()
+	const invoiceNumber = data?.invoice_number ?? data?.id ?? "";
 
 	return (
 		<>
-			<Modal isOpen={isOpenConfirmDeleteModal} onOpenChange={onOpenChangeConfirmDeleteModal}>
-				<ModalContent>
+			<Modal
+				hideCloseButton
+				isOpen={isOpenConfirmDeleteModal}
+				onOpenChange={onOpenChangeConfirmDeleteModal}
+				placement="center"
+				size="lg"
+				classNames={{
+					backdrop: "bg-black/40 backdrop-blur-[1px]",
+					wrapper: "px-4",
+				}}
+			>
+				<ModalContent className="max-w-[560px] overflow-hidden rounded-[22px] bg-white p-0 shadow-[0_24px_70px_-28px_rgba(16,24,40,0.55)]">
 					{(onClose) => (
 						<>
-							<ModalHeader className="flex flex-col gap-1">
-								<h2 className="px-5 py-6">Deleting Invoice #{data.invoice_number}</h2>
-							</ModalHeader>
-							<ModalBody>
-								<p>Are you sure you want to delete this Invoice?</p>
-							</ModalBody>
-							<ModalFooter>
-								<Button color="danger" variant="light" onPress={onClose}>
-									Close
+							<ModalHeader className="flex items-center gap-4 border-b border-[#eef1f5] !px-[12px] !py-[12px]">
+								<div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#fff0f5] text-[#f31260]">
+									<FileText className="size-5" strokeWidth={2.2}/>
+								</div>
+								<h2 className="min-w-0 flex-1 text-[22px] font-bold leading-tight tracking-normal text-[#111827]">
+									Archiving Invoice <span className="text-[#f31260]">#{invoiceNumber}</span>
+								</h2>
+								<Button
+									isIconOnly
+									aria-label="Close delete invoice dialog"
+									className="h-9 w-9 min-w-9 shrink-0 rounded-full bg-transparent text-[#9ca3af] shadow-none hover:bg-[#f4f6f8] hover:text-[#4b5563]"
+									variant="light"
+									onPress={onClose}
+								>
+									<X className="size-5" strokeWidth={2.2}/>
 								</Button>
-								<Button color="danger" onPress={() => {
+							</ModalHeader>
+							<ModalBody className="gap-0 px-8 py-8">
+								<div className="flex gap-4 rounded-[14px] border border-[#f8c8d5] bg-[#fff1f5] px-5 py-5">
+									<TriangleAlert className="mt-1 size-6 shrink-0 fill-[#f31260] text-[#f31260]" strokeWidth={2}/>
+									<div>
+										<p className="text-lg font-bold leading-7 text-[#111827]">This action cannot be undone</p>
+										<p className="mt-1 text-base leading-7 text-[#5f6675]">
+											This invoice will be removed from your active invoice list and will no longer be accessible from your account.
+										</p>
+									</div>
+								</div>
+								<div className="mt-7 flex items-center gap-4 rounded-[14px] border border-[#eef1f5] bg-[#f9fafb] px-5 py-5">
+									<div className="flex size-12 shrink-0 items-center justify-center rounded-[10px] border border-[#dde2ea] bg-white text-[#8b95a5]">
+										<FileText className="size-6" strokeWidth={1.9}/>
+									</div>
+									<div className="min-w-0 flex-1">
+										<p className="truncate text-lg font-bold leading-6 text-[#111827]">Invoice #{invoiceNumber}</p>
+										<p className="mt-1 text-base leading-6 text-[#8a91a0]">Will be permanently archived</p>
+									</div>
+									<span className="shrink-0 rounded-full bg-[#fff0f5] px-4 py-2 text-sm font-bold text-[#f31260]">
+										Archive
+									</span>
+								</div>
+								<p className="mt-8 text-center text-lg font-normal leading-7 text-[#4b5563]">
+									Are you sure you want to archive this Invoice?
+								</p>
+							</ModalBody>
+							<ModalFooter className="grid grid-cols-1 gap-4 px-8 pb-8 pt-0 sm:grid-cols-2">
+								<Button
+									className="h-12 rounded-[12px] border border-[#dfe3ea] bg-white text-base font-bold text-[#374151] shadow-none hover:bg-[#f9fafb]"
+									variant="bordered"
+									onPress={onClose}
+								>
+									Cancel
+								</Button>
+								<Button className="h-12 rounded-[12px] bg-[#f31260] text-base font-bold text-white shadow-[inset_0_-4px_0_rgba(180,20,75,0.28),0_14px_24px_-16px_rgba(243,18,96,0.9)] hover:bg-[#e21158]" onPress={() => {
 									deleteInvoice(data.id).then((r) => {
-										console.log('r', r)
 										const inv = r?.data
 										userInvoices.data = userInvoices.data.filter(d => d.id !== inv.id)
 										onClose()
 									})
 								}}>
-									Delete
+									<Trash2 className="size-5" strokeWidth={2.2}/>
+									Archive Invoice
 								</Button>
 							</ModalFooter>
 						</>
