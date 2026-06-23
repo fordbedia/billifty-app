@@ -217,7 +217,7 @@ export default function Forbidden() {
 							className="inline-flex items-center gap-2 text-[15px] font-medium text-[#98a5b5] transition-colors hover:text-[#5148ee]"
 						>
 							<ArrowLeft aria-hidden="true" className="h-4 w-4" />
-							Back to Dashboard
+							Back to My Invoices
 						</Link>
 					</div>
 				</div>
