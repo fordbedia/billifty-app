@@ -21,6 +21,10 @@ function Component() {
 		setSearch
 	} = useClient()
 	const {userData: me} = useApp()
+	const clientLimit = me?.plan_capabilities?.limits?.max_clients;
+	const currentClients = me?.plan_capabilities?.limits?.['current:clients'];
+	const canCreateClient = clientLimit === null
+		|| (typeof clientLimit === "number" && typeof currentClients === "number" && currentClients < clientLimit);
 
 	const column = [
 		{key: 'name', label: 'Business Name'},
@@ -58,7 +62,7 @@ function Component() {
 											{/*</div>*/}
 										</div>
 										<div className="w-full self-start lg:w-auto workspace-actions">
-											{me?.plan_capabilities?.limits?.max_clients > me?.plan_capabilities?.limits?.['current:clients'] && (
+											{canCreateClient && (
 												<Button as={Link} href={uri.client.create_client} className={dashboardPrimaryButtonClass}>
 													<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 transition-transform duration-300 group-hover:rotate-90">
 														<path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

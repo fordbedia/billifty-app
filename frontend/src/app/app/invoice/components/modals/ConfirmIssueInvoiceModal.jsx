@@ -70,7 +70,7 @@ export default function ConfirmIssueInvoiceModal({invoiceId}) {
 					base: "z-[10000] max-w-[640px] overflow-hidden rounded-[24px] bg-white shadow-[0_28px_80px_-28px_rgba(15,23,42,0.55)]",
 				}}
 			>
-				<ModalContent>
+				<ModalContent className="w-full max-w-[560px] overflow-hidden rounded-[16px] bg-white p-0 shadow-[0_28px_70px_-30px_rgba(15,23,42,0.65)]">
 					{(onClose) => (
 						<>
 							<ModalHeader className="flex !px-[12px] !py-[12px] justify-between items-center border-b border-[#edf0f5] sm:px-8">
@@ -101,7 +101,7 @@ export default function ConfirmIssueInvoiceModal({invoiceId}) {
 										Are you sure you want to issue this invoice?
 									</strong>
 									<p className="mt-4 max-w-[500px] text-[15px] font-normal leading-[1.55] tracking-normal text-[#697386] sm:text-[17px]">
-										Once issued, this invoice will be finalized and its main fields can no longer be edited. The invoice status will change to Issued, and you can then send it to the client, email yourself a copy, or download it manually.
+										To send, email, or download this invoice, it must first be issued. Once issued, the invoice will be finalized, its main fields can no longer be edited, and its status will change to Issued.
 									</p>
 								</div>
 

@@ -41,3 +41,23 @@ export const reminderIndicator = (data: InvoiceProps): ReminderIndicatorProps =>
 
     return false;
 }
+
+export const reminderIndicatorColor = (data: InvoiceProps): string | null => {
+    if (reminderIndicator(data) === 'Completed') {
+        return 'text-green-500'
+    }
+
+    if (reminderIndicator(data) === 'Reminder sequence ended') {
+        return 'text-yellow-400'
+    }
+
+    if (reminderIndicator(data) === 'Cancelled') {
+        return 'text-red-400'
+    }
+
+    if (reminderIndicator(data) === 'Active') {
+        return 'text-blue-400'
+    }
+
+    return null;
+}

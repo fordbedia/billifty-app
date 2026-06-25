@@ -15,6 +15,9 @@ import {
 import {uri} from "@/app/constants/routePaths";
 import {useApp} from "@/app/providers/AppContext";
 import {useUser} from "@/app/providers/UserContext";
+import {useQuery} from "@tanstack/react-query";
+import Plans from "@/app/models/Plans";
+import {useEffect, useState} from "react";
 
 type UsageItem = {
 	title: string;
@@ -24,10 +27,21 @@ type UsageItem = {
 	isPrimary?: boolean;
 };
 
+const defaultPlanFeatures = [
+	"Unlimited invoices",
+	"Unlimited clients",
+	"5 business profiles",
+	"Custom branding",
+	"Priority support",
+	"Analytics dashboard",
+];
+
 export default function Forbidden() {
 	const {planCapabilities} = useApp();
     const {me} = useUser()
 	const limits = planCapabilities?.limits;
+    const [planFeatures, setPlanFeatures] = useState<string[]>([]);
+    const displayedPlanFeatures = planFeatures.length > 0 ? planFeatures : defaultPlanFeatures;
 
 	const usageItems: UsageItem[] = [
 		{
@@ -68,6 +82,22 @@ export default function Forbidden() {
 		return Math.min(100, Math.max(0, ((current ?? 0) / max) * 100));
 	};
 	const isExceeded = (current?: number, max?: number) => Boolean(max && (current ?? 0) >= max);
+
+    const nextPlan = me?.subscription?.plan?.code === "free" ? "pro" : "premium"
+
+    const {data: planData} = useQuery({
+        queryKey: ['lookup-plan'],
+        queryFn: async () => (await Plans.getPlan(nextPlan)).data,
+        retry: false,
+    })
+
+    useEffect(() => {
+        if (!planData) return;
+        const features = planData.features_text
+			.slice(0, 5)
+			.filter((feature: unknown): feature is string => typeof feature === "string" && feature.length > 0);
+        setPlanFeatures(features)
+    }, [planData]);
 
 	return (
 		<main
@@ -178,14 +208,7 @@ export default function Forbidden() {
 						</h2>
 
 						<div className="mt-4 grid gap-x-8 gap-y-3 text-[15px] font-medium text-[#293244] sm:grid-cols-3">
-							{[
-								"Unlimited invoices",
-								"Unlimited clients",
-								"5 business profiles",
-								"Custom branding",
-								"Priority support",
-								"Analytics dashboard",
-							].map((feature) => (
+							{displayedPlanFeatures.map((feature) => (
 								<div key={feature} className="flex items-center gap-3">
 									<Check aria-hidden="true" className="h-4 w-4 shrink-0 text-[#5b5fd6]" strokeWidth={2.7} />
 									<span>{feature}</span>

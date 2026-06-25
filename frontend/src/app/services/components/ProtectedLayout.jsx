@@ -16,6 +16,7 @@ export default function ProtectedLayout({children, isProtected = false}) {
 	const pathname = usePathname();
 
 	const [allowed, setAllowed] = useState(false);
+	const [allowedPath, setAllowedPath] = useState(null);
 	const [forbiddenInfo, setForbiddenInfo] = useState(null);
 
 	useEffect(() => {
@@ -25,6 +26,7 @@ export default function ProtectedLayout({children, isProtected = false}) {
 		// 0) Not protected
 		if (!protectedRoute) {
 			setAllowed(true);
+			setAllowedPath(pathname);
 			setForbiddenInfo(null);
 			return;
 		}
@@ -38,6 +40,7 @@ export default function ProtectedLayout({children, isProtected = false}) {
 		// 2) Always allow pricing/checkout
 		if (pathname === uri.pricing || pathname === uri.checkout) {
 			setAllowed(true);
+			setAllowedPath(pathname);
 			setForbiddenInfo(null);
 			return;
 		}
@@ -105,6 +108,11 @@ export default function ProtectedLayout({children, isProtected = false}) {
 		if (rule) {
 			const res = checkLimit(planCapabilities, rule);
 			if (res.blocked) {
+				if (allowed && allowedPath === pathname) {
+					setForbiddenInfo(null);
+					return;
+				}
+
 				setAllowed(false);
 				setForbiddenInfo({
 					...res,
@@ -117,7 +125,8 @@ export default function ProtectedLayout({children, isProtected = false}) {
 
 		setForbiddenInfo(null);
 		setAllowed(true);
-	}, [router, pathname, userData, isUserDataLoading, planCapabilities, invoiceInfo]);
+		setAllowedPath(pathname);
+	}, [router, pathname, userData, isUserDataLoading, planCapabilities, invoiceInfo, allowed, allowedPath]);
 
 	if (forbiddenInfo) {
 		return (
@@ -158,7 +167,7 @@ const LIMIT_RULES = [
 ];
 
 function checkLimit(planCaps, rule) {
-	const limits = planCaps?.allowed?.limits ?? planCaps?.limits;
+	const limits = planCaps?.limits;
 	if (!limits) return {blocked: false};
 
 	const current = limits?.[rule.currentKey];

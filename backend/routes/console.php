@@ -11,6 +11,10 @@ Artisan::command('inspire', function () {
 Schedule::command('billing:downgrade-expired-cancellations --grace=1')
     ->hourly(); // or daily()
 
+Schedule::command('billing:sync-plan-usage-periods')
+	->daily()
+	->withoutOverlapping();
+
 Schedule::command('invoice-reminders:send-due')
 	->everyFifteenMinutes()
 	->withoutOverlapping();

@@ -20,6 +20,7 @@ import {DateRangePicker} from "@heroui/react";
 import {useApp} from "@/app/providers/AppContext";
 import DashboardSidebar from "@/app/app/component/DashboardSidebar";
 import {Pencil, Plus, Search, Trash2, Archive, Clock, FileText, TriangleAlert, X} from "lucide-react";
+import {reminderIndicator, reminderIndicatorColor} from "@/app/helpers/paymentReminder";
 
 const dashboardPrimaryButtonClass =
 	"group h-11 min-h-11 rounded-[7px] bg-[#075de8] px-6 text-[15px] font-semibold tracking-normal text-white shadow-[0_14px_24px_-18px_rgba(7,93,232,0.85)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#034fc9] hover:shadow-[0_18px_30px_-20px_rgba(7,93,232,0.9)] focus-visible:ring-2 focus-visible:ring-[#75b7ff] focus-visible:ring-offset-2";
@@ -142,7 +143,7 @@ function Component() {
 					<div
 						className="text-sm font-semibold text-[#07142c]">created: {formattedDate(item.created_at)}</div>
 					<div className="mt-0.5 text-xs font-semibold text-[#66738a]">Due: {formattedDate(item.due_on)}</div>
-					{(item?.reminder_schedule ?? item?.reminderSchedule) && (<span className="flex items-center text-xs text-red-300"><Clock size={12} /> Payment Reminder</span>)}
+					{(item?.reminder_schedule ?? item?.reminderSchedule) && (<span className={`flex items-center text-xs  ${reminderIndicatorColor(item)}`}><Clock size={12} /> &nbsp;{reminderIndicator(item)}</span>)}
 				</>
 
 			default:

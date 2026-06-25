@@ -8,6 +8,16 @@ export type PlanPermissionPayload = {
 	flags?: Record<string, boolean | string | number | null | undefined>;
 	allowed?: Record<string, boolean | undefined>;
 	not_allowed?: Record<string, boolean | undefined>;
+	usage_periods?: UsagePeriodPayload[] | Record<string, UsagePeriodPayload | undefined>;
+};
+
+export type UsagePeriodPayload = {
+	capability_key?: string | null;
+	used?: number | null;
+	limit?: number | null;
+	period_start?: string | null;
+	period_end?: string | null;
+	reset_strategy?: string | null;
 };
 
 const aliases = {
@@ -147,15 +157,37 @@ export class PlanPermission {
 	}
 
 	private currentUsageFor(limitKey: string): number | undefined {
+		const periodUsage = this.usagePeriodFor(limitKey)?.used;
+
+		if (typeof periodUsage === 'number') {
+			return periodUsage;
+		}
+
 		const currentKey = currentUsageKeys[limitKey];
 
-		if (! currentKey) {
+		if (currentKey) {
+			const currentUsage = this.payload?.limits?.[currentKey];
+
+			if (typeof currentUsage === 'number') {
+				return currentUsage;
+			}
+		}
+
+		return undefined;
+	}
+
+	private usagePeriodFor(limitKey: string): UsagePeriodPayload | undefined {
+		const periods = this.payload?.usage_periods;
+
+		if (! periods) {
 			return undefined;
 		}
 
-		const currentUsage = this.payload?.limits?.[currentKey];
+		if (Array.isArray(periods)) {
+			return periods.find((period) => period?.capability_key === limitKey);
+		}
 
-		return typeof currentUsage === 'number' ? currentUsage : undefined;
+		return periods[limitKey];
 	}
 
 	private allowsFlagValue(value: boolean | string | number | null | undefined): boolean {

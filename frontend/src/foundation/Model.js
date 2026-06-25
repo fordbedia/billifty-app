@@ -3,8 +3,17 @@
 import axios from 'axios';
 import {auth} from "@/app/helpers/auth";
 
+function resolveApiBaseURL() {
+	const configuredApiURL = process.env.NEXT_PUBLIC_API_URL?.trim();
+	const secureURL = process.env.NEXT_PUBLIC_SECURE_URL?.trim();
+	const apiRoot = configuredApiURL || (secureURL ? `${secureURL}/api` : '/api');
+	const normalizedApiRoot = apiRoot.replace(/\/+$/, '');
+
+	return normalizedApiRoot.endsWith('/v1') ? normalizedApiRoot : `${normalizedApiRoot}/v1`;
+}
+
 export default class Model {
-  static baseURL = process.env.NEXT_PUBLIC_SECURE_URL + '/api/v1'
+  static baseURL = resolveApiBaseURL()
   static resource;
   data = {};
 
@@ -34,6 +43,8 @@ export default class Model {
   }
 
   static guest() {
+		const resource = this.resource ?? this.getName()
+
       return axios.create({ baseURL: `${this.baseURL}/${resource}`, })
   }
 
