@@ -144,7 +144,7 @@ export default function Actions({isIssuedOrPaid, isPaid}) {
 									</Button>
 								)}
 								<Button disableRipple={true} className="invoice-action-button invoice-action-button-danger w-full" onPress={onOpenConfirmDeleteModal} color="danger">
-									{data.status === 'paid' ? 'Archive' : 'Delete' }
+									Archive
 								</Button>
 							</>
 						)}

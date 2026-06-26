@@ -68,7 +68,7 @@ export default function Forbidden() {
     const upgradeLabel = () => {
         if(me?.subscription?.plan?.code === "free") return "Upgrade to Pro"
 
-        return "Upgrade to Premium"
+        return "Premium"
     }
 
 	const formatValue = (value?: number) => {
@@ -204,7 +204,7 @@ export default function Forbidden() {
 					<section className="rounded-[14px] border border-[#dfe4f7] bg-[#f1f4ff] px-5 py-5">
 						<h2 className="flex items-center gap-3 text-[18px] font-extrabold text-[#3436aa]">
 							<Info aria-hidden="true" className="h-4 w-4" />
-							With Billifty Pro
+                            {`With Billifty ${upgradeLabel()}`}
 						</h2>
 
 						<div className="mt-4 grid gap-x-8 gap-y-3 text-[15px] font-medium text-[#293244] sm:grid-cols-3">
@@ -223,7 +223,7 @@ export default function Forbidden() {
 							className="inline-flex h-14 items-center justify-center gap-3 rounded-[11px] bg-[#5148ee] px-6 text-[18px] font-extrabold text-white shadow-[0_8px_14px_rgba(66,55,216,0.24)] transition-opacity hover:opacity-95"
 						>
 							<Sparkles aria-hidden="true" className="h-5 w-5" strokeWidth={2.5} />
-                            {upgradeLabel()}
+                            {`Upgrade to ${upgradeLabel()}`}
 						</Link>
 						<Link
 							href={uri.pricing}

@@ -98,3 +98,13 @@ export type PlanRecord = {
     id: number;
 }
 
+export type UserRecord = {
+    id: number;
+    name: string;
+    email: string;
+    avatar?: string | null;
+    onboarding: Record<string, any>;
+    subscription: Record<string, any | null>;
+    plan: PlanRecord;
+}
+

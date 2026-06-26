@@ -10,8 +10,9 @@ import {useAuth} from "@/app/providers/AuthContext";
 import Avatar from '@/app/components/common/includes/Avatar'
 import {isOnboardingCompleted} from "@/app/utils/onboardingUser";
 import {useApp} from "@/app/providers/AppContext";
+import {useUser} from "@/app/providers/UserContext";
 
-export const BilliftyLogo = ({width =100, height=100}) => {
+export const BilliftyLogo = ({width = 100, height = 100}) => {
 	return (
 		<Link href={path.lp} className="billifty-logo-link"><Image
 			alt="Billifty Logo"
@@ -26,7 +27,7 @@ export const BilliftyLogo = ({width =100, height=100}) => {
 
 export default function App() {
 	const {logout} = useAuth()
-	const {userData} = useApp()
+	const {me} = useUser()
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
 	const accountMenuRef = useRef(null);
@@ -113,8 +114,8 @@ export default function App() {
 										return (
 											(
 												(
-													link.label === "Onboarding" && !isOnboardingCompleted(userData.plan_capabilities)) ||
-												link.label !== "Onboarding"
+													link.label === "Onboarding" && !isOnboardingCompleted(me, me?.plan_capabilities))
+													|| link.label !== "Onboarding"
 											) &&
 											(
 												<Link
