@@ -19,11 +19,487 @@ import {formattedDate} from "@/app/utils/date";
 import {DateRangePicker} from "@heroui/react";
 import {useApp} from "@/app/providers/AppContext";
 import DashboardSidebar from "@/app/app/component/DashboardSidebar";
-import {Pencil, Plus, Search, Trash2, Archive, Clock, FileText, TriangleAlert, X} from "lucide-react";
+import AdvancedFilterBuilder from "@/app/components/filters/AdvancedFilterBuilder";
+import {useState} from "react";
+import {
+	Archive,
+	Clock,
+	FileText,
+	Filter,
+	Pencil,
+	Plus,
+	RotateCcw,
+	Search,
+	Trash2,
+	TriangleAlert,
+	X,
+} from "lucide-react";
 import {reminderIndicator, reminderIndicatorColor} from "@/app/helpers/paymentReminder";
 
 const dashboardPrimaryButtonClass =
 	"group h-11 min-h-11 rounded-[7px] bg-[#075de8] px-6 text-[15px] font-semibold tracking-normal text-white shadow-[0_14px_24px_-18px_rgba(7,93,232,0.85)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#034fc9] hover:shadow-[0_18px_30px_-20px_rgba(7,93,232,0.9)] focus-visible:ring-2 focus-visible:ring-[#75b7ff] focus-visible:ring-offset-2";
+
+const invoiceNumberOptions = [
+	{value: "INV-00001", label: "INV-00001"},
+	{value: "INV-00002", label: "INV-00002"},
+	{value: "INV-00003", label: "INV-00003"},
+	{value: "INV-00004", label: "INV-00004"},
+];
+
+const statusOptions = [
+	{value: "draft", label: "Draft"},
+	{value: "issued", label: "Issued"},
+	{value: "paid", label: "Paid"},
+	{value: "void", label: "Void"},
+];
+
+const invoiceAdvancedFilterFields = [
+	{
+		value: "invoice_number",
+		label: "Invoice Number",
+		dataType: "string",
+		defaultOperator: "contains",
+		operators: [
+			{
+				value: "contains",
+				label: "Contains",
+				valueComponent: "multi_select",
+				placeholder: "Choose invoice numbers",
+				options: invoiceNumberOptions,
+			},
+			{
+				value: "=",
+				label: "Equals (=)",
+				valueComponent: "text",
+				placeholder: "Enter invoice number",
+			},
+			{
+				value: "!=",
+				label: "Not equals (!=)",
+				valueComponent: "text",
+				placeholder: "Enter invoice number",
+			},
+		],
+	},
+	{
+		value: "issued_at",
+		label: "Issued On",
+		dataType: "date",
+		defaultOperator: "date_range",
+		operators: [
+			{
+				value: "date_range",
+				label: "Date Range",
+				valueComponent: "date_range",
+			},
+		],
+	},
+	{
+		value: "created_at",
+		label: "Created On",
+		dataType: "date",
+		defaultOperator: "date_range",
+		operators: [
+			{
+				value: "date_range",
+				label: "Date Range",
+				valueComponent: "date_range",
+			},
+		],
+	},
+	{
+		value: "status",
+		label: "Status",
+		dataType: "enum",
+		defaultOperator: "contains",
+		operators: [
+			{
+				value: "contains",
+				label: "Contains",
+				valueComponent: "multi_select",
+				placeholder: "Choose statuses",
+				options: statusOptions,
+			},
+			{
+				value: "not_contains",
+				label: "Not Contains",
+				valueComponent: "multi_select",
+				placeholder: "Choose statuses",
+				options: statusOptions,
+			},
+		],
+	},
+	{
+		value: "business_profile",
+		label: "Business Profile",
+		defaultSubField: "name",
+		subFields: [
+			{
+				value: "name",
+				label: "Name",
+				dataType: "string",
+				defaultOperator: "contains",
+				operators: [
+					{
+						value: "contains",
+						label: "Contains",
+						valueComponent: "text",
+						placeholder: "Enter business profile name",
+					},
+					{
+						value: "=",
+						label: "Equals (=)",
+						valueComponent: "text",
+						placeholder: "Enter business profile name",
+					},
+					{
+						value: "!=",
+						label: "Not equals (!=)",
+						valueComponent: "text",
+						placeholder: "Enter business profile name",
+					},
+				],
+			},
+			{
+				value: "legal_name",
+				label: "Legal Name",
+				dataType: "string",
+				defaultOperator: "contains",
+				operators: [
+					{
+						value: "contains",
+						label: "Contains",
+						valueComponent: "text",
+						placeholder: "Enter legal name",
+					},
+					{
+						value: "=",
+						label: "Equals (=)",
+						valueComponent: "text",
+						placeholder: "Enter legal name",
+					},
+					{
+						value: "!=",
+						label: "Not equals (!=)",
+						valueComponent: "text",
+						placeholder: "Enter legal name",
+					},
+				],
+			},
+			{
+				value: "email",
+				label: "Email Address",
+				dataType: "string",
+				defaultOperator: "contains",
+				operators: [
+					{
+						value: "contains",
+						label: "Contains",
+						valueComponent: "text",
+						placeholder: "Enter business profile email",
+					},
+					{
+						value: "=",
+						label: "Equals (=)",
+						valueComponent: "text",
+						placeholder: "Enter business profile email",
+					},
+					{
+						value: "!=",
+						label: "Not equals (!=)",
+						valueComponent: "text",
+						placeholder: "Enter business profile email",
+					},
+				],
+			},
+			{
+				value: "phone",
+				label: "Phone",
+				dataType: "string",
+				defaultOperator: "contains",
+				operators: [
+					{
+						value: "contains",
+						label: "Contains",
+						valueComponent: "text",
+						placeholder: "Enter business profile phone",
+					},
+					{
+						value: "=",
+						label: "Equals (=)",
+						valueComponent: "text",
+						placeholder: "Enter business profile phone",
+					},
+					{
+						value: "!=",
+						label: "Not equals (!=)",
+						valueComponent: "text",
+						placeholder: "Enter business profile phone",
+					},
+				],
+			},
+			{
+				value: "website",
+				label: "Website",
+				dataType: "string",
+				defaultOperator: "contains",
+				operators: [
+					{
+						value: "contains",
+						label: "Contains",
+						valueComponent: "text",
+						placeholder: "Enter website",
+					},
+					{
+						value: "=",
+						label: "Equals (=)",
+						valueComponent: "text",
+						placeholder: "Enter website",
+					},
+					{
+						value: "!=",
+						label: "Not equals (!=)",
+						valueComponent: "text",
+						placeholder: "Enter website",
+					},
+				],
+			},
+			{
+				value: "created_at",
+				label: "Date Created",
+				dataType: "date",
+				defaultOperator: "date_range",
+				operators: [
+					{
+						value: "date_range",
+						label: "Date Range",
+						valueComponent: "date_range",
+					},
+				],
+			},
+			{
+				value: "ein",
+				label: "EIN",
+				dataType: "string",
+				defaultOperator: "contains",
+				operators: [
+					{
+						value: "contains",
+						label: "Contains",
+						valueComponent: "text",
+						placeholder: "Enter EIN",
+					},
+					{
+						value: "=",
+						label: "Equals (=)",
+						valueComponent: "text",
+						placeholder: "Enter EIN",
+					},
+					{
+						value: "!=",
+						label: "Not equals (!=)",
+						valueComponent: "text",
+						placeholder: "Enter EIN",
+					},
+				],
+			},
+		],
+	},
+	{
+		value: "client",
+		label: "Client",
+		defaultSubField: "name",
+		subFields: [
+			{
+				value: "name",
+				label: "Name",
+				dataType: "string",
+				defaultOperator: "contains",
+				operators: [
+					{
+						value: "contains",
+						label: "Contains",
+						valueComponent: "text",
+						placeholder: "Enter client name",
+					},
+					{
+						value: "=",
+						label: "Equals (=)",
+						valueComponent: "text",
+						placeholder: "Enter client name",
+					},
+					{
+						value: "!=",
+						label: "Not equals (!=)",
+						valueComponent: "text",
+						placeholder: "Enter client name",
+					},
+				],
+			},
+			{
+				value: "email",
+				label: "Email Address",
+				dataType: "string",
+				defaultOperator: "contains",
+				operators: [
+					{
+						value: "contains",
+						label: "Contains",
+						valueComponent: "text",
+						placeholder: "Enter client email",
+					},
+					{
+						value: "=",
+						label: "Equals (=)",
+						valueComponent: "text",
+						placeholder: "Enter client email",
+					},
+					{
+						value: "!=",
+						label: "Not equals (!=)",
+						valueComponent: "text",
+						placeholder: "Enter client email",
+					},
+				],
+			},
+			{
+				value: "phone",
+				label: "Phone",
+				dataType: "string",
+				defaultOperator: "contains",
+				operators: [
+					{
+						value: "contains",
+						label: "Contains",
+						valueComponent: "text",
+						placeholder: "Enter client phone",
+					},
+					{
+						value: "=",
+						label: "Equals (=)",
+						valueComponent: "text",
+						placeholder: "Enter client phone",
+					},
+					{
+						value: "!=",
+						label: "Not equals (!=)",
+						valueComponent: "text",
+						placeholder: "Enter client phone",
+					},
+				],
+			},
+			{
+				value: "billing_address",
+				label: "Billing Address",
+				dataType: "string",
+				defaultOperator: "contains",
+				operators: [
+					{
+						value: "contains",
+						label: "Contains",
+						valueComponent: "text",
+						placeholder: "Enter billing address",
+					},
+					{
+						value: "=",
+						label: "Equals (=)",
+						valueComponent: "text",
+						placeholder: "Enter billing address",
+					},
+					{
+						value: "!=",
+						label: "Not equals (!=)",
+						valueComponent: "text",
+						placeholder: "Enter billing address",
+					},
+				],
+			},
+			{
+				value: "shipping_address",
+				label: "Shipping Address",
+				dataType: "string",
+				defaultOperator: "contains",
+				operators: [
+					{
+						value: "contains",
+						label: "Contains",
+						valueComponent: "text",
+						placeholder: "Enter shipping address",
+					},
+					{
+						value: "=",
+						label: "Equals (=)",
+						valueComponent: "text",
+						placeholder: "Enter shipping address",
+					},
+					{
+						value: "!=",
+						label: "Not equals (!=)",
+						valueComponent: "text",
+						placeholder: "Enter shipping address",
+					},
+				],
+			},
+			{
+				value: "created_at",
+				label: "Date Created",
+				dataType: "date",
+				defaultOperator: "date_range",
+				operators: [
+					{
+						value: "date_range",
+						label: "Date Range",
+						valueComponent: "date_range",
+					},
+				],
+			},
+		],
+	},
+];
+
+const getInitialInvoiceFilterGroups = () => [
+	{
+		id: 1,
+		conditions: [
+			{
+				id: 1,
+				field: "invoice_number",
+				subField: "",
+				operator: "contains",
+				value: ["INV-00001", "INV-00004"],
+			},
+			{
+				id: 2,
+				field: "status",
+				subField: "",
+				operator: "contains",
+				value: ["issued", "paid"],
+			},
+			{
+				id: 3,
+				field: "business_profile",
+				subField: "name",
+				operator: "contains",
+				value: "John Doe",
+			},
+		],
+	},
+	{
+		id: 2,
+		conditions: [
+			{
+				id: 4,
+				field: "created_at",
+				subField: "",
+				operator: "date_range",
+				value: {
+					from: "2026-01-01",
+					to: "2026-01-31",
+				},
+			},
+		],
+	},
+];
 
 function Component() {
 	const {
@@ -42,6 +518,10 @@ function Component() {
 	const {onOpenConfirmDeleteModal, setData} = useInvoice()
 
 	const router = useRouter()
+	const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
+	const [advancedFilterCount, setAdvancedFilterCount] = useState(0);
+	const [advancedFilterResetKey, setAdvancedFilterResetKey] = useState(0);
+
 	const column = [
 		{
 			key: 'invoice_number',
@@ -215,11 +695,11 @@ function Component() {
 									</div>
 								</CardHeader>
 								<CardBody className="invoice-workspace-body">
-									<div className="invoice-filter-grid">
+									<div className="mb-5 grid gap-3 xl:grid-cols-[minmax(240px,340px)_minmax(260px,1fr)_auto] xl:items-end">
 										<DateRangePicker
 											className="invoice-filter-control"
 											classNames={{
-												inputWrapper: "h-[60px] rounded-[8px] border border-[#dbe3ef] bg-white px-5 shadow-none",
+												inputWrapper: "h-12 rounded-[8px] border border-[#dbe3ef] bg-white px-4 shadow-none",
 												label: "text-[13px] font-semibold text-[#18243a]",
 												segment: "text-[15px] text-[#5f6d84]",
 												selectorButton: "text-[#53627a]",
@@ -232,13 +712,13 @@ function Component() {
 										<Input
 											className="invoice-filter-control"
 											classNames={{
-												inputWrapper: "h-[60px] rounded-[8px] border border-[#dbe3ef] bg-white px-5 shadow-none",
+												inputWrapper: "h-12 rounded-[8px] border border-[#dbe3ef] bg-white px-4 shadow-none",
 												label: "text-[13px] font-semibold text-[#18243a]",
 												input: "text-[15px] text-[#5f6d84] placeholder:text-[#5f6d84]",
 											}}
 											name="search"
 											label="Search"
-											placeholder="Search for client name or email"
+											placeholder="Search by client name or email"
 											onValueChange={setSearch}
 											onKeyDown={handleSearchKeyDown}
 											radius="sm"
@@ -246,7 +726,50 @@ function Component() {
 																  strokeWidth={2}/>}
 											variant="bordered"
 										/>
+										<div className="flex flex-wrap gap-2 xl:justify-end">
+											<Button
+												className={`h-12 rounded-[8px] border px-4 text-sm font-semibold shadow-none ${advancedFiltersOpen ? "border-[#b9d3ff] bg-[#eef5ff] text-[#075de8]" : "border-[#dbe3ef] bg-white text-[#17233a] hover:border-[#b8c6d8]"}`}
+												variant="bordered"
+												onPress={() => setAdvancedFiltersOpen((open) => !open)}
+											>
+												<Filter className="size-4" strokeWidth={2}/>
+												Filters
+												<span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#075de8] px-1.5 text-[11px] font-bold leading-none text-white">
+													{advancedFilterCount}
+												</span>
+											</Button>
+											<Button
+												className="h-12 rounded-[8px] border border-[#dbe3ef] bg-white px-4 text-sm font-semibold text-[#4d5d77] shadow-none hover:border-[#b8c6d8] hover:bg-[#f8fafc]"
+												variant="bordered"
+												onPress={() => setAdvancedFilterResetKey((key) => key + 1)}
+											>
+												<RotateCcw className="size-4" strokeWidth={2}/>
+												Reset
+											</Button>
+										</div>
 									</div>
+									<AdvancedFilterBuilder
+										open={advancedFiltersOpen}
+										title="Advanced Filters"
+										description="Build advanced queries to find exactly what you need."
+										searchButtonLabel="Search Invoices"
+										fields={invoiceAdvancedFilterFields}
+										initialGroups={getInitialInvoiceFilterGroups()}
+										resetKey={advancedFilterResetKey}
+										onClose={() => setAdvancedFiltersOpen(false)}
+										onActiveFilterCountChange={setAdvancedFilterCount}
+										onSearch={(groups) => {
+											const payload = {groups};
+											const params = new URLSearchParams();
+
+											params.set("page", "1");
+											params.set("per_page", "15");
+											params.set("advanced_filters", JSON.stringify(payload));
+
+											console.log("Advanced invoice filters payload", payload);
+											console.log("Advanced invoice filters query string", params.toString());
+										}}
+									/>
 									{userInvoices && userInvoices.data && userInvoices.data.length > 0 && (
 										<TableData
 											classNames="invoice-table invoice-dashboard-table"
