@@ -1,6 +1,6 @@
 "use client"
 
-import {useEffect, useRef, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import type {Key} from "react";
 import {Button, Input, Select, SelectItem} from "@heroui/react";
 import {ChevronUp, GripVertical, Plus, Trash2} from "lucide-react";
@@ -15,7 +15,7 @@ export type FilterOperator = {
 	label: string;
 	valueComponent: "text" | "single_select" | "multi_select" | "date_range" | "number";
 	placeholder?: string;
-	options?: FilterOption[];
+	valueSource?: string | null;
 };
 
 export type FilterSubField = {
@@ -59,17 +59,30 @@ export type FilterGroup = {
 	conditions: FilterCondition[];
 };
 
+export type LoadOptionsArgs = {
+	valueSource: string;
+	search?: string;
+	page?: number;
+};
+
+export type LoadOptionsResult = {
+	options: FilterOption[];
+	hasMore?: boolean;
+	nextPage?: number | null;
+};
+
 type AdvancedFilterBuilderProps = {
 	open: boolean;
 	title?: string;
 	description?: string;
 	searchButtonLabel?: string;
-	fields: FilterField[];
+	fields?: FilterField[];
 	initialGroups: FilterGroup[];
 	resetKey?: number;
 	onClose: () => void;
 	onSearch?: (groups: FilterGroup[]) => void;
 	onActiveFilterCountChange?: (count: number) => void;
+	onLoadOptions?: (args: LoadOptionsArgs) => Promise<LoadOptionsResult>;
 };
 
 type ConditionUpdate = Partial<FilterCondition>;
@@ -312,16 +325,64 @@ export default function AdvancedFilterBuilder({
 	title = "Advanced Filters",
 	description = "Build advanced queries to find exactly what you need.",
 	searchButtonLabel = "Search",
-	fields,
+	fields = [],
 	initialGroups,
 	resetKey = 0,
 	onClose,
 	onSearch,
 	onActiveFilterCountChange,
+	onLoadOptions,
 }: AdvancedFilterBuilderProps) {
 	const [groups, setGroups] = useState<FilterGroup[]>(() => cloneGroups(initialGroups));
+	const [optionsCache, setOptionsCache] = useState<Record<string, LoadOptionsResult>>({});
+	const [loadingOptionSources, setLoadingOptionSources] = useState<Record<string, boolean>>({});
 	const initialGroupsRef = useRef(initialGroups);
+	const loadingOptionSourcesRef = useRef(new Set<string>());
 	const canSearch = areGroupsComplete(groups, fields);
+
+	const loadOptionsForSource = useCallback(async (valueSource: string) => {
+		if (!onLoadOptions || optionsCache[valueSource] || loadingOptionSourcesRef.current.has(valueSource)) {
+			return;
+		}
+
+		loadingOptionSourcesRef.current.add(valueSource);
+		setLoadingOptionSources((currentSources) => ({
+			...currentSources,
+			[valueSource]: true,
+		}));
+
+		try {
+			const result = await onLoadOptions({
+				valueSource,
+				search: "",
+				page: 1,
+			});
+
+			setOptionsCache((currentCache) => ({
+				...currentCache,
+				[valueSource]: {
+					options: result.options ?? [],
+					hasMore: result.hasMore ?? false,
+					nextPage: result.nextPage ?? null,
+				},
+			}));
+		} catch {
+			setOptionsCache((currentCache) => ({
+				...currentCache,
+				[valueSource]: {
+					options: [],
+					hasMore: false,
+					nextPage: null,
+				},
+			}));
+		} finally {
+			loadingOptionSourcesRef.current.delete(valueSource);
+			setLoadingOptionSources((currentSources) => ({
+				...currentSources,
+				[valueSource]: false,
+			}));
+		}
+	}, [onLoadOptions, optionsCache]);
 
 	useEffect(() => {
 		initialGroupsRef.current = initialGroups;
@@ -521,16 +582,19 @@ export default function AdvancedFilterBuilder({
 											</div>
 										)}
 
-										<FilterConditionRow
-											condition={condition}
-											fields={fields}
-											groupId={group.id}
-											onFieldChange={handleFieldChange}
-											onOperatorChange={handleOperatorChange}
-											onRemoveCondition={removeCondition}
-											onSubFieldChange={handleSubFieldChange}
-											onUpdateCondition={updateCondition}
-										/>
+											<FilterConditionRow
+												condition={condition}
+												fields={fields}
+												groupId={group.id}
+												loadingOptionSources={loadingOptionSources}
+												onFieldChange={handleFieldChange}
+												onLoadOptions={loadOptionsForSource}
+												onOperatorChange={handleOperatorChange}
+												onRemoveCondition={removeCondition}
+												onSubFieldChange={handleSubFieldChange}
+												onUpdateCondition={updateCondition}
+												optionsCache={optionsCache}
+											/>
 									</div>
 								))}
 							</div>
@@ -575,22 +639,28 @@ type FilterConditionRowProps = {
 	fields: FilterField[];
 	condition: FilterCondition;
 	groupId: number;
+	loadingOptionSources: Record<string, boolean>;
 	onFieldChange: (groupId: number, conditionId: number, fieldValue: string) => void;
+	onLoadOptions: (valueSource: string) => Promise<void>;
 	onOperatorChange: (groupId: number, conditionId: number, condition: FilterCondition, operator: string) => void;
 	onRemoveCondition: (groupId: number, conditionId: number) => void;
 	onSubFieldChange: (groupId: number, conditionId: number, fieldValue: string, subField: string) => void;
 	onUpdateCondition: (groupId: number, conditionId: number, updates: ConditionUpdate) => void;
+	optionsCache: Record<string, LoadOptionsResult>;
 };
 
 function FilterConditionRow({
 	fields,
 	condition,
 	groupId,
+	loadingOptionSources,
 	onFieldChange,
+	onLoadOptions,
 	onOperatorChange,
 	onRemoveCondition,
 	onSubFieldChange,
 	onUpdateCondition,
+	optionsCache,
 }: FilterConditionRowProps) {
 	const field = findField(fields, condition.field);
 	const showSubField = Boolean(field?.subFields?.length);
@@ -638,12 +708,15 @@ function FilterConditionRow({
 				</div>
 
 				<div className={valueColumnClass}>
-					<FilterValueControl
-						config={activeConfig}
-						operator={operator}
-						value={condition.value}
-						onChange={(value) => onUpdateCondition(groupId, condition.id, {value})}
-					/>
+						<FilterValueControl
+							config={activeConfig}
+							isLoadingOptions={operator?.valueSource ? Boolean(loadingOptionSources[operator.valueSource]) : false}
+							loadedOptions={operator?.valueSource ? optionsCache[operator.valueSource]?.options ?? [] : []}
+							onLoadOptions={onLoadOptions}
+							operator={operator}
+							value={condition.value}
+							onChange={(value) => onUpdateCondition(groupId, condition.id, {value})}
+						/>
 				</div>
 
 				<div className="flex justify-end xl:col-span-1">
@@ -666,15 +739,17 @@ type FilterSelectControlProps = {
 	label: string;
 	placeholder: string;
 	options: FilterOption[];
+	isLoading?: boolean;
 	value?: string;
 	onChange: (value: string) => void;
 };
 
-function FilterSelectControl({label, placeholder, options, value, onChange}: FilterSelectControlProps) {
+function FilterSelectControl({label, placeholder, options, isLoading = false, value, onChange}: FilterSelectControlProps) {
 	return (
 		<Select
 			className="w-full"
 			classNames={filterControlClassNames}
+			isLoading={isLoading}
 			label={label}
 			labelPlacement="outside"
 			placeholder={placeholder}
@@ -695,15 +770,17 @@ type FilterMultiSelectControlProps = {
 	label: string;
 	placeholder: string;
 	options: FilterOption[];
+	isLoading?: boolean;
 	value: FilterConditionValue;
 	onChange: (value: string[]) => void;
 };
 
-function FilterMultiSelectControl({label, placeholder, options, value, onChange}: FilterMultiSelectControlProps) {
+function FilterMultiSelectControl({label, placeholder, options, isLoading = false, value, onChange}: FilterMultiSelectControlProps) {
 	return (
 		<Select
 			className="w-full"
 			classNames={filterControlClassNames}
+			isLoading={isLoading}
 			label={label}
 			labelPlacement="outside"
 			placeholder={placeholder}
@@ -722,12 +799,33 @@ function FilterMultiSelectControl({label, placeholder, options, value, onChange}
 
 type FilterValueControlProps = {
 	config?: ActiveFilterConfig;
+	isLoadingOptions?: boolean;
+	loadedOptions?: FilterOption[];
 	operator?: FilterOperator;
 	value: FilterConditionValue;
 	onChange: (value: FilterConditionValue) => void;
+	onLoadOptions?: (valueSource: string) => Promise<void>;
 };
 
-function FilterValueControl({config, operator, value, onChange}: FilterValueControlProps) {
+function FilterValueControl({
+	config,
+	isLoadingOptions = false,
+	loadedOptions = [],
+	operator,
+	value,
+	onChange,
+	onLoadOptions,
+}: FilterValueControlProps) {
+	const valueSource = operator?.valueSource ?? "";
+	const usesLoadedOptions = Boolean(valueSource)
+		&& (operator?.valueComponent === "single_select" || operator?.valueComponent === "multi_select");
+
+	useEffect(() => {
+		if (usesLoadedOptions && valueSource) {
+			onLoadOptions?.(valueSource);
+		}
+	}, [onLoadOptions, usesLoadedOptions, valueSource]);
+
 	if (!operator) {
 		return (
 			<Input
@@ -744,7 +842,7 @@ function FilterValueControl({config, operator, value, onChange}: FilterValueCont
 		);
 	}
 
-	const options = operator.options ?? [];
+	const options = usesLoadedOptions ? loadedOptions : [];
 	const placeholder = operator.placeholder ?? config?.placeholder ?? "Enter value";
 
 	if (operator.valueComponent === "single_select") {
@@ -752,6 +850,7 @@ function FilterValueControl({config, operator, value, onChange}: FilterValueCont
 			<FilterSelectControl
 				label="Value"
 				placeholder={placeholder || "Choose value"}
+				isLoading={isLoadingOptions}
 				options={options}
 				value={typeof value === "string" ? value : ""}
 				onChange={onChange}
@@ -764,6 +863,7 @@ function FilterValueControl({config, operator, value, onChange}: FilterValueCont
 			<FilterMultiSelectControl
 				label="Value"
 				placeholder={placeholder || "Choose values"}
+				isLoading={isLoadingOptions}
 				options={options}
 				value={value}
 				onChange={onChange}
