@@ -46,7 +46,6 @@ function CheckoutRedirectInner() {
     };
 
     run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planCode, billingCycle]);
 
   return (

@@ -1,5 +1,5 @@
-@import "../styles/fonts.scss";
-@import "../styles/svgs.scss";
-@import "../styles/headers.scss";
-@import "../styles/body.scss";
-@import "../styles/app.scss";
+@use "../styles/fonts";
+@use "../styles/svgs";
+@use "../styles/headers";
+@use "../styles/body";
+@use "../styles/app";

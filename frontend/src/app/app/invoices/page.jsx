@@ -454,7 +454,7 @@ const getInitialInvoiceFilterGroups = () => [
 				field: "invoice_number",
 				subField: "",
 				operator: "contains",
-				value: ["INV-00001", "INV-00004"],
+				value: [],
 			},
 			{
 				id: 2,
@@ -773,7 +773,7 @@ function Component() {
 													nextPage: response.data?.meta?.next_page ?? null,
 												};
 											}}
-											onSearch={(groups) => {
+											onSearch={async (groups) => {
 											const payload = {groups};
 											const params = new URLSearchParams();
 
@@ -783,6 +783,10 @@ function Component() {
 
 											console.log("Advanced invoice filters payload", payload);
 											console.log("Advanced invoice filters query string", params.toString());
+											await AdvancedFilter.onSearch(
+												'invoices',
+												params.toString()
+											)
 										}}
 									/>
 									{userInvoices && userInvoices.data && userInvoices.data.length > 0 && (

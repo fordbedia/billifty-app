@@ -23,4 +23,11 @@ export default class AdvancedFilter extends Model {
 			},
 		});
 	}
+	static async onSearch(module, search) {
+		return await this.axios().get(`/on-search?${search}`, {
+			params: {
+				module,
+			},
+		});
+	}
 }
