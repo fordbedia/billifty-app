@@ -18,13 +18,18 @@ export type FilterOperator = {
 	valueSource?: string | null;
 };
 
+type FilterValueComponent = FilterOperator["valueComponent"];
+
 export type FilterSubField = {
 	value: string;
 	label: string;
 	dataType: "string" | "date" | "enum" | "number" | "money";
-	operators: FilterOperator[];
+	operators?: FilterOperator[];
 	placeholder?: string;
 	defaultOperator?: string;
+	valueComponent?: FilterValueComponent;
+	valueSource?: string | null;
+	valueOptions?: FilterOption[];
 };
 
 export type FilterField = {
@@ -34,6 +39,9 @@ export type FilterField = {
 	operators?: FilterOperator[];
 	placeholder?: string;
 	defaultOperator?: string;
+	valueComponent?: FilterValueComponent;
+	valueSource?: string | null;
+	valueOptions?: FilterOption[];
 	subFields?: FilterSubField[];
 	defaultSubField?: string;
 };
@@ -149,7 +157,7 @@ const isDateRangeValue = (value: FilterConditionValue): value is {from: string; 
 	return typeof value === "object" && value !== null && !Array.isArray(value) && "from" in value && "to" in value;
 };
 
-const getEmptyValueForComponent = (valueComponent?: FilterOperator["valueComponent"]): FilterConditionValue => {
+const getEmptyValueForComponent = (valueComponent?: FilterValueComponent): FilterConditionValue => {
 	if (valueComponent === "multi_select") {
 		return [];
 	}
@@ -218,6 +226,10 @@ const getDefaultOperator = (config: ActiveFilterConfig | undefined) => {
 	return config.operators.find((operator) => operator.value === config.defaultOperator) ?? config.operators[0];
 };
 
+const getValueComponent = (config: ActiveFilterConfig | undefined, operator?: FilterOperator) => {
+	return operator?.valueComponent ?? config?.valueComponent;
+};
+
 const getActiveFilterConfig = (field: FilterField | undefined, subFieldValue?: string): ActiveFilterConfig | undefined => {
 	if (!field) {
 		return undefined;
@@ -246,7 +258,7 @@ const getDefaultValuesForField = (field: FilterField | undefined): Pick<FilterCo
 		return {
 			subField: subField?.value ?? "",
 			operator: operator?.value ?? "",
-			value: getEmptyValueForComponent(operator?.valueComponent),
+			value: getEmptyValueForComponent(getValueComponent(subField, operator)),
 		};
 	}
 
@@ -255,7 +267,7 @@ const getDefaultValuesForField = (field: FilterField | undefined): Pick<FilterCo
 	return {
 		subField: "",
 		operator: operator?.value ?? "",
-		value: getEmptyValueForComponent(operator?.valueComponent),
+		value: getEmptyValueForComponent(getValueComponent(field, operator)),
 	};
 };
 
@@ -265,7 +277,7 @@ const getDefaultValuesForSubField = (field: FilterField | undefined, subFieldVal
 
 	return {
 		operator: operator?.value ?? "",
-		value: getEmptyValueForComponent(operator?.valueComponent),
+		value: getEmptyValueForComponent(getValueComponent(subField, operator)),
 	};
 };
 
@@ -275,7 +287,7 @@ const getDefaultValueForOperator = (config: ActiveFilterConfig | undefined, oper
 	return getEmptyValueForComponent(operator?.valueComponent);
 };
 
-const isValueComplete = (value: FilterConditionValue, valueComponent: FilterOperator["valueComponent"]) => {
+const isValueComplete = (value: FilterConditionValue, valueComponent: FilterValueComponent) => {
 	if (valueComponent === "multi_select") {
 		return Array.isArray(value) && value.length > 0;
 	}
@@ -300,12 +312,13 @@ const isConditionComplete = (condition: FilterCondition, fields: FilterField[]) 
 
 	const activeConfig = getActiveFilterConfig(field, condition.subField);
 	const operator = findOperator(activeConfig?.operators, condition.operator);
+	const valueComponent = getValueComponent(activeConfig, operator);
 
-	if (!activeConfig || !operator) {
+	if (!activeConfig || !valueComponent) {
 		return false;
 	}
 
-	return isValueComplete(condition.value, operator.valueComponent);
+	return isValueComplete(condition.value, valueComponent);
 };
 
 const getCompletedConditionCount = (groups: FilterGroup[], fields: FilterField[]) => {
@@ -667,7 +680,11 @@ function FilterConditionRow({
 	const activeConfig = getActiveFilterConfig(field, condition.subField);
 	const operators = activeConfig?.operators ?? [];
 	const operator = findOperator(operators, condition.operator);
-	const valueColumnClass = showSubField ? "xl:col-span-5" : "xl:col-span-7";
+	const showOperator = operators.length > 0;
+	const valueColumnClass = showSubField
+		? showOperator ? "xl:col-span-5" : "xl:col-span-7"
+		: showOperator ? "xl:col-span-7" : "xl:col-span-9";
+	const valueSource = operator?.valueSource ?? activeConfig?.valueSource ?? "";
 
 	return (
 		<div className="relative rounded-[10px] border border-[#e8eef6] bg-white p-3 xl:pl-10">
@@ -697,21 +714,23 @@ function FilterConditionRow({
 					</div>
 				)}
 
-				<div className="xl:col-span-2">
-					<FilterSelectControl
-						label="Operator"
-						placeholder="Choose operator"
-						options={operators}
-						value={condition.operator}
-						onChange={(selectedOperator) => onOperatorChange(groupId, condition.id, condition, selectedOperator)}
-					/>
-				</div>
+				{showOperator && (
+					<div className="xl:col-span-2">
+						<FilterSelectControl
+							label="Operator"
+							placeholder="Choose operator"
+							options={operators}
+							value={condition.operator}
+							onChange={(selectedOperator) => onOperatorChange(groupId, condition.id, condition, selectedOperator)}
+						/>
+					</div>
+				)}
 
 				<div className={valueColumnClass}>
 						<FilterValueControl
 							config={activeConfig}
-							isLoadingOptions={operator?.valueSource ? Boolean(loadingOptionSources[operator.valueSource]) : false}
-							loadedOptions={operator?.valueSource ? optionsCache[operator.valueSource]?.options ?? [] : []}
+							isLoadingOptions={valueSource ? Boolean(loadingOptionSources[valueSource]) : false}
+							loadedOptions={valueSource ? optionsCache[valueSource]?.options ?? [] : []}
 							onLoadOptions={onLoadOptions}
 							operator={operator}
 							value={condition.value}
@@ -816,9 +835,10 @@ function FilterValueControl({
 	onChange,
 	onLoadOptions,
 }: FilterValueControlProps) {
-	const valueSource = operator?.valueSource ?? "";
+	const valueSource = operator?.valueSource ?? config?.valueSource ?? "";
+	const valueComponent = getValueComponent(config, operator);
 	const usesLoadedOptions = Boolean(valueSource)
-		&& (operator?.valueComponent === "single_select" || operator?.valueComponent === "multi_select");
+		&& (valueComponent === "single_select" || valueComponent === "multi_select");
 
 	useEffect(() => {
 		if (usesLoadedOptions && valueSource) {
@@ -826,7 +846,7 @@ function FilterValueControl({
 		}
 	}, [onLoadOptions, usesLoadedOptions, valueSource]);
 
-	if (!operator) {
+	if (!valueComponent) {
 		return (
 			<Input
 				className="w-full"
@@ -842,10 +862,10 @@ function FilterValueControl({
 		);
 	}
 
-	const options = usesLoadedOptions ? loadedOptions : [];
-	const placeholder = operator.placeholder ?? config?.placeholder ?? "Enter value";
+	const options = usesLoadedOptions ? loadedOptions : config?.valueOptions ?? [];
+	const placeholder = operator?.placeholder ?? config?.placeholder ?? "Enter value";
 
-	if (operator.valueComponent === "single_select") {
+	if (valueComponent === "single_select") {
 		return (
 			<FilterSelectControl
 				label="Value"
@@ -858,7 +878,7 @@ function FilterValueControl({
 		);
 	}
 
-	if (operator.valueComponent === "multi_select") {
+	if (valueComponent === "multi_select") {
 		return (
 			<FilterMultiSelectControl
 				label="Value"
@@ -871,7 +891,7 @@ function FilterValueControl({
 		);
 	}
 
-	if (operator.valueComponent === "date_range") {
+	if (valueComponent === "date_range") {
 		const dateRangeValue = isDateRangeValue(value) ? value : {from: "", to: ""};
 
 		return (
@@ -913,7 +933,7 @@ function FilterValueControl({
 			labelPlacement="outside"
 			placeholder={placeholder}
 			radius="sm"
-			type={operator.valueComponent === "number" ? "number" : "text"}
+			type={valueComponent === "number" ? "number" : "text"}
 			value={typeof value === "string" ? value : ""}
 			variant="bordered"
 			onValueChange={onChange}

@@ -41,6 +41,12 @@ import {AdvancedFilterProvider, useAdvancedFilter} from "@/app/providers/Advance
 const dashboardPrimaryButtonClass =
 	"group h-11 min-h-11 rounded-[7px] bg-[#075de8] px-6 text-[15px] font-semibold tracking-normal text-white shadow-[0_14px_24px_-18px_rgba(7,93,232,0.85)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#034fc9] hover:shadow-[0_18px_30px_-20px_rgba(7,93,232,0.9)] focus-visible:ring-2 focus-visible:ring-[#75b7ff] focus-visible:ring-offset-2";
 
+const invoiceStatusValueOptions = [
+	{value: "draft", label: "Created"},
+	{value: "issued", label: "Issued"},
+	{value: "void", label: "Voided"},
+];
+
 const invoiceAdvancedFilterFields = [
 	{
 		value: "invoice_number",
@@ -116,6 +122,15 @@ const invoiceAdvancedFilterFields = [
 				valueSource: "statuses",
 			},
 		],
+	},
+	{
+		value: "invoice",
+		label: "Invoice",
+		dataType: "enum",
+		valueComponent: "single_select",
+		valueSource: "invoice_states",
+		valueOptions: invoiceStatusValueOptions,
+		placeholder: "Choose invoice state",
 	},
 	{
 		value: "business_profile",
@@ -441,6 +456,15 @@ const invoiceAdvancedFilterFields = [
 					},
 				],
 			},
+			{
+				value: "invoice",
+				label: "Invoice",
+				dataType: "enum",
+				valueComponent: "single_select",
+				valueSource: "invoice_states",
+				valueOptions: invoiceStatusValueOptions,
+				placeholder: "Choose invoice state",
+			},
 		],
 	},
 ];
@@ -465,10 +489,10 @@ const getInitialInvoiceFilterGroups = () => [
 			},
 			{
 				id: 3,
-				field: "business_profile",
-				subField: "name",
-				operator: "contains",
-				value: "John Doe",
+				field: "client",
+				subField: "invoice",
+				operator: "",
+				value: "issued",
 			},
 		],
 	},
