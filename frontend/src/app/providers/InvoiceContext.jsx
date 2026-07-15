@@ -149,6 +149,7 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 	const [dateRange, setDateRange] = useState(null)
 	const [search, setSearch] = useState(null)
 	const [appliedSearch, setAppliedSearch] = useState("");
+	const [advancedFilters, setAdvancedFilters] = useState(null);
 	const hasRange = !!dateRange?.start && !!dateRange?.end;
 	const hasSearch = appliedSearch.trim().length > 0
 	const handleDateRangeChange = (newRange) => setDateRange(newRange);
@@ -157,6 +158,14 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 			setAppliedSearch(search);    // 👈 trigger query update
 			setInvoicePage(1);           // optional: reset pagination
 		}
+	}
+	const applyAdvancedFilters = (filters) => {
+		setAdvancedFilters(filters);
+		setInvoicePage(1);
+	}
+	const clearAdvancedFilters = () => {
+		setAdvancedFilters(null);
+		setInvoicePage(1);
 	}
 	const [invoicePage, setInvoicePage] = useState(1);
 	const {data: userInvoices} = useQuery({
@@ -170,6 +179,7 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 			hasSearch
 				? appliedSearch.trim()
 				: null,
+			advancedFilters,
 		],
 		enabled: pathname === '/app/invoices',
 		queryFn: async () => {
@@ -182,6 +192,9 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 			}
 			if (hasSearch) {
 				params.search = appliedSearch.trim()
+			}
+			if (advancedFilters) {
+				params.advanced_filters = JSON.stringify(advancedFilters)
 			}
 			return (await Invoice.invoices(params))?.data
 		},
@@ -860,6 +873,8 @@ function InvoiceProviderInner({children, mode, initialId = null}) {
 		handleDateRangeChange,
 		handleSearchKeyDown,
 		setSearch,
+		applyAdvancedFilters,
+		clearAdvancedFilters,
 		isLoadingInvoice,
 		isOpenConfirmDeleteModal, onOpenConfirmDeleteModal, onOpenChangeConfirmDeleteModal,
 		deleteInvoice,
