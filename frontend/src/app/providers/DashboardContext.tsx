@@ -1,6 +1,7 @@
 "use client";
 
-import type {DashboardMetric, RevenuePoint} from "@/app/app/dashboard/data";
+import {InvoiceStatus} from "@/app/enums/InvoiceStatus";
+import type {DashboardMetric, RecentInvoice, RevenuePoint, TopClient} from "@/app/app/dashboard/data";
 import DashboardModel from "@/app/models/Dashboard";
 import {createContext, type ReactNode, useCallback, useContext, useMemo, useState} from "react";
 
@@ -37,17 +38,40 @@ type RevenueOverviewResponsePoint = {
     client_count: number;
 };
 
+type TrendingInvoiceResponse = {
+    recent: Array<{
+        issued_on: string | null;
+        invoice_number: string;
+        total_cents: number;
+        status: string;
+        client?: {
+            name?: string | null;
+        } | null;
+    }>;
+    top_clients: Array<{
+        client_id: number;
+        invoice_count: number;
+        total_cents: number;
+        client?: {
+            name?: string | null;
+        } | null;
+    }>;
+};
+
 type DashboardResponse = {
     invoices: InvoiceDashboardMetrics;
     revenue_overview: RevenueOverviewResponsePoint[];
+    trending_invoices: TrendingInvoiceResponse;
 };
 
-type DashboardContextValue = {
+export type DashboardContextValue = {
     dashboardMetrics: DashboardMetric[];
     error: string | null;
     isLoading: boolean;
     loadDashboard: (payload: DashboardFilterPayload) => Promise<void>;
+    recentInvoices: RecentInvoice[];
     revenueOverview: RevenuePoint[];
+    topClients: TopClient[];
 };
 
 type DashboardProviderProps = {
@@ -59,6 +83,12 @@ const metricMoneyFormatter = new Intl.NumberFormat("en-US", {
     currency: "USD",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
+});
+
+const dashboardDateFormatter = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
 });
 
 const initialDashboardMetrics: DashboardMetric[] = [
@@ -118,11 +148,63 @@ function mapRevenueOverview(response: DashboardResponse): RevenuePoint[] {
     }));
 }
 
+function formatDashboardDate(date: string | null): string {
+    if (!date) {
+        return "Date unavailable";
+    }
+
+    const parsedDate = new Date(`${date.slice(0, 10)}T00:00:00`);
+
+    return Number.isNaN(parsedDate.getTime())
+        ? "Date unavailable"
+        : dashboardDateFormatter.format(parsedDate);
+}
+
+function clientInitials(name: string): string {
+    return name
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part.charAt(0).toUpperCase())
+        .join("") || "—";
+}
+
+function invoiceStatus(status: string): RecentInvoice["status"] {
+    return Object.values(InvoiceStatus).includes(status as InvoiceStatus)
+        ? status as InvoiceStatus
+        : InvoiceStatus.Issued;
+}
+
+function mapRecentInvoices(response: DashboardResponse): RecentInvoice[] {
+    return (response.trending_invoices?.recent ?? []).map((invoice) => ({
+        invoiceNumber: invoice.invoice_number,
+        client: invoice.client?.name || "Unknown client",
+        date: formatDashboardDate(invoice.issued_on),
+        amount: metricMoneyFormatter.format(Number(invoice.total_cents ?? 0) / 100),
+        status: invoiceStatus(invoice.status),
+    }));
+}
+
+function mapTopClients(response: DashboardResponse): TopClient[] {
+    return (response.trending_invoices?.top_clients ?? []).map((client) => {
+        const name = client.client?.name || "Unknown client";
+
+        return {
+            initials: clientInitials(name),
+            name,
+            invoices: Number(client.invoice_count ?? 0),
+            amount: metricMoneyFormatter.format(Number(client.total_cents ?? 0) / 100),
+        };
+    });
+}
+
 const DashboardContext = createContext<DashboardContextValue | null>(null);
 
 export function DashboardProvider({children}: DashboardProviderProps) {
     const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetric[]>(initialDashboardMetrics);
+    const [recentInvoices, setRecentInvoices] = useState<RecentInvoice[]>([]);
     const [revenueOverview, setRevenueOverview] = useState<RevenuePoint[]>([]);
+    const [topClients, setTopClients] = useState<TopClient[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -133,7 +215,9 @@ export function DashboardProvider({children}: DashboardProviderProps) {
         try {
             const response = await DashboardModel.dashboard(payload) as DashboardResponse;
             setDashboardMetrics(mapDashboardMetrics(response));
+            setRecentInvoices(mapRecentInvoices(response));
             setRevenueOverview(mapRevenueOverview(response));
+            setTopClients(mapTopClients(response));
         } catch (requestError) {
             console.error("Unable to load dashboard data", requestError);
             setError("Unable to load dashboard data.");
@@ -147,8 +231,10 @@ export function DashboardProvider({children}: DashboardProviderProps) {
         error,
         isLoading,
         loadDashboard,
+        recentInvoices,
         revenueOverview,
-    }), [dashboardMetrics, error, isLoading, loadDashboard, revenueOverview]);
+        topClients,
+    }), [dashboardMetrics, error, isLoading, loadDashboard, recentInvoices, revenueOverview, topClients]);
 
     return (
         <DashboardContext.Provider value={value}>

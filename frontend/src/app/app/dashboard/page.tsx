@@ -6,12 +6,11 @@ import {InvoiceStatus} from "@/app/enums/InvoiceStatus";
 import {type DashboardFilterPayload, useDashboard} from "@/app/providers/DashboardContext";
 import {
     monthlySummary,
-    recentInvoices,
     setupProgress,
-    topClients,
     type DashboardMetric,
     type RecentInvoice,
     type RevenuePoint,
+    type TopClient,
 } from "@/app/app/dashboard/data";
 import {
     Button,
@@ -143,7 +142,7 @@ const statusClasses: Record<RecentInvoice["status"], string> = {
 export default function Dashboard() {
     const [reportingPeriod, setReportingPeriod] = useState<ReportingPeriodKey>("last-6-months");
     const [customDateRange, setCustomDateRange] = useState<DashboardDateRange | null>(null);
-    const {dashboardMetrics, loadDashboard, revenueOverview} = useDashboard();
+    const {dashboardMetrics, loadDashboard, recentInvoices, revenueOverview, topClients} = useDashboard();
 
     useEffect(() => {
         const payload = buildDashboardPayload(reportingPeriod, customDateRange);
@@ -167,11 +166,11 @@ export default function Dashboard() {
                         <RevenueCard data={revenueOverview} />
 
                         <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)]">
-                            <RecentInvoicesCard />
-                            <TopClientsCard />
+                            <RecentInvoicesCard invoices={recentInvoices} />
+                            <TopClientsCard clients={topClients} />
                         </div>
 
-                        <SetupProgressCard />
+                        {/*<SetupProgressCard />*/}
                     </main>
 
                     <aside className="grid content-start gap-4">
@@ -496,14 +495,14 @@ function RevenueChart({data}: { data: RevenuePoint[] }) {
     );
 }
 
-function RecentInvoicesCard() {
+function RecentInvoicesCard({invoices}: {invoices: RecentInvoice[]}) {
     return (
         <Card shadow="none" className="rounded-lg border border-[#dbe3ef]">
             <CardBody className="p-4">
                 <CardHeading title="Recent Invoices" href={uri.invoices} />
                 <div className="mt-3 overflow-x-auto">
                     <div className="min-w-[650px] divide-y divide-[#e8eef7]">
-                        {recentInvoices.map((invoice) => (
+                        {invoices.map((invoice) => (
                             <div key={invoice.invoiceNumber} className="grid grid-cols-[24px_minmax(140px,1fr)_minmax(120px,0.9fr)_110px_90px_72px] items-center gap-3 py-2 text-sm">
                                 <ReceiptText className="size-5 text-[#53627a]" />
                                 <span className="font-medium text-[#07142c]">{invoice.invoiceNumber}</span>
@@ -515,6 +514,11 @@ function RecentInvoicesCard() {
                                 </span>
                             </div>
                         ))}
+                        {invoices.length === 0 && (
+                            <p className="py-8 text-center text-sm text-[#53627a]">
+                                No recent invoices for this period.
+                            </p>
+                        )}
                     </div>
                 </div>
             </CardBody>
@@ -522,13 +526,13 @@ function RecentInvoicesCard() {
     );
 }
 
-function TopClientsCard() {
+function TopClientsCard({clients}: {clients: TopClient[]}) {
     return (
         <Card shadow="none" className="rounded-lg border border-[#dbe3ef]">
             <CardBody className="p-4">
                 <CardHeading title="Top Clients" href={uri.client.clients} />
                 <div className="mt-3 divide-y divide-[#e8eef7]">
-                    {topClients.map((client) => (
+                    {clients.map((client) => (
                         <div key={client.name} className="flex items-center gap-3 py-3">
                             <span className="grid size-10 place-items-center rounded-full bg-[#edf2f9] text-sm font-bold text-[#53627a]">
                                 {client.initials}
@@ -540,6 +544,11 @@ function TopClientsCard() {
                             <strong className="text-sm text-[#07142c]">{client.amount}</strong>
                         </div>
                     ))}
+                    {clients.length === 0 && (
+                        <p className="py-8 text-center text-sm text-[#53627a]">
+                            No paid client activity for this period.
+                        </p>
+                    )}
                 </div>
             </CardBody>
         </Card>
