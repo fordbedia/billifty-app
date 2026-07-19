@@ -1,6 +1,6 @@
 "use client";
 
-import type {DashboardMetric} from "@/app/app/dashboard/data";
+import type {DashboardMetric, RevenuePoint} from "@/app/app/dashboard/data";
 import DashboardModel from "@/app/models/Dashboard";
 import {createContext, type ReactNode, useCallback, useContext, useMemo, useState} from "react";
 
@@ -28,8 +28,18 @@ type InvoiceDashboardMetrics = {
     draft_invoices_change: MetricChange | null;
 };
 
+type RevenueOverviewResponsePoint = {
+    month: string;
+    revenue_cents: number;
+    invoice_count: number;
+    paid_cents: number;
+    outstanding_cents: number;
+    client_count: number;
+};
+
 type DashboardResponse = {
     invoices: InvoiceDashboardMetrics;
+    revenue_overview: RevenueOverviewResponsePoint[];
 };
 
 type DashboardContextValue = {
@@ -37,6 +47,7 @@ type DashboardContextValue = {
     error: string | null;
     isLoading: boolean;
     loadDashboard: (payload: DashboardFilterPayload) => Promise<void>;
+    revenueOverview: RevenuePoint[];
 };
 
 type DashboardProviderProps = {
@@ -96,10 +107,22 @@ function mapDashboardMetrics(response: DashboardResponse): DashboardMetric[] {
     ];
 }
 
+function mapRevenueOverview(response: DashboardResponse): RevenuePoint[] {
+    return response.revenue_overview.map((point) => ({
+        month: point.month,
+        revenue: point.revenue_cents / 100,
+        invoices: point.invoice_count,
+        paid: point.paid_cents / 100,
+        outstanding: point.outstanding_cents / 100,
+        clients: point.client_count,
+    }));
+}
+
 const DashboardContext = createContext<DashboardContextValue | null>(null);
 
 export function DashboardProvider({children}: DashboardProviderProps) {
     const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetric[]>(initialDashboardMetrics);
+    const [revenueOverview, setRevenueOverview] = useState<RevenuePoint[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -110,6 +133,7 @@ export function DashboardProvider({children}: DashboardProviderProps) {
         try {
             const response = await DashboardModel.dashboard(payload) as DashboardResponse;
             setDashboardMetrics(mapDashboardMetrics(response));
+            setRevenueOverview(mapRevenueOverview(response));
         } catch (requestError) {
             console.error("Unable to load dashboard data", requestError);
             setError("Unable to load dashboard data.");
@@ -123,7 +147,8 @@ export function DashboardProvider({children}: DashboardProviderProps) {
         error,
         isLoading,
         loadDashboard,
-    }), [dashboardMetrics, error, isLoading, loadDashboard]);
+        revenueOverview,
+    }), [dashboardMetrics, error, isLoading, loadDashboard, revenueOverview]);
 
     return (
         <DashboardContext.Provider value={value}>

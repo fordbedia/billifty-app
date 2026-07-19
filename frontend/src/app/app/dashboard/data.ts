@@ -31,15 +31,6 @@ export type TopClient = {
     amount: string;
 };
 
-export const revenueOverview: RevenuePoint[] = [
-    {month: "Dec '24", revenue: 4850, invoices: 8, paid: 4200, outstanding: 650, clients: 6},
-    {month: "Jan '25", revenue: 7350, invoices: 11, paid: 6600, outstanding: 750, clients: 8},
-    {month: "Feb '25", revenue: 5650, invoices: 9, paid: 4950, outstanding: 700, clients: 7},
-    {month: "Mar '25", revenue: 6425, invoices: 10, paid: 5750, outstanding: 675, clients: 8},
-    {month: "Apr '25", revenue: 8950, invoices: 13, paid: 8100, outstanding: 850, clients: 10},
-    {month: "May '25", revenue: 6850, invoices: 12, paid: 5950, outstanding: 900, clients: 9},
-];
-
 export const recentInvoices: RecentInvoice[] = [
     {invoiceNumber: "INV-2025-0042", client: "Acme Corporation", date: "May 12, 2025", amount: "$1,250.00", status: InvoiceStatus.Paid},
     {invoiceNumber: "INV-2025-0041", client: "BrightWave Studio", date: "May 9, 2025", amount: "$2,450.00", status: InvoiceStatus.Issued},

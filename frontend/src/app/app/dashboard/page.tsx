@@ -7,7 +7,6 @@ import {type DashboardFilterPayload, useDashboard} from "@/app/providers/Dashboa
 import {
     monthlySummary,
     recentInvoices,
-    revenueOverview,
     setupProgress,
     topClients,
     type DashboardMetric,
@@ -144,7 +143,7 @@ const statusClasses: Record<RecentInvoice["status"], string> = {
 export default function Dashboard() {
     const [reportingPeriod, setReportingPeriod] = useState<ReportingPeriodKey>("last-6-months");
     const [customDateRange, setCustomDateRange] = useState<DashboardDateRange | null>(null);
-    const {dashboardMetrics, loadDashboard} = useDashboard();
+    const {dashboardMetrics, loadDashboard, revenueOverview} = useDashboard();
 
     useEffect(() => {
         const payload = buildDashboardPayload(reportingPeriod, customDateRange);
@@ -165,7 +164,7 @@ export default function Dashboard() {
                             onReportingPeriodChange={setReportingPeriod}
                         />
                         <MetricGrid metrics={dashboardMetrics} />
-                        <RevenueCard />
+                        <RevenueCard data={revenueOverview} />
 
                         <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)]">
                             <RecentInvoicesCard />
@@ -322,7 +321,7 @@ function MetricCard({metric, iconIndex}: { metric: DashboardMetric; iconIndex: n
     );
 }
 
-function RevenueCard() {
+function RevenueCard({data}: {data: RevenuePoint[]}) {
     return (
         <Card shadow="none" className="mt-4 rounded-lg border border-[#dbe3ef]">
             <CardBody className="p-4 sm:p-5">
@@ -335,7 +334,7 @@ function RevenueCard() {
                     </div>
                 </div>
 
-                <RevenueChart data={revenueOverview} />
+                <RevenueChart data={data} />
             </CardBody>
         </Card>
     );
@@ -343,22 +342,35 @@ function RevenueCard() {
 
 function RevenueChart({data}: { data: RevenuePoint[] }) {
     const [activePointIndex, setActivePointIndex] = useState<number | null>(null);
-    const width = 760;
+
+    if (data.length === 0) {
+        return (
+            <div className="mt-4 grid h-[230px] place-items-center rounded-lg bg-[#f8fafc] text-sm text-[#53627a]">
+                No revenue data is available for this period.
+            </div>
+        );
+    }
+
+    const width = Math.max(760, data.length * 82);
     const height = 190;
     const padding = {top: 18, right: 24, bottom: 34, left: 50};
     const values = data.map((item) => item.revenue);
-    const maxValue = 10000;
+    const highestValue = Math.max(...values);
+    const maxValue = highestValue > 0 ? Math.ceil(highestValue / 1000) * 1000 : 1000;
     const minValue = 0;
     const chartWidth = width - padding.left - padding.right;
     const chartHeight = height - padding.top - padding.bottom;
     const points = values.map((value, index) => {
-        const x = padding.left + (chartWidth / (data.length - 1)) * index;
+        const x =
+            data.length === 1
+                ? padding.left + chartWidth / 2
+                : padding.left + (chartWidth / (data.length - 1)) * index;
         const y = padding.top + chartHeight - ((value - minValue) / (maxValue - minValue)) * chartHeight;
         return {x, y};
     });
     const path = points.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
     const areaPath = `${path} L ${points[points.length - 1].x} ${height - padding.bottom} L ${points[0].x} ${height - padding.bottom} Z`;
-    const gridValues = [10000, 7500, 5000, 2500, 0];
+    const gridValues = [maxValue, maxValue * 0.75, maxValue * 0.5, maxValue * 0.25, 0];
     const activePoint = activePointIndex === null ? null : data[activePointIndex];
     const activeCoordinates = activePointIndex === null ? null : points[activePointIndex];
     const tooltipWidth = 190;
@@ -375,12 +387,12 @@ function RevenueChart({data}: { data: RevenuePoint[] }) {
 
     return (
         <div className="mt-4 w-full overflow-x-auto">
-            <div className="relative h-[230px] min-w-[680px]">
+            <div className="relative h-[230px]" style={{minWidth: `${width}px`}}>
                 <svg
                     viewBox={`0 0 ${width} ${height}`}
                     className="absolute inset-0 h-full w-full"
                     role="img"
-                    aria-label="Revenue over the last six months"
+                    aria-label="Revenue for the selected reporting period"
                     onPointerLeave={() => setActivePointIndex(null)}
                 >
                     <defs>
