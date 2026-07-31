@@ -175,7 +175,7 @@ export default function Dashboard() {
 
                     <aside className="grid content-start gap-4">
                         <DashboardSidebar />
-                        <MonthlySummaryCard />
+                        {/*<MonthlySummaryCard />*/}
                     </aside>
                 </div>
             </div>
@@ -499,7 +499,7 @@ function RecentInvoicesCard({invoices}: {invoices: RecentInvoice[]}) {
     return (
         <Card shadow="none" className="rounded-lg border border-[#dbe3ef]">
             <CardBody className="p-4">
-                <CardHeading title="Recent Invoices" href={uri.invoices} />
+                <CardHeading title="Recent Invoices" href={`${uri.invoices}?af=true&advanced_filters=%7B%22groups%22%3A%5B%7B%22id%22%3A1%2C%22conditions%22%3A%5B%7B%22id%22%3A1%2C%22field%22%3A%22invoice%22%2C%22subField%22%3A%22%22%2C%22operator%22%3A%22%22%2C%22value%22%3A%22issued%22%7D%5D%7D%5D%7D`} />
                 <div className="mt-3 overflow-x-auto">
                     <div className="min-w-[650px] divide-y divide-[#e8eef7]">
                         {invoices.map((invoice) => (
