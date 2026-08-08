@@ -5,7 +5,7 @@ import RootLayout from "@/app/components/common/RootLayout";
 import TableData from "@/app/components/Table";
 import {Button, Card, CardBody, CardHeader, Link, Input} from "@heroui/react";
 import {useInvoice} from "@/app/providers/InvoiceContext";
-import {useRouter} from "next/navigation";
+import {useRouter, useSearchParams} from "next/navigation";
 import {
 	Chip,
 	Tooltip,
@@ -19,11 +19,68 @@ import {formattedDate} from "@/app/utils/date";
 import {DateRangePicker} from "@heroui/react";
 import {useApp} from "@/app/providers/AppContext";
 import DashboardSidebar from "@/app/app/component/DashboardSidebar";
-import {Pencil, Plus, Search, Trash2, Archive, Clock, FileText, TriangleAlert, X} from "lucide-react";
+import AdvancedFilterBuilder from "@/app/components/filters/AdvancedFilterBuilder";
+import AdvancedFilter from "@/app/models/AdvancedFilter";
+import {useEffect, useMemo, useState} from "react";
+import {
+	Archive,
+	Clock,
+	FileText,
+	Filter,
+	Pencil,
+	Plus,
+	RotateCcw,
+	Search,
+	Trash2,
+	TriangleAlert,
+	X,
+} from "lucide-react";
 import {reminderIndicator, reminderIndicatorColor} from "@/app/helpers/paymentReminder";
+import {AdvancedFilterProvider, useAdvancedFilter} from "@/app/providers/AdvancedFilterContext";
 
 const dashboardPrimaryButtonClass =
 	"group h-11 min-h-11 rounded-[7px] bg-[#075de8] px-6 text-[15px] font-semibold tracking-normal text-white shadow-[0_14px_24px_-18px_rgba(7,93,232,0.85)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#034fc9] hover:shadow-[0_18px_30px_-20px_rgba(7,93,232,0.9)] focus-visible:ring-2 focus-visible:ring-[#75b7ff] focus-visible:ring-offset-2";
+
+const invoiceStatusValueOptions = [
+	{value: "draft", label: "Created"},
+	{value: "issued", label: "Issued"},
+	{value: "void", label: "Voided"},
+];
+
+const invoiceAdvancedFilterFields = [];
+
+const getInitialInvoiceFilterGroups = () => [];
+
+const getAdvancedFilterGroupsFromQuery = (isEnabled, advancedFilters) => {
+	if (!isEnabled || !advancedFilters) {
+		return null;
+	}
+
+	try {
+		const payload = JSON.parse(advancedFilters);
+		return Array.isArray(payload?.groups) ? payload.groups : null;
+	} catch {
+		return null;
+	}
+};
+
+const getAdvancedFilterUrl = (searchParams, groups) => {
+	const params = new URLSearchParams(searchParams.toString());
+
+	params.set("af", "true");
+	params.set("advanced_filters", JSON.stringify({groups}));
+
+	return `/app/invoices?${params.toString()}`;
+};
+
+const getClearAdvancedFilterUrl = (searchParams) => {
+	const params = new URLSearchParams(searchParams.toString());
+
+	params.delete("af");
+	params.delete("advanced_filters");
+
+	return params.toString() ? `/app/invoices?${params.toString()}` : "/app/invoices";
+};
 
 function Component() {
 	const {
@@ -34,7 +91,17 @@ function Component() {
 		handleDateRangeChange,
 		handleSearchKeyDown,
 		setSearch,
+		applyAdvancedFilters,
+		clearAdvancedFilters,
 	} = useInvoice()
+	const {
+		invoiceAdvancedFilterMetadata, isInvoiceAdvancedFilterMetadataPending
+	} = useAdvancedFilter()
+
+	const advancedFilterFields = !isInvoiceAdvancedFilterMetadataPending
+		? invoiceAdvancedFilterMetadata ?? invoiceAdvancedFilterFields
+		: invoiceAdvancedFilterFields;
+
 	const {
 		planCapabilities
 	} = useApp();
@@ -42,6 +109,41 @@ function Component() {
 	const {onOpenConfirmDeleteModal, setData} = useInvoice()
 
 	const router = useRouter()
+	const searchParams = useSearchParams()
+	const advancedFilterEnabled = searchParams.get("af") === "true";
+	const advancedFilterQuery = searchParams.get("advanced_filters");
+	const queryFilterGroups = useMemo(
+		() => getAdvancedFilterGroupsFromQuery(advancedFilterEnabled, advancedFilterQuery),
+		[advancedFilterEnabled, advancedFilterQuery],
+	);
+	const initialFilterGroups = useMemo(
+		() => queryFilterGroups ?? getInitialInvoiceFilterGroups(),
+		[queryFilterGroups],
+	);
+	const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
+	const [advancedFilterCount, setAdvancedFilterCount] = useState(0);
+	const [advancedFilterResetKey, setAdvancedFilterResetKey] = useState(0);
+	const resetAdvancedFilters = () => {
+		clearAdvancedFilters();
+		router.replace(getClearAdvancedFilterUrl(searchParams), {scroll: false});
+		setAdvancedFilterResetKey((key) => key + 1);
+	}
+
+	useEffect(() => {
+		if (!advancedFilterEnabled) {
+			clearAdvancedFilters();
+			setAdvancedFilterResetKey((key) => key + 1);
+			return;
+		}
+
+		if (!queryFilterGroups) {
+			return;
+		}
+
+		applyAdvancedFilters({groups: queryFilterGroups});
+		setAdvancedFilterResetKey((key) => key + 1);
+	}, [advancedFilterEnabled, queryFilterGroups]);
+
 	const column = [
 		{
 			key: 'invoice_number',
@@ -143,7 +245,9 @@ function Component() {
 					<div
 						className="text-sm font-semibold text-[#07142c]">created: {formattedDate(item.created_at)}</div>
 					<div className="mt-0.5 text-xs font-semibold text-[#66738a]">Due: {formattedDate(item.due_on)}</div>
-					{(item?.reminder_schedule ?? item?.reminderSchedule) && (<span className={`flex items-center text-xs  ${reminderIndicatorColor(item)}`}><Clock size={12} /> &nbsp;{reminderIndicator(item)}</span>)}
+					{(item?.reminder_schedule ?? item?.reminderSchedule) && (
+						<span className={`flex items-center text-xs  ${reminderIndicatorColor(item)}`}><Clock
+							size={12}/> &nbsp;{reminderIndicator(item)}</span>)}
 				</>
 
 			default:
@@ -215,11 +319,12 @@ function Component() {
 									</div>
 								</CardHeader>
 								<CardBody className="invoice-workspace-body">
-									<div className="invoice-filter-grid">
+									<div
+										className="mb-5 grid gap-3 xl:grid-cols-[minmax(240px,340px)_minmax(260px,1fr)_auto] xl:items-end">
 										<DateRangePicker
 											className="invoice-filter-control"
 											classNames={{
-												inputWrapper: "h-[60px] rounded-[8px] border border-[#dbe3ef] bg-white px-5 shadow-none",
+												inputWrapper: "h-12 rounded-[8px] border border-[#dbe3ef] bg-white px-4 shadow-none",
 												label: "text-[13px] font-semibold text-[#18243a]",
 												segment: "text-[15px] text-[#5f6d84]",
 												selectorButton: "text-[#53627a]",
@@ -232,13 +337,13 @@ function Component() {
 										<Input
 											className="invoice-filter-control"
 											classNames={{
-												inputWrapper: "h-[60px] rounded-[8px] border border-[#dbe3ef] bg-white px-5 shadow-none",
+												inputWrapper: "h-12 rounded-[8px] border border-[#dbe3ef] bg-white px-4 shadow-none",
 												label: "text-[13px] font-semibold text-[#18243a]",
 												input: "text-[15px] text-[#5f6d84] placeholder:text-[#5f6d84]",
 											}}
 											name="search"
 											label="Search"
-											placeholder="Search for client name or email"
+											placeholder="Search by client name or email"
 											onValueChange={setSearch}
 											onKeyDown={handleSearchKeyDown}
 											radius="sm"
@@ -246,7 +351,59 @@ function Component() {
 																  strokeWidth={2}/>}
 											variant="bordered"
 										/>
+										<div className="flex flex-wrap gap-2 xl:justify-end">
+											<Button
+												className={`h-12 rounded-[8px] border px-4 text-sm font-semibold shadow-none ${advancedFiltersOpen ? "border-[#b9d3ff] bg-[#eef5ff] text-[#075de8]" : "border-[#dbe3ef] bg-white text-[#17233a] hover:border-[#b8c6d8]"}`}
+												variant="bordered"
+												onPress={() => setAdvancedFiltersOpen((open) => !open)}
+											>
+												<Filter className="size-4" strokeWidth={2}/>
+												Filters
+												<span
+													className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#075de8] px-1.5 text-[11px] font-bold leading-none text-white">
+													{advancedFilterCount}
+												</span>
+											</Button>
+											<Button
+												className="h-12 rounded-[8px] border border-[#dbe3ef] bg-white px-4 text-sm font-semibold text-[#4d5d77] shadow-none hover:border-[#b8c6d8] hover:bg-[#f8fafc]"
+												variant="bordered"
+												onPress={resetAdvancedFilters}
+											>
+												<RotateCcw className="size-4" strokeWidth={2}/>
+												Reset
+											</Button>
+										</div>
 									</div>
+									<AdvancedFilterBuilder
+										open={advancedFiltersOpen}
+										title="Advanced Filters"
+										description="Build advanced queries to find exactly what you need."
+										searchButtonLabel="Search Invoices"
+										fields={advancedFilterFields}
+										initialGroups={initialFilterGroups}
+										resetKey={advancedFilterResetKey}
+										onClose={() => setAdvancedFiltersOpen(false)}
+										onActiveFilterCountChange={setAdvancedFilterCount}
+											onLoadOptions={async ({valueSource, search = "", page = 1}) => {
+												const response = await AdvancedFilter.getAdvancedFilterOptions(
+													"invoices",
+													valueSource,
+													search,
+													page,
+													25
+												);
+
+												return {
+													options: response.data?.data ?? [],
+													hasMore: response.data?.meta?.has_more ?? false,
+													nextPage: response.data?.meta?.next_page ?? null,
+												};
+											}}
+											onSearch={(groups) => {
+											router.replace(getAdvancedFilterUrl(searchParams, groups), {scroll: false});
+											setAdvancedFiltersOpen(false);
+										}}
+									/>
 									{userInvoices && userInvoices.data && userInvoices.data.length > 0 && (
 										<TableData
 											classNames="invoice-table invoice-dashboard-table"
@@ -309,11 +466,14 @@ export function ConfirmDeleteModal() {
 					wrapper: "px-4",
 				}}
 			>
-				<ModalContent className="max-w-[560px] overflow-hidden rounded-[22px] bg-white p-0 shadow-[0_24px_70px_-28px_rgba(16,24,40,0.55)]">
+				<ModalContent
+					className="max-w-[560px] overflow-hidden rounded-[22px] bg-white p-0 shadow-[0_24px_70px_-28px_rgba(16,24,40,0.55)]">
 					{(onClose) => (
 						<>
-							<ModalHeader className="flex items-center gap-4 border-b border-[#eef1f5] !px-[12px] !py-[12px]">
-								<div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#fff0f5] text-[#f31260]">
+							<ModalHeader
+								className="flex items-center gap-4 border-b border-[#eef1f5] !px-[12px] !py-[12px]">
+								<div
+									className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#fff0f5] text-[#f31260]">
 									<FileText className="size-5" strokeWidth={2.2}/>
 								</div>
 								<h2 className="min-w-0 flex-1 text-[22px] font-bold leading-tight tracking-normal text-[#111827]">
@@ -330,24 +490,33 @@ export function ConfirmDeleteModal() {
 								</Button>
 							</ModalHeader>
 							<ModalBody className="gap-0 px-8 py-8">
-								<div className="flex gap-4 rounded-[14px] border border-[#f8c8d5] bg-[#fff1f5] px-5 py-5">
-									<TriangleAlert className="mt-1 size-6 shrink-0 fill-[#f31260] text-[#f31260]" strokeWidth={2}/>
+								<div
+									className="flex gap-4 rounded-[14px] border border-[#f8c8d5] bg-[#fff1f5] px-5 py-5">
+									<TriangleAlert className="mt-1 size-6 shrink-0 fill-[#f31260] text-[#f31260]"
+												   strokeWidth={2}/>
 									<div>
-										<p className="text-lg font-bold leading-7 text-[#111827]">This action cannot be undone</p>
+										<p className="text-lg font-bold leading-7 text-[#111827]">This action cannot be
+											undone</p>
 										<p className="mt-1 text-base leading-7 text-[#5f6675]">
-											This invoice will be removed from your active invoice list and will no longer be accessible from your account.
+											This invoice will be removed from your active invoice list and will no
+											longer be accessible from your account.
 										</p>
 									</div>
 								</div>
-								<div className="mt-7 flex items-center gap-4 rounded-[14px] border border-[#eef1f5] bg-[#f9fafb] px-5 py-5">
-									<div className="flex size-12 shrink-0 items-center justify-center rounded-[10px] border border-[#dde2ea] bg-white text-[#8b95a5]">
+								<div
+									className="mt-7 flex items-center gap-4 rounded-[14px] border border-[#eef1f5] bg-[#f9fafb] px-5 py-5">
+									<div
+										className="flex size-12 shrink-0 items-center justify-center rounded-[10px] border border-[#dde2ea] bg-white text-[#8b95a5]">
 										<FileText className="size-6" strokeWidth={1.9}/>
 									</div>
 									<div className="min-w-0 flex-1">
-										<p className="truncate text-lg font-bold leading-6 text-[#111827]">Invoice #{invoiceNumber}</p>
-										<p className="mt-1 text-base leading-6 text-[#8a91a0]">Will be permanently archived</p>
+										<p className="truncate text-lg font-bold leading-6 text-[#111827]">Invoice
+											#{invoiceNumber}</p>
+										<p className="mt-1 text-base leading-6 text-[#8a91a0]">Will be permanently
+											archived</p>
 									</div>
-									<span className="shrink-0 rounded-full bg-[#fff0f5] px-4 py-2 text-sm font-bold text-[#f31260]">
+									<span
+										className="shrink-0 rounded-full bg-[#fff0f5] px-4 py-2 text-sm font-bold text-[#f31260]">
 										Archive
 									</span>
 								</div>
@@ -363,13 +532,15 @@ export function ConfirmDeleteModal() {
 								>
 									Cancel
 								</Button>
-								<Button className="h-12 rounded-[12px] bg-[#f31260] text-base font-bold text-white shadow-[inset_0_-4px_0_rgba(180,20,75,0.28),0_14px_24px_-16px_rgba(243,18,96,0.9)] hover:bg-[#e21158]" onPress={() => {
-									deleteInvoice(data.id).then((r) => {
-										const inv = r?.data
-										userInvoices.data = userInvoices.data.filter(d => d.id !== inv.id)
-										onClose()
-									})
-								}}>
+								<Button
+									className="h-12 rounded-[12px] bg-[#f31260] text-base font-bold text-white shadow-[inset_0_-4px_0_rgba(180,20,75,0.28),0_14px_24px_-16px_rgba(243,18,96,0.9)] hover:bg-[#e21158]"
+									onPress={() => {
+										deleteInvoice(data.id).then((r) => {
+											const inv = r?.data
+											userInvoices.data = userInvoices.data.filter(d => d.id !== inv.id)
+											onClose()
+										})
+									}}>
 									<Trash2 className="size-5" strokeWidth={2.2}/>
 									Archive Invoice
 								</Button>
@@ -386,7 +557,9 @@ export function ConfirmDeleteModal() {
 export default function Invoices() {
 	return (
 		<InvoiceProvider mode="list">
-			<Component/>
+			<AdvancedFilterProvider>
+				<Component/>
+			</AdvancedFilterProvider>
 		</InvoiceProvider>
 	);
 }

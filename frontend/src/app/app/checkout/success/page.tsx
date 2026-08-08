@@ -459,7 +459,7 @@ function Inner() {
                         className="mt-5 w-full rounded-[24px] bg-white p-4 shadow-[0_30px_80px_-44px_rgba(17,24,39,0.28)] ring-1 ring-black/5 md:p-5">
                         <div className="px-2 pt-2 text-center">
                             <h2 className="text-[22px] font-extrabold tracking-[-0.03em] text-slate-900 sm:text-[40px] md:text-[42px]">
-                                You're All Set
+                                You&apos;re All Set
                             </h2>
                             <p className="mt-2 text-sm font-medium text-slate-500">
                                 Your Billifty account is ready. You can now continue creating invoices, managing
