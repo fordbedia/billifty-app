@@ -68,4 +68,5 @@
 /backend/Homestead.json
 /backend/Homestead.yaml
 /backend/Thumbs.db
-/configs/CLAUDE.md
+/configs
+/CLAUDE.md
